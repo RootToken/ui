@@ -42,7 +42,7 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
           >
             {isConnected && address
               ? trimAddress(address).toUpperCase()
-              : "Connect"}
+              : "CONNECT"}
           </S.ConnectButton>
         </div>
       </S.Header>

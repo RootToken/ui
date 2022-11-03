@@ -1,12 +1,14 @@
-import { BigNumber } from "@ethersproject/bignumber";
-import { ethers } from "ethers";
 import { useState } from "react";
+import { ChevronDown, HelpCircle, Info, Settings } from "react-feather";
 import { NumericFormat } from "react-number-format";
-import { MintFormState } from "../../interfaces/mintForm";
+import { IMintFormState } from "../../interfaces/mintForm";
+import TokenPickerModal from "../TokenPickerModal";
 import * as S from "./styled";
 
 export default function MintForm() {
-  const [form, setForm] = useState<MintFormState>({
+  const [openTokenPicker, setOpenTokenPicker] = useState(false);
+  const [form, setForm] = useState<IMintFormState>({
+    mintTokens: [],
     mintAmount: "",
   });
   return (
@@ -17,18 +19,21 @@ export default function MintForm() {
     >
       <S.Phase>
         <div className="group">
-          <label htmlFor="rootAmount">ROOT TOKENS AMOUNT</label>
+          <div className="header">
+            <div>TOKENS</div>
+            <button>
+              <Settings size={15} />
+            </button>
+          </div>
           <div className="contentContainer">
             <div className="inputContainer">
               <NumericFormat
-                placeholder="Mint amount"
+                placeholder="0"
                 id="rootAmount"
                 thousandSeparator
                 valueIsNumericString
                 allowNegative={false}
-                value={
-                  form.mintAmount
-                }
+                value={form.mintAmount}
                 onValueChange={(e) => {
                   const value = e.value;
                   setForm((v) => ({
@@ -37,20 +42,70 @@ export default function MintForm() {
                   }));
                 }}
               />
+              <div className="pickerContainer">
+                <button onClick={() => setOpenTokenPicker(true)}>
+                  <div>
+                    <img width={14} height={14} src="/eth.svg" />
+                    <div>ETH</div>
+                  </div>
+                  <ChevronDown size={14} color="#999999" />
+                </button>
+                <div className="balance">
+                  <span>Balance: 4,000</span> <button>Max</button>
+                </div>
+              </div>
             </div>
           </div>
           <div className="infoContainer">
-            <div className="bdv">~ 100 BDV</div>
-            <div className="max">
-              4,000 <button>(Max)</button>
+            <div className="add">
+              <button>+ Add another token</button>
+              <HelpCircle size={16} color="#3D3D3D" />
             </div>
           </div>
         </div>
       </S.Phase>
       <S.Phase>
-        
+        <div className="group">
+          <div className="header">
+            <div>MINT AMOUNT</div>
+          </div>
+          <div className="contentContainer">
+            <div className="inputContainer">
+              <NumericFormat
+                placeholder="0"
+                id="rootAmount"
+                thousandSeparator
+                valueIsNumericString
+                allowNegative={false}
+                value={form.mintAmount}
+                onValueChange={(e) => {
+                  const value = e.value;
+                  setForm((v) => ({
+                    ...v,
+                    mintAmount: value,
+                  }));
+                }}
+              />
+              <div className="rootContainer">
+                <img width={14} height={14} src="/root.svg" />
+                <div>Root</div>
+              </div>
+            </div>
+          </div>
+          <div className="infoContainer">
+            <div className="add">
+              <button>+ Add another token</button>
+              <HelpCircle size={16} color="#3D3D3D" />
+            </div>
+          </div>
+        </div>
       </S.Phase>
       <S.MintButton>MINT</S.MintButton>
+
+      <TokenPickerModal
+        open={openTokenPicker}
+        onClose={() => setOpenTokenPicker(false)}
+      />
     </S.Form>
   );
 }

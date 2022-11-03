@@ -51,7 +51,7 @@ const Banner = styled.div`
       display: flex;
       align-items: center;
       > span {
-        margin-left: 3px;
+        margin: 0 0 -3px 3px;
         color: #fff;
         font-size: 12.5px;
         > b {
@@ -84,7 +84,7 @@ const MintHeader = styled.div`
   }
 `;
 const MintHeaderButton = styled.button<{ active: boolean }>`
-  font-weight: 500;
+  font-weight: bold;
   font-size: 14px;
   line-height: 18px;
   text-align: center;
@@ -125,7 +125,7 @@ export default function AppPage() {
       <>
         <Container>
           <Banner>
-            <img className="ribbon" src="/fifa-wc.svg" />
+            <img className="ribbon" src="/fifa-wc.svg" width={31} height={54} />
             <div>
               <h2>
                 Bet to Earn on the
@@ -138,7 +138,7 @@ export default function AppPage() {
                 </span>
               </p>
             </div>
-            <img className="img" src="/wc.png" />
+            <img className="img" src="/wc.png" width={369} height={101} />
           </Banner>
           <MintContainer>
             <MintHeader>

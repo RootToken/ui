@@ -29,8 +29,8 @@ export const Header = styled.div`
 
       > li {
         font-style: normal;
-        font-weight: 400;
-        font-size: 14px;
+        font-weight: 300;
+        font-size: 16px;
         line-height: 24px;
         color: #f4eff4;
         margin-right: 24px;
@@ -81,5 +81,8 @@ export const ConnectButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 27px;
+  padding: 14px 20px;
+  font-weight: bold;
+  line-height: 20px;
+  min-width: 155px;
 `;

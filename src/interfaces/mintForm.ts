@@ -1,5 +1,6 @@
 import { BigNumber } from "@ethersproject/bignumber";
 
-export interface MintFormState {
+export interface IMintFormState {
   mintAmount: string;
+  mintTokens: [];
 }

@@ -1,15 +1,34 @@
+import { darken, lighten } from "polished";
 import styled from "styled-components";
 
 export const Form = styled.form`
   .group {
-    > label {
-      font-weight: 700;
-      font-size: 14px;
-      line-height: 26px;
-      text-transform: uppercase;
-      color: #757880;
-      margin-bottom: 6px;
+    > .header {
+      justify-content: space-between;
       display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+
+      > div {
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 26px;
+        text-transform: uppercase;
+        color: #757880;
+      }
+      > button {
+        border: none;
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+        > svg {
+          stroke: #fdfdfd;
+
+          &:hover {
+            stroke: ${darken("0.2", "#FDFDFD")};
+          }
+        }
+      }
     }
     > .contentContainer {
       border-radius: 6px;
@@ -17,14 +36,84 @@ export const Form = styled.form`
 
       > .inputContainer {
         position: relative;
+        display: flex;
         > input {
           background-color: transparent;
           border: 0;
           color: #fff;
-          font-size: 14px;
+          font-size: 16px;
           line-height: 19px;
           padding: 15px 20px;
-          width: 100%;
+          flex: 1;
+        }
+        > .rootContainer {
+          display: flex;
+          align-items: center;
+          padding: 5px 28px 5px 5px;
+          > img {
+            margin-right: 10px;
+          }
+          > div {
+            font-weight: bold;
+            color: #FFF;
+          }
+        }
+        > .pickerContainer {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          padding: 5px;
+          > button {
+            border: none;
+            margin: 0 0 3px 0;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: 3.17392px;
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+
+            &:hover {
+              background-color: rgba(255, 255, 255, 0.1);
+            }
+            > div {
+              display: flex;
+              align-items: center;
+              margin-right: 10px;
+              > div {
+                margin-left: 8px;
+                color: #fff;
+                font-size: 14px;
+                line-height: 19px;
+              }
+              > img {
+                margin: 0 0 -2px 0;
+              }
+            }
+          }
+          > .balance {
+            color: #fff;
+            font-size: 14px;
+            text-align: right;
+            > span {
+              font-weight: 300;
+              font-size: 14px;
+              line-height: 26px;
+              color: #757880;
+            }
+            > button {
+              color: #00f97c;
+              background-color: transparent;
+              margin: 0 0 0 5px;
+              padding: 0;
+              border: none;
+              font-size: 14px;
+              font-weight: bold;
+
+              &:hover {
+                color: ${darken("0.1", "#00f97c")};
+              }
+            }
+          }
         }
       }
     }
@@ -33,20 +122,16 @@ export const Form = styled.form`
       display: flex;
       align-items: center;
       justify-content: space-between;
-      > .bdv {
-        color: #fff;
-        font-size: 14px;
-      }
-      > .max {
-        color: #fff;
-        font-size: 14px;
+      > .add {
+        display: flex;
+        align-items: center;
         > button {
-          color: #00f97c;
-          background-color: transparent;
-          margin: 0;
-          padding: 0;
+          color: #787878;
+          font-size: 16px;
+          background: transparent;
           border: none;
-          font-size: 14px;
+          margin: 0 10px 0 0;
+          line-height: 26px;
         }
       }
     }
@@ -71,7 +156,6 @@ export const Option = styled.div<{ active: boolean }>`
 export const OptionBody = styled.div`
   padding: 12px;
   display: flex;
-
 `;
 
 export const OptionHeader = styled.div<{ active: boolean }>`
@@ -110,7 +194,7 @@ export const OptionHeader = styled.div<{ active: boolean }>`
     margin: 0;
     color: #999999;
     line-height: 20px;
-    font-weight: 400;
+    font-weight: 300;
     font-size: 14px;
 
     ${(props) =>
