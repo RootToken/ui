@@ -156,7 +156,7 @@ const Wrapper = ({ children }: { children: JSX.Element }) => {
       });
       const rootContract = createRootContract(data);
       setRootContract(rootContract);
-      rootContract.bdvPerRoot().then((v) => console.log(v.toString()));
+      rootContract.bdvPerRoot().then((v: any) => console.log(v.toString()));
       sdk.sun.getSeason().then((season) => {
         sdk.silo.getBalances().then((v) => {
           console.log(

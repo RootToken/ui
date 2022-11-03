@@ -48,32 +48,7 @@ export default function MintForm() {
         </div>
       </S.Phase>
       <S.Phase>
-        <S.Option active>
-          <S.OptionHeader active>
-            <button>
-              <div />
-            </button>
-            <h3>Current Deposit(s)</h3>
-          </S.OptionHeader>
-          <S.OptionBody>
-            <S.Graph>HELLO</S.Graph>
-            <S.Content>ddd</S.Content>
-          </S.OptionBody>
-        </S.Option>
-        <S.Option active={false}>
-          <S.OptionHeader>
-            <button></button>
-            <h3>New Capital</h3>
-          </S.OptionHeader>
-          <S.OptionBody>x</S.OptionBody>
-        </S.Option>
-        <S.Option active={false}>
-          <S.OptionHeader>
-            <button></button>
-            <h3>Capital Efficient Combination</h3>
-          </S.OptionHeader>
-          <S.OptionBody>x</S.OptionBody>
-        </S.Option>
+        
       </S.Phase>
       <S.MintButton>MINT</S.MintButton>
     </S.Form>
