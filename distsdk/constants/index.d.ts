@@ -1,0 +1,12 @@
+import BigNumber from 'bignumber.js';
+import { BeanNumber } from '../utils/BeanNumber';
+export * from './addresses';
+export * from './chains';
+export declare const NEW_BeanNumber: BeanNumber;
+export declare const ZERO_NEW_BeanNumber: BeanNumber;
+export declare const ONE_NEW_BeanNumber: BeanNumber;
+export declare const NEW_BN: BigNumber;
+export declare const ZERO_BN: BigNumber;
+export declare const ONE_BN: BigNumber;
+export declare const MAX_UINT32 = 4294967295;
+export declare const MAX_UINT256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";

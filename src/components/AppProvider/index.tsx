@@ -15,7 +15,7 @@ import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-import { BeanstalkSDK } from "../../../sdk/src/index";
+import { BeanstalkSDK } from "../../../distsdk/sdk.esm.js";
 import ENVIRONMENT from "../../config";
 import { useEffect } from "react";
 import useAppStore from "../../store";
@@ -138,18 +138,15 @@ const client = createClient({
 });
 
 const Wrapper = ({ children }: { children: JSX.Element }) => {
-  const { setBeanstalkSdk, setRootContract } = useAppStore(
-    (v) => ({
-      setBeanstalkSdk: v.setBeanstalkSdk,
-      setRootContract: v.setRootContract,
-    })
-  );
+  const { setBeanstalkSdk, setRootContract } = useAppStore((v) => ({
+    setBeanstalkSdk: v.setBeanstalkSdk,
+    setRootContract: v.setRootContract,
+  }));
   const { data } = useSigner();
   const { address } = useAccount();
 
   useEffect(() => {
     if (address && data) {
-
       const sdk = new BeanstalkSDK({
         signer: data,
         subgraphUrl: ENVIRONMENT.beanstalkSubgraphUrl,

@@ -1,0 +1,40 @@
+import { GraphQLClient } from 'graphql-request';
+import { BeanstalkConfig, DataSource, Provider, Reconfigurable, Signer } from '../types';
+import { addresses, ChainId } from '../constants';
+import { Tokens } from './tokens';
+import { Contracts } from './contracts';
+import { EventManager } from './events/EventManager';
+import { Silo } from './silo';
+import { Sun } from './sun';
+import { Sdk as Queries } from '../constants/generated-gql/graphql';
+import { Farm } from './farm';
+import { Permit } from './permit';
+import { Root } from './root';
+export declare class BeanstalkSDK {
+    DEBUG: boolean;
+    signer?: Signer;
+    provider: Provider;
+    providerOrSigner: Signer | Provider;
+    source: DataSource;
+    readonly chainId: ChainId;
+    readonly addresses: typeof addresses;
+    readonly contracts: Contracts;
+    readonly tokens: Tokens;
+    readonly graphql: GraphQLClient;
+    readonly queries: Queries;
+    readonly farm: Farm;
+    readonly silo: Silo;
+    readonly events: EventManager;
+    readonly sun: Sun;
+    readonly permit: Permit;
+    readonly root: Root;
+    constructor(config?: BeanstalkConfig);
+    handleConfig(config?: BeanstalkConfig): void;
+    debug(...args: any[]): void;
+    getProviderFromUrl(url: string): Provider;
+    getAccount(_account?: string): Promise<string>;
+    deriveSource<T extends {
+        source?: DataSource;
+    }>(config?: T): DataSource;
+    deriveConfig<T extends BeanstalkConfig>(key: keyof Reconfigurable, _config?: T): BeanstalkConfig[typeof key];
+}

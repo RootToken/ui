@@ -1,8 +1,7 @@
 import { Contract, ethers } from "ethers";
 import create from "zustand";
-import { BeanstalkSDK } from "../sdk/src";
+import { BeanstalkSDK } from "../distsdk/sdk.esm.js";
 import ENVIRONMENT from "./config";
-import rootAbi from "./abi/Root.json";
 import { createRootContract } from "./util/root";
 
 interface AppState {
