@@ -29,6 +29,12 @@ export default function MintForm() {
     onResetMintFormState();
   }, []);
 
+  let mintAmount = 0;
+
+  mintFormState.mintTokens.forEach((v) => {
+    mintAmount += parseFloat(v.amount || "0") * 2;
+  });
+
   return (
     <S.Form
       onSubmit={(e) => {
@@ -86,19 +92,14 @@ export default function MintForm() {
           <div className="contentContainer">
             <div className="inputContainer">
               <NumericFormat
+                decimalScale={2}
                 placeholder="0"
                 id="rootAmount"
                 thousandSeparator
                 valueIsNumericString
                 allowNegative={false}
-                // value={form.mintAmount}
-                // onValueChange={(e) => {
-                //   const value = e.value;
-                //   setForm((v) => ({
-                //     ...v,
-                //     mintAmount: value,
-                //   }));
-                // }}
+                readOnly
+                value={mintAmount}
               />
               <div className="rootContainer">
                 <img width={14} height={14} src="/root.svg" />
@@ -159,7 +160,10 @@ export default function MintForm() {
               </div>
               <div>
                 <img width={16} height={16} src="/root.svg" />
-                175,233
+                {(
+                  (mintAmount / 100) *
+                  (100 - parseFloat(mintFormState.slippage))
+                ).toLocaleString()}
               </div>
             </div>
             <div>

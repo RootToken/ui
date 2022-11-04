@@ -48,6 +48,7 @@ export default function MintRow({ index }: { index: number }) {
             placeholder="0"
             id="rootAmount"
             thousandSeparator
+            decimalScale={mintItem.token.formatDecimals}
             valueIsNumericString
             allowNegative={false}
             value={mintItem.amount}

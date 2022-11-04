@@ -102,7 +102,7 @@ export const Form = styled.form`
         align-items: center;
         > button {
           color: #787878;
-          font-size: 16px;
+          font-size: 14px;
           background: transparent;
           border: none;
           margin: 0 10px 0 0;
