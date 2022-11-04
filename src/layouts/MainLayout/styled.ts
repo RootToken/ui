@@ -1,6 +1,5 @@
-import { between, darken } from "polished";
 import styled from "styled-components";
-import { mediaDown, mediaUp } from "../../styled";
+import { mediaUp } from "../../styled";
 
 export const Layout = styled.div`
   display: flex;
@@ -15,6 +14,9 @@ export const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  z-index: 15;
+  position: fixed;
+  width: 100%;
 
   > .right {
     display: flex;
@@ -51,8 +53,9 @@ export const Body = styled.div`
   height: 100%;
   flex: 1;
   overflow: hidden;
+  margin-top: 75px;
   > .bgTop {
-    position: absolute;
+    position: fixed;
     top: 0;
     filter: brightness(0.12);
     width: 100%;
@@ -66,7 +69,7 @@ export const Body = styled.div`
     padding: 20px 30px 100px 30px;
   }
   > .bgBottom {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     filter: brightness(0.12);
     width: 100%;

@@ -1,4 +1,3 @@
-import { darken, lighten } from "polished";
 import styled from "styled-components";
 
 export const Form = styled.form`
@@ -21,19 +20,34 @@ export const Form = styled.form`
         margin: 0;
         padding: 0;
         background-color: transparent;
-        > svg {
-          stroke: #fdfdfd;
+      }
+    }
+    > .mintList {
+      display: flex;
+      flex-direction: column;
+      > div {
+        margin-bottom: 15px;
+        position: relative;
 
-          &:hover {
-            stroke: ${darken("0.2", "#FDFDFD")};
-          }
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        > button {
+          position: absolute;
+          right: -35px;
+          transform: translate(0, -50%);
+          top: 50%;
+          background: transparent;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
       }
     }
     > .contentContainer {
       border-radius: 6px;
       background-color: rgba(255, 255, 255, 0.03);
-
       > .inputContainer {
         position: relative;
         display: flex;
@@ -43,7 +57,7 @@ export const Form = styled.form`
           color: #fff;
           font-size: 16px;
           line-height: 19px;
-          padding: 15px 20px;
+          padding: 15px 5px 15px 20px;
           flex: 1;
         }
         > .rootContainer {
@@ -55,64 +69,7 @@ export const Form = styled.form`
           }
           > div {
             font-weight: bold;
-            color: #FFF;
-          }
-        }
-        > .pickerContainer {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          padding: 5px;
-          > button {
-            border: none;
-            margin: 0 0 3px 0;
-            background-color: rgba(255, 255, 255, 0.03);
-            border-radius: 3.17392px;
-            display: flex;
-            align-items: center;
-            padding: 5px 10px;
-
-            &:hover {
-              background-color: rgba(255, 255, 255, 0.1);
-            }
-            > div {
-              display: flex;
-              align-items: center;
-              margin-right: 10px;
-              > div {
-                margin-left: 8px;
-                color: #fff;
-                font-size: 14px;
-                line-height: 19px;
-              }
-              > img {
-                margin: 0 0 -2px 0;
-              }
-            }
-          }
-          > .balance {
             color: #fff;
-            font-size: 14px;
-            text-align: right;
-            > span {
-              font-weight: 300;
-              font-size: 14px;
-              line-height: 26px;
-              color: #757880;
-            }
-            > button {
-              color: #00f97c;
-              background-color: transparent;
-              margin: 0 0 0 5px;
-              padding: 0;
-              border: none;
-              font-size: 14px;
-              font-weight: bold;
-
-              &:hover {
-                color: ${darken("0.1", "#00f97c")};
-              }
-            }
           }
         }
       }
@@ -122,6 +79,24 @@ export const Form = styled.form`
       display: flex;
       align-items: center;
       justify-content: space-between;
+      > .price {
+        display: flex;
+        align-items: center;
+        > div:nth-child(1) {
+          margin-right: 8px;
+        }
+        > div:nth-child(2) {
+          font-size: 12px;
+          line-height: 20px;
+          color: #999999;
+        }
+      }
+      > .gas {
+        font-size: 12px;
+        line-height: 8px;
+
+        color: #ffffff;
+      }
       > .add {
         display: flex;
         align-items: center;
@@ -231,4 +206,36 @@ export const Graph = styled.div`
 export const Content = styled.div`
   flex: 1;
   margin-left: 19px;
+`;
+
+export const TxDetails = styled.div`
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px 13px;
+  cursor: pointer;
+
+  > .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    > .content {
+      display: flex;
+      align-items: center;
+
+      > img {
+        margin-right: 10px;
+      }
+      > span {
+        font-size: 14px;
+        line-height: 20px;
+        color: #999999;
+      }
+    }
+  }
+  > .collapse {
+    height: 0px;
+    overflow: hidden;
+    transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    visibility: hidden;
+  }
 `;

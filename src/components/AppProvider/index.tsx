@@ -73,6 +73,8 @@ const GlobalStyle = createGlobalStyle`
     button {
       padding: 0;
       cursor: pointer;
+      border: none;
+      margin: 0;
     }
     input:focus,
     select:focus,
@@ -83,6 +85,9 @@ const GlobalStyle = createGlobalStyle`
     a {
       text-decoration: none;
     }
+    :focus-visible {
+      outline: none;
+    }
 
     .modalOverlay {
       position: fixed;
@@ -90,7 +95,9 @@ const GlobalStyle = createGlobalStyle`
       background-color: rgba(0, 0, 0, 0.85);
       z-index: 1000;
     }
-    
+    #layers {
+      z-index: 10;
+    }
 `;
 
 interface AppProvider {

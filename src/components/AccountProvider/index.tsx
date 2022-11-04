@@ -4,12 +4,11 @@ import useAppStore from "../../store";
 import { BeanstalkSDK } from "../../../distsdk/sdk.esm.js";
 import ENVIRONMENT from "../../config";
 import { createERC20Contract, createRootContract } from "../../util/contract";
-import { TOKENS } from "../../util/token";
 import { Signer } from "@wagmi/core";
 import { ISiloDeposit } from "../../interfaces/siloDeposit";
 import { calculateGrownStalk } from "../../util/deposit";
 import { BigNumber } from "bignumber.js";
-import { ITokenSymbol } from "../../interfaces/token";
+import { ITokenSymbol, TOKENS } from "../../interfaces/token";
 import { ethers } from "ethers";
 
 export default function AccountProvider({
@@ -17,24 +16,19 @@ export default function AccountProvider({
 }: {
   children: JSX.Element;
 }) {
-  const {
-    beanstalkSdk,
-    setBeanstalkSdk,
-    setERC20Contract,
-    setAccount,
-    erc20Contract,
-  } = useAppStore((v) => ({
-    beanstalkSdk: v.beanstalkSdk,
-    erc20Contract: v.erc20Contract,
-    setBeanstalkSdk: v.setBeanstalkSdk,
-    setERC20Contract: v.setERC20Contract,
-    account: v.account,
-    setAccount: v.setAccount,
-  }));
+  const { setBeanstalkSdk, setERC20Contract, setAccount, erc20Contract } =
+    useAppStore((v) => ({
+      beanstalkSdk: v.beanstalkSdk,
+      erc20Contract: v.erc20Contract,
+      setBeanstalkSdk: v.setBeanstalkSdk,
+      setERC20Contract: v.setERC20Contract,
+      account: v.account,
+      setAccount: v.setAccount,
+    }));
   const { data: signerData } = useSigner();
-  const { address } = useAccount();
+  const { address, isDisconnected } = useAccount();
 
-  const setupContractWithSigner = (signer: Signer) => {
+  const setupContractWithSigner = (signer?: Signer) => {
     setERC20Contract(
       ENVIRONMENT.rootContractAddress,
       createRootContract(signer)
@@ -112,7 +106,10 @@ export default function AccountProvider({
             }
             return {
               address: TOKENS[key as ITokenSymbol].address,
-              balance: new BigNumber(ethers.utils.formatUnits(result), TOKENS[key as ITokenSymbol].decimals),
+              balance: new BigNumber(
+                ethers.utils.formatUnits(result),
+                TOKENS[key as ITokenSymbol].decimals
+              ),
             };
           } catch (err) {
             return {
@@ -144,6 +141,13 @@ export default function AccountProvider({
       setupAccount(signerData, address);
     }
   }, [address, signerData]);
+
+  useEffect(() => {
+    if (isDisconnected) {
+      setupContractWithSigner();
+      setAccount(undefined);
+    }
+  }, [isDisconnected]);
 
   return <>{children}</>;
 }

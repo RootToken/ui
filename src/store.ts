@@ -3,8 +3,9 @@ import create from "zustand";
 import { BeanstalkSDK } from "../distsdk/sdk.esm.js";
 import ENVIRONMENT from "./config";
 import { IAccount } from "./interfaces/account.js";
+import { defaultMintFormState, IMintFormState } from "./interfaces/mintForm.js";
+import { TOKENS } from "./interfaces/token.js";
 import { createERC20Contract, createRootContract } from "./util/contract.js";
-import { TOKENS } from "./util/token.js";
 
 interface AppState {
   connectedAddress?: string;
@@ -16,7 +17,11 @@ interface AppState {
   setERC20Contract: (address: string, instance: ethers.Contract) => void;
 
   account?: IAccount;
-  setAccount: (account: IAccount) => void;
+  setAccount: (account?: IAccount) => void;
+
+  mintFormState: IMintFormState;
+  onChangeMintFormStateField: (field: keyof IMintFormState, value: any) => void;
+  onResetMintFormState: () => void;
 }
 
 const useAppStore = create<AppState>()((set) => ({
@@ -42,6 +47,18 @@ const useAppStore = create<AppState>()((set) => ({
     set((state) => ({
       ...state,
       account,
+    })),
+
+  mintFormState: defaultMintFormState,
+  onChangeMintFormStateField: (field, value) =>
+    set((state) => ({
+      ...state,
+      mintFormState: { ...state.mintFormState, [field]: value },
+    })),
+  onResetMintFormState: () =>
+    set((state) => ({
+      ...state,
+      mintFormState: defaultMintFormState,
     })),
 }));
 

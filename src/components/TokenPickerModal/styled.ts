@@ -54,58 +54,76 @@ export const CoinList = styled.ul`
   padding: 0 22px 22px;
   max-height: 350px;
   overflow-y: auto;
-  > li {
+`;
+
+export const CoinItem = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+
+  padding: 10px;
+  border-radius: 12px;
+  &:hover {
+    background-color: #222226;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  > .content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    cursor: pointer;
-
-    padding: 10px;
-    border-radius: 12px;
-    &:hover {
-      background-color: #222226;
+    > img {
+      margin-right: 23.5px;
+      width: 35px;
+      height: 35px;
     }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    > .content {
+    > div {
       display: flex;
-      align-items: center;
-      > img {
-        margin-right: 23.5px;
-        width: 35px;
-        height: 35px;
+      flex-direction: column;
+      align-items: flex-start;
+      > div:nth-child(1) {
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 23px;
+        color: #ffffff;
       }
-      > div {
-        > div:nth-child(1) {
-          font-weight: bold;
-          font-size: 16px;
-          line-height: 23px;
-          color: #ffffff;
-        }
-        > div:nth-child(2) {
-          font-weight: bold;
-          font-size: 12px;
-          line-height: 15px;
-          color: #b0b0b0;
-        }
+      > div:nth-child(2) {
+        font-weight: bold;
+        font-size: 12px;
+        line-height: 15px;
+        color: #b0b0b0;
       }
-    }
-    > .balance {
-      display: flex;
-      align-items: center;
-      font-size: 16px;
-      line-height: 32px;
-      display: flex;
-      align-items: center;
-      font-weight: bold;
-
-      color: #ffffff;
     }
   }
+  > .balance {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    line-height: 32px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+
+    color: #ffffff;
+  }
+
+  ${(props) =>
+    props.disabled &&
+    `
+  opacity: 0.2;
+  cursor: unset;
+
+  &:hover {
+    background-color: transparent;
+  }
+`}
 `;
 
 export const ErrorMessage = styled.div`
