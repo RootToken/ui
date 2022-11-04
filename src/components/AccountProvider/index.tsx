@@ -147,7 +147,7 @@ export default function AccountProvider({
       setupContractWithSigner();
       setAccount(undefined);
     }
-  }, [isDisconnected]);
-
+  }, [isDisconnected]); 
+  
   return <>{children}</>;
 }

@@ -4,12 +4,14 @@ import { NumericFormat } from "react-number-format";
 import { TOKENS } from "../../interfaces/token";
 import useAppStore from "../../store";
 import MintSettingsPopover from "../MintSettingsPopover";
+import TokenPickerModal from "../TokenPickerModal";
 import TooltipIcon from "../TooltipIcon";
 import MintRow from "./MintRow";
 import * as S from "./styled";
 
 export default function MintForm() {
   const [openTx, setOpenTx] = useState(false);
+  const [openPicker, setOpenPicker] = useState(false);
   const { mintFormState, onChangeMintFormStateField, onResetMintFormState } =
     useAppStore(
       ({
@@ -64,10 +66,7 @@ export default function MintForm() {
             <div className="add">
               <button
                 onClick={() => {
-                  onChangeMintFormStateField("mintTokens", [
-                    ...mintFormState.mintTokens,
-                    { amount: "", token: TOKENS.ETH },
-                  ]);
+                  setOpenPicker(true);
                 }}
               >
                 + Add another token
@@ -119,12 +118,14 @@ export default function MintForm() {
         </div>
       </S.Phase>
       <S.Phase>
-        <S.TxDetails
-          onClick={() => {
-            setOpenTx((t) => !t);
-          }}
-        >
-          <div className="header">
+        <S.TxDetails>
+          <S.TxHeader
+            active={openTx}
+            className="header"
+            onClick={() => {
+              setOpenTx((t) => !t);
+            }}
+          >
             <div className="content">
               <img src="/tx.svg" />
               <span>Transaction details</span>
@@ -134,25 +135,59 @@ export default function MintForm() {
             ) : (
               <ChevronDown size={14} color="#999999" />
             )}
-          </div>
+          </S.TxHeader>
           <div
             className="collapse"
             style={
               openTx
                 ? {
                     minHeight: "0px",
-                    transitionDuration: "100ms",
-                    height: "50px",
+                    transitionDuration: "200ms",
+                    height: "75px",
                     visibility: "initial",
+                    padding: "10px 13px",
                   }
                 : {}
             }
           >
-            test
+            <div>
+              <div>
+                Minimum Output{" "}
+                <TooltipIcon text="The amount you expect to receive at the current market price. You may receive less or more if the market price changes while your transaction is pending.">
+                  <HelpCircle size={16} color="#3D3D3D" />
+                </TooltipIcon>
+              </div>
+              <div>
+                <img width={16} height={16} src="/root.svg" />
+                175,233
+              </div>
+            </div>
+            <div>
+              <div>
+                Price Impact{" "}
+                <TooltipIcon text="The amount you expect to receive at the current market price. You may receive less or more if the market price changes while your transaction is pending.">
+                  <HelpCircle size={16} color="#3D3D3D" />
+                </TooltipIcon>
+              </div>
+              <div>1.4%</div>
+            </div>
           </div>
         </S.TxDetails>
       </S.Phase>
       <S.MintButton>MINT</S.MintButton>
+
+      <TokenPickerModal
+        open={openPicker}
+        onClose={() => {
+          setOpenPicker(false);
+        }}
+        onSelect={(token, deposit) => {
+          onChangeMintFormStateField("mintTokens", [
+            ...mintFormState.mintTokens,
+            { amount: "", token, siloDeposit: deposit },
+          ]);
+        }}
+      />
     </S.Form>
   );
 }

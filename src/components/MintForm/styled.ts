@@ -63,7 +63,7 @@ export const Form = styled.form`
         > .rootContainer {
           display: flex;
           align-items: center;
-          padding: 5px 28px 5px 5px;
+          padding: 5px 20px 5px 5px;
           > img {
             margin-right: 10px;
           }
@@ -211,31 +211,69 @@ export const Content = styled.div`
 export const TxDetails = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
-  padding: 6px 13px;
-  cursor: pointer;
 
-  > .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    > .content {
-      display: flex;
-      align-items: center;
-
-      > img {
-        margin-right: 10px;
-      }
-      > span {
-        font-size: 14px;
-        line-height: 20px;
-        color: #999999;
-      }
-    }
-  }
   > .collapse {
     height: 0px;
     overflow: hidden;
     transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     visibility: hidden;
+    display: flex;
+    flex-direction: column;
+
+    > div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+
+      > div:nth-child(1) {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        > div {
+          margin-left: 6px;
+        }
+      }
+      > div:nth-child(2) {
+        display: flex;
+        align-items: center;
+        > img {
+          margin-right: 6px;
+        }
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+`;
+
+export const TxHeader = styled.div<{ active: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 13px;
+  cursor: pointer;
+  user-select: none;
+  ${(props) =>
+    props.active &&
+    `
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  
+  `}
+  > .content {
+    display: flex;
+    align-items: center;
+
+    > img {
+      margin-right: 10px;
+    }
+    > span {
+      font-size: 14px;
+      line-height: 20px;
+      color: #999999;
+    }
   }
 `;

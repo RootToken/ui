@@ -7,6 +7,7 @@ export const PopoverContainer = styled(motion.div)`
   border-radius: 12px;
   padding: 12px 15px;
   width: fit-content;
+  max-width: 250px;
 
   > p {
     margin: 0;
