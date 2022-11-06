@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import MainLayout from "../layouts/MainLayout";
 import MintForm from "../components/MintForm";
+import { Route, Routes, useLocation, useNavigate } from "react-router";
+import RedeemForm from "../components/RedeemForm";
+import ClaimForm from "../components/ClaimForm";
+import FarmForm from "../components/FarmForm";
 
 const Container = styled.div`
   max-width: 470px;
@@ -75,7 +79,7 @@ const MintHeader = styled.div`
   justify-content: space-between;
 
   > div {
-    width: 50px;
+    width: 0px;
     height: 1px;
     position: absolute;
     background-color: #00f97c;
@@ -111,15 +115,86 @@ const MintBody = styled.div`
 `;
 
 export default function AppPage() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<{
-    active: "mint" | "redeem" | "claim" | "farm";
     offset: number;
     width: number;
+    active?: boolean;
   }>({
-    active: "mint",
     offset: 0,
-    width: 53,
+    width: 45,
+    active: false,
   });
+
+  const setTabPosition = () => {
+    new ResizeObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.contentRect.width;
+        if (pathname === "/farm") {
+          setTab({
+            offset: entry.target.offsetLeft - 53,
+            width: entry.contentRect.width,
+            active: true,
+          });
+        }
+      });
+    }).observe(document.getElementById("farm")!);
+
+    new ResizeObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.contentRect.width;
+        if (pathname === "/mint" || pathname === "/") {
+          setTab({
+            offset: entry.target.offsetLeft - 53,
+            width: entry.contentRect.width,
+            active: true,
+          });
+        }
+      });
+    }).observe(document.getElementById("mint")!);
+
+    new ResizeObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.contentRect.width;
+        if (pathname === "/redeem") {
+          setTab({
+            offset: entry.target.offsetLeft - 53,
+            width: entry.contentRect.width,
+            active: true,
+          });
+        }
+      });
+    }).observe(document.getElementById("redeem")!);
+
+    new ResizeObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.contentRect.width;
+        if (pathname === "/claim") {
+          setTab({
+            offset: entry.target.offsetLeft - 53,
+            width: entry.contentRect.width,
+            active: true,
+          });
+        }
+      });
+    }).observe(document.getElementById("claim")!);
+  };
+
+  useEffect(() => {
+    setTabPosition();
+  }, [pathname]);
+
+  useEffect(() => {
+    const resize = (event: any) => {
+      setTabPosition();
+    };
+    addEventListener("resize", resize);
+    return () => {
+      removeEventListener("resize", resize);
+    };
+  }, []);
+
   return (
     <MainLayout>
       <>
@@ -143,61 +218,58 @@ export default function AppPage() {
           <MintContainer>
             <MintHeader>
               <MintHeaderButton
-                active={tab.active === "mint"}
+                id="mint"
+                active={pathname === "/mint"}
                 onClick={(e: any) => {
-                  setTab({
-                    active: "mint",
-                    offset: 0,
-                    width: e.target.clientWidth,
-                  });
+                  navigate("/mint");
                 }}
               >
                 Minting
               </MintHeaderButton>
               <MintHeaderButton
-                active={tab.active === "redeem"}
+                id="redeem"
+                active={pathname === "/redeem"}
                 onClick={(e: any) => {
-                  setTab({
-                    active: "redeem",
-                    offset: e.target.offsetLeft - 53,
-                    width: e.target.clientWidth,
-                  });
+                  navigate("/redeem");
                 }}
               >
                 Redeem
               </MintHeaderButton>
               <MintHeaderButton
-                active={tab.active === "claim"}
+                id="claim"
+                active={pathname === "/claim"}
                 onClick={(e: any) => {
-                  setTab({
-                    active: "claim",
-                    offset: e.target.offsetLeft - 53,
-                    width: e.target.clientWidth,
-                  });
+                  navigate("/claim");
                 }}
               >
                 Claim
               </MintHeaderButton>
               <MintHeaderButton
-                active={tab.active === "farm"}
+                id="farm"
+                active={pathname === "/farm"}
                 onClick={(e: any) => {
-                  setTab({
-                    active: "farm",
-                    offset: e.target.offsetLeft - 53,
-                    width: e.target.clientWidth,
-                  });
+                  navigate("/farm");
                 }}
               >
                 Collective Farming
               </MintHeaderButton>
-              <div
-                style={{
-                  transform: `translateX(${tab.offset}px)`,
-                  width: tab.width,
-                }}
-              />
+              {tab.active && (
+                <div
+                  style={{
+                    transform: `translateX(${tab.offset}px)`,
+                    width: tab.width,
+                  }}
+                />
+              )}
             </MintHeader>
-            <MintBody>{tab.active === "mint" && <MintForm />}</MintBody>
+            <MintBody>
+              <Routes>
+                <Route path="/redeem" element={<RedeemForm />} />
+                <Route path="/claim" element={<ClaimForm />} />
+                <Route path="/farm" element={<FarmForm />} />
+                <Route path="*" element={<MintForm />} />
+              </Routes>
+            </MintBody>
           </MintContainer>
         </Container>
       </>

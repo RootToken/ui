@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, HelpCircle, Info, X } from "react-feather";
 import { NumericFormat } from "react-number-format";
-import { TOKENS } from "../../interfaces/token";
 import useAppStore from "../../store";
 import MintSettingsPopover from "../MintSettingsPopover";
 import TokenPickerModal from "../TokenPickerModal";
@@ -11,28 +10,43 @@ import * as S from "./styled";
 
 export default function MintForm() {
   const [openTx, setOpenTx] = useState(false);
+  const [totalPreview, setTotalPreview] = useState(true);
   const [openPicker, setOpenPicker] = useState(false);
-  const { mintFormState, onChangeMintFormStateField, onResetMintFormState } =
-    useAppStore(
-      ({
-        mintFormState,
-        onChangeMintFormStateField,
-        onResetMintFormState,
-      }) => ({
-        mintFormState,
-        onChangeMintFormStateField,
-        onResetMintFormState,
-      })
-    );
+  const {
+    mintFormState,
+    onChangeMintFormStateField,
+    onResetMintFormState,
+    prices,
+  } = useAppStore(
+    ({
+      mintFormState,
+      onChangeMintFormStateField,
+      onResetMintFormState,
+      prices,
+    }) => ({
+      mintFormState,
+      onChangeMintFormStateField,
+      onResetMintFormState,
+      prices,
+    })
+  );
 
   useEffect(() => {
     onResetMintFormState();
+    return () => {
+      onResetMintFormState();
+    }
   }, []);
 
   let mintAmount = 0;
+  let totalUSD = 0;
 
-  mintFormState.mintTokens.forEach((v) => {
-    mintAmount += parseFloat(v.amount || "0") * 2;
+  mintFormState.mintTokens.forEach((v, idx) => {
+    if (prices) {
+      mintAmount +=
+        prices[v.token.symbol] * (idx + 1) * parseFloat(v.amount || "0");
+      totalUSD += prices[v.token.symbol] * parseFloat(v.amount || "0");
+    }
   });
 
   return (
@@ -109,10 +123,56 @@ export default function MintForm() {
           </div>
           <div className="infoContainer">
             <div className="price">
-              <TooltipIcon text="Testing">
-                <Info size={16} color="#E4E4E6" />
-              </TooltipIcon>
-              <div>1 ETH = 148 Root</div>
+              {prices && mintAmount > 0 && (
+                <>
+                  <TooltipIcon
+                    element={
+                      <S.PriceExchangeTooltip>
+                        <div className="header">Exchange Rate</div>
+                        <div className="body">
+                          {mintFormState.mintTokens.map((v, idx) => {
+                            return (
+                              <div key={idx}>
+                                Swap {v.amount} {v.token.symbol} for{" "}
+                                {(
+                                  (idx + 1) *
+                                  prices[v.token.symbol] *
+                                  parseFloat(v.amount)
+                                ).toLocaleString("en-us", {
+                                  maximumFractionDigits: 2,
+                                })}{" "}
+                                ROOT
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </S.PriceExchangeTooltip>
+                    }
+                  >
+                    <Info size={16} color="#E4E4E6" />
+                  </TooltipIcon>
+                  {totalPreview ? (
+                    <div onClick={() => setTotalPreview(false)}>
+                      $
+                      {totalUSD.toLocaleString("en-us", {
+                        maximumFractionDigits: 2,
+                      })}{" "}
+                      ={" "}
+                      {mintAmount.toLocaleString("en-us", {
+                        maximumFractionDigits: 2,
+                      })}{" "}
+                      Root
+                    </div>
+                  ) : (
+                    <div onClick={() => setTotalPreview(true)}>
+                      1 Root = $
+                      {(mintAmount / totalUSD).toLocaleString("en-us", {
+                        maximumFractionDigits: 2,
+                      })}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
             <div className="gas">Est. Gas: 0.03319 ETH</div>
           </div>
@@ -163,7 +223,9 @@ export default function MintForm() {
                 {(
                   (mintAmount / 100) *
                   (100 - parseFloat(mintFormState.slippage))
-                ).toLocaleString()}
+                ).toLocaleString("en-us", {
+                  maximumFractionDigits: 2,
+                })}
               </div>
             </div>
             <div>
@@ -188,7 +250,12 @@ export default function MintForm() {
         onSelect={(token, deposit) => {
           onChangeMintFormStateField("mintTokens", [
             ...mintFormState.mintTokens,
-            { amount: "", token, siloDeposit: deposit },
+            {
+              amount: "",
+              token,
+              siloDeposit: deposit,
+              slippage: token.slippage.toString(),
+            },
           ]);
         }}
       />

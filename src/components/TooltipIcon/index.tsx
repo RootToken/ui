@@ -5,9 +5,11 @@ import * as S from "./styled";
 export default function TooltipIcon({
   children,
   text,
+  element,
 }: {
-  text: string;
+  text?: string;
   children: JSX.Element;
+  element?: JSX.Element;
 }) {
   const [isOpen, hoverProps] = useHover();
 
@@ -32,7 +34,8 @@ export default function TooltipIcon({
         <AnimatePresence>
           {isOpen && (
             <S.PopoverContainer {...layerProps}>
-              <p>{text}</p>
+              {text && <p>{text}</p>}
+              {element && element}
             </S.PopoverContainer>
           )}
         </AnimatePresence>

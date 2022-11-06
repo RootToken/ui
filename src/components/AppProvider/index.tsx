@@ -4,8 +4,7 @@ import {
   createClient,
   configureChains,
   defaultChains,
-  useAccount,
-  useSigner,
+  allChains,
 } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
@@ -15,18 +14,12 @@ import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-import { BeanstalkSDK } from "../../../distsdk/sdk.esm.js";
 import ENVIRONMENT from "../../config";
+import AccountProvider from "../AccountProvider/index.js";
+import useSWR from "swr";
+import { getPrices } from "../../api/coingecko";
 import { useEffect } from "react";
 import useAppStore from "../../store";
-import { calculateGrownStalk } from "../../util/deposit";
-import { BigNumber } from "bignumber.js";
-import {
-  createERC20Contract,
-  createRootContract,
-} from "../../util/contract.js";
-import { TOKENS } from "../../util/token.js";
-import AccountProvider from "../AccountProvider/index.js";
 
 const GlobalStyle = createGlobalStyle`
 
@@ -140,6 +133,16 @@ const client = createClient({
 });
 
 export function AppProvider({ children }: AppProvider): any {
+  const setPrices = useAppStore((v) => v.setPrices);
+  const { data } = useSWR("prices", getPrices);
+
+  useEffect(() => {
+    if (data) {
+      setPrices(data);
+    }
+
+  }, [data]);
+
   return (
     <ThemeProvider theme={{}}>
       <GlobalStyle />

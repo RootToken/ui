@@ -6,6 +6,7 @@ export type ITokenSymbol =
   | "DAI"
   | "BEAN"
   | "BEAN DEPOSIT";
+
 export interface IToken {
   name: string;
   symbol: ITokenSymbol;
@@ -13,6 +14,7 @@ export interface IToken {
   address: string;
   decimals: number;
   formatDecimals: number;
+  slippage: number;
 }
 
 export const TOKENS: { [key in ITokenSymbol]: IToken } = {
@@ -23,6 +25,7 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0x",
     decimals: 18,
     formatDecimals: 4,
+    slippage: 0.5,
   },
   WETH: {
     name: "Wrapped Ether",
@@ -31,6 +34,8 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     decimals: 18,
     formatDecimals: 4,
+    slippage: 0.5,
+
   },
   BEAN: {
     name: "Bean",
@@ -39,6 +44,7 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0xBEA0000029AD1c77D3d5D23Ba2D8893dB9d1Efab",
     decimals: 6,
     formatDecimals: 2,
+    slippage: 0,
   },
   USDC: {
     name: "USDC",
@@ -47,6 +53,8 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     decimals: 6,
     formatDecimals: 2,
+    slippage: 0.2,
+
   },
   USDT: {
     name: "USDT",
@@ -55,6 +63,8 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     decimals: 6,
     formatDecimals: 2,
+    slippage: 0.2,
+
   },
   DAI: {
     name: "DAI",
@@ -63,13 +73,15 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
     decimals: 18,
     formatDecimals: 2,
+    slippage: 0.2,
   },
-  'BEAN DEPOSIT': {
+  "BEAN DEPOSIT": {
     name: "Bean Deposit",
     symbol: "BEAN DEPOSIT",
     icon: "/bean.svg",
     address: "0xBEA0000029AD1c77D3d5D23Ba2D8893dB9d1Efab",
     decimals: 6,
     formatDecimals: 2,
+    slippage: 0,
   },
 };

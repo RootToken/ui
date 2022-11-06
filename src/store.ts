@@ -3,8 +3,15 @@ import create from "zustand";
 import { BeanstalkSDK } from "../distsdk/sdk.esm.js";
 import ENVIRONMENT from "./config";
 import { IAccount } from "./interfaces/account.js";
-import { defaultMintFormState, IMintFormState } from "./interfaces/mintForm.js";
-import { TOKENS } from "./interfaces/token.js";
+import {
+  getDefaultClaimFormState,
+  getDefaultMintFormState,
+  getDefaultRedeemFormState,
+  IClaimFormState,
+  IMintFormState,
+  IRedeemFormState,
+} from "./interfaces/mintForm.js";
+import { ITokenSymbol, TOKENS } from "./interfaces/token.js";
 import { createERC20Contract, createRootContract } from "./util/contract.js";
 
 interface AppState {
@@ -22,6 +29,27 @@ interface AppState {
   mintFormState: IMintFormState;
   onChangeMintFormStateField: (field: keyof IMintFormState, value: any) => void;
   onResetMintFormState: () => void;
+
+  redeemFormState: IRedeemFormState;
+  onChangeRedeemFormStateField: (
+    field: keyof IRedeemFormState,
+    value: any
+  ) => void;
+  onResetRedeemFormState: () => void;
+
+  claimFormState: IClaimFormState;
+  onChangeClaimFormStateField: (
+    field: keyof IClaimFormState,
+    value: any
+  ) => void;
+  onResetClaimFormState: () => void;
+
+  prices?: {
+    [key in ITokenSymbol]: number;
+  };
+  setPrices: (prices: {
+    [key in ITokenSymbol]: number;
+  }) => void;
 }
 
 const useAppStore = create<AppState>()((set) => ({
@@ -49,7 +77,7 @@ const useAppStore = create<AppState>()((set) => ({
       account,
     })),
 
-  mintFormState: defaultMintFormState,
+  mintFormState: getDefaultMintFormState(),
   onChangeMintFormStateField: (field, value) =>
     set((state) => ({
       ...state,
@@ -58,7 +86,37 @@ const useAppStore = create<AppState>()((set) => ({
   onResetMintFormState: () =>
     set((state) => ({
       ...state,
-      mintFormState: defaultMintFormState,
+      mintFormState: getDefaultMintFormState(),
+    })),
+
+  redeemFormState: getDefaultRedeemFormState(),
+  onChangeRedeemFormStateField: (field, value) =>
+    set((state) => ({
+      ...state,
+      redeemFormState: { ...state.redeemFormState, [field]: value },
+    })),
+  onResetRedeemFormState: () =>
+    set((state) => ({
+      ...state,
+      redeemFormState: getDefaultRedeemFormState(),
+    })),
+
+  claimFormState: getDefaultClaimFormState(),
+  onChangeClaimFormStateField: (field, value) =>
+    set((state) => ({
+      ...state,
+      claimFormState: { ...state.claimFormState, [field]: value },
+    })),
+  onResetClaimFormState: () =>
+    set((state) => ({
+      ...state,
+      claimFormState: getDefaultClaimFormState(),
+    })),
+
+  setPrices: (prices) =>
+    set((state) => ({
+      ...state,
+      prices,
     })),
 }));
 

@@ -1,3 +1,4 @@
+import { darken } from "polished";
 import styled from "styled-components";
 
 export const Form = styled.form`
@@ -79,6 +80,31 @@ export const Form = styled.form`
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      > .balance {
+        color: #fff;
+        font-size: 14px;
+        text-align: right;
+        > span {
+          font-weight: 300;
+          font-size: 14px;
+          line-height: 18px;
+          color: #757880;
+        }
+        > button {
+          color: #00f97c;
+          background-color: transparent;
+          margin: 0 0 0 5px;
+          padding: 0;
+          border: none;
+          font-size: 14px;
+          font-weight: bold;
+
+          &:hover {
+            color: ${darken("0.1", "#00f97c")};
+          }
+        }
+      }
       > .price {
         display: flex;
         align-items: center;
@@ -116,6 +142,15 @@ export const Form = styled.form`
 export const Phase = styled.section`
   margin-bottom: 25px;
 `;
+export const Info = styled.div`
+  margin-top: 20px;
+  border-radius: 8px;
+  padding: 11px 15px;
+  background-color: rgba(203, 208, 169, 0.16);
+  color: #CACBA9;
+  font-size: 14px;
+`;
+
 export const Option = styled.div<{ active: boolean }>`
   border-radius: 6px;
   border: 1px solid #7c7c7c;

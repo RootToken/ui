@@ -10,6 +10,7 @@ import { calculateGrownStalk } from "../../util/deposit";
 import { BigNumber } from "bignumber.js";
 import { ITokenSymbol, TOKENS } from "../../interfaces/token";
 import { ethers } from "ethers";
+import NetworkModal from "../NetworkModal";
 
 export default function AccountProvider({
   children,
@@ -127,6 +128,20 @@ export default function AccountProvider({
       console.log(err);
     }
 
+    try {
+      const result = await erc20Contract[
+        ENVIRONMENT.rootContractAddress
+      ].balanceOf(accountAddress);
+      if (result) {
+        balances.set(
+          ENVIRONMENT.rootContractAddress,
+          new BigNumber(ethers.utils.formatUnits(result), 18)
+        );
+      }
+    } catch (e) {
+      balances.set(ENVIRONMENT.rootContractAddress, new BigNumber(0));
+    }
+
     setAccount({
       address: accountAddress,
       balances,
@@ -147,7 +162,12 @@ export default function AccountProvider({
       setupContractWithSigner();
       setAccount(undefined);
     }
-  }, [isDisconnected]); 
-  
-  return <>{children}</>;
+  }, [isDisconnected]);
+
+  return (
+    <>
+      {children}
+      <NetworkModal />
+    </>
+  );
 }

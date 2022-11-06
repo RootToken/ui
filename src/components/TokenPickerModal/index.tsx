@@ -10,12 +10,14 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   onSelect: (token: IToken, siloDeposit?: ISiloDeposit) => void;
+  excludes: ITokenSymbol[];
 }
 
 export default function TokenPickerModal({
   open,
   onClose,
   onSelect,
+  excludes = [],
 }: ModalProps) {
   const [search, setSearch] = useState("");
   const { account, mintFormState } = useAppStore((state) => ({
@@ -112,7 +114,7 @@ export default function TokenPickerModal({
                 </li>
               );
             })}
-          {(search === "" || "BEAN DEPOSIT".includes(search.toUpperCase())) &&
+          {!excludes.includes("BEAN DEPOSIT") && (search === "" || "BEAN DEPOSIT".includes(search.toUpperCase())) &&
             account?.siloDeposits.map((deposit) => {
               const isDisabled =
                 disabledTokens[TOKENS["BEAN DEPOSIT"].symbol + deposit.season];

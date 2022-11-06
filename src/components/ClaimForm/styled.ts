@@ -1,3 +1,4 @@
+import { darken } from "polished";
 import styled from "styled-components";
 
 export const Form = styled.form`
@@ -79,6 +80,31 @@ export const Form = styled.form`
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      > .balance {
+        color: #fff;
+        font-size: 14px;
+        text-align: right;
+        > span {
+          font-weight: 300;
+          font-size: 14px;
+          line-height: 18px;
+          color: #757880;
+        }
+        > button {
+          color: #00f97c;
+          background-color: transparent;
+          margin: 0 0 0 5px;
+          padding: 0;
+          border: none;
+          font-size: 14px;
+          font-weight: bold;
+
+          &:hover {
+            color: ${darken("0.1", "#00f97c")};
+          }
+        }
+      }
       > .price {
         display: flex;
         align-items: center;

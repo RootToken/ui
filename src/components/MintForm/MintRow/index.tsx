@@ -80,6 +80,7 @@ export default function MintRow({ index }: { index: number }) {
       </S.Row>
 
       <TokenPickerModal
+        excludes={[]}
         open={openTokenPicker}
         onClose={() => setOpenTokenPicker(false)}
         onSelect={(newToken, deposit) => {
