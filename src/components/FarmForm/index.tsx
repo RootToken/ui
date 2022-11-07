@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, HelpCircle, Info, X } from "react-feather";
-import { NumericFormat } from "react-number-format";
+import {  HelpCircle } from "react-feather";
 import useAppStore from "../../store";
-import MintSettingsPopover from "../MintSettingsPopover";
-import TokenPickerModal from "../TokenPickerModal";
 import TooltipIcon from "../TooltipIcon";
 import * as S from "./styled";
 

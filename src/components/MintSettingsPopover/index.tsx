@@ -1,7 +1,7 @@
 import { useLayer } from "react-laag";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Settings } from "react-feather";
+import { ArrowRight, ChevronsRight, Settings } from "react-feather";
 import * as S from "./styled";
 import useAppStore from "../../store";
 
@@ -42,9 +42,51 @@ export default function MintSettingsPopover() {
           {isOpen && (
             <S.PopoverContainer {...layerProps}>
               <div className="section">
-                <div className="header">Settings</div>
-                <div className="content">
-                  <div className="text">Mint Slippage Tolerance</div>
+                <div className="header">Slippage Tolerance</div>
+
+                {mintFormState.mintTokens.map((v, idx) => {
+                  if (v.token.slippage === 0) {
+                    return null;
+                  }
+                  return (
+                    <div className="content" key={idx}>
+                      <div className="text">
+                        <img width={16} src={v.token.icon} /> {v.token.symbol}{" "}
+                        <ChevronsRight color="#b0b0b0" size={16} />
+                        <img src="/root.svg" width={16} />
+                        ROOT
+                      </div>
+                      <div className="slippage">
+                        <S.SlippageInput
+                          id={`slippage-${v.token.symbol}`}
+                          maxLength={5}
+                          allowNegative={false}
+                          allowLeadingZeros={false}
+                          decimalScale={2}
+                          placeholder="1"
+                          value={v.slippage}
+                          valueIsNumericString
+                          onValueChange={(v) => {
+                            const value = v.value;
+                            const temp = [...mintFormState.mintTokens];
+                            temp[idx].slippage = value;
+                            onChangeMintFormStateField("mintTokens", temp);
+                          }}
+                        />
+                        <label htmlFor={`slippage-${v.token.symbol}`}>%</label>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* <div className="content">
+                  <div className="text">
+                    <img src="/bean.svg" width={16} />
+                    BEAN
+                    <ChevronsRight color="#b0b0b0" size={16} />
+                    <img src="/root.svg" width={16} />
+                    ROOT
+                  </div>
 
                   <div className="slippage">
                     <S.SlippageInput
@@ -63,44 +105,8 @@ export default function MintSettingsPopover() {
                     />
                     <label htmlFor="slippage">%</label>
                   </div>
-                </div>
+                </div> */}
               </div>
-
-              {mintFormState.mintTokens.filter((v) => v.token.slippage > 0)
-                .length > 0 && (
-                <div className="section">
-                  <div className="header">Swap Slippage</div>
-                  {mintFormState.mintTokens.map((v, idx) => {
-                    if (v.token.slippage === 0) {
-                      return null;
-                    }
-                    return (
-                      <div className="content" key={idx}>
-                        <div className="text">{v.token.symbol} Tolerance</div>
-                        <div className="slippage">
-                          <S.SlippageInput
-                            id={`slippage-${v.token.symbol}`}
-                            maxLength={5}
-                            allowNegative={false}
-                            allowLeadingZeros={false}
-                            decimalScale={2}
-                            placeholder="1"
-                            value={v.slippage}
-                            valueIsNumericString
-                            onValueChange={(v) => {
-                              const value = v.value;
-                              const temp = [...mintFormState.mintTokens];
-                              temp[idx].slippage = value;
-                              onChangeMintFormStateField("mintTokens", temp);
-                            }}
-                          />
-                          <label htmlFor={`slippage-${v.token.symbol}`}>%</label>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </S.PopoverContainer>
           )}
         </AnimatePresence>

@@ -18,7 +18,7 @@ export const PopoverContainer = styled(motion.div)`
     }
     > .header {
       font-weight: bold;
-      margin: 0 0 4px 0;
+      margin: 0 0 10px 0;
       color: #757880;
     }
     > .content {
@@ -33,6 +33,14 @@ export const PopoverContainer = styled(motion.div)`
       > .text {
         color: #b0b0b0;
         font-size: 14px;
+        display: flex;
+        align-items: center;
+        > img {
+          margin-right: 5px;
+        }
+        > svg {
+          margin: 3px 6px 0 6px;
+        }
       }
       > .slippage {
         display: flex;

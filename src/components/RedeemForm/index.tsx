@@ -168,7 +168,7 @@ export default function RedeemForm() {
             <div>
               <div>
                 Minimum Output{" "}
-                <TooltipIcon text="The amount you expect to receive at the current market price. You may receive less or more if the market price changes while your transaction is pending.">
+                <TooltipIcon text="The minimum amount you are guaranteed to receive. If the price slips any further, your transaction will revert.">
                   <HelpCircle size={16} color="#3D3D3D" />
                 </TooltipIcon>
               </div>
@@ -187,7 +187,7 @@ export default function RedeemForm() {
             <div>
               <div>
                 Price Impact{" "}
-                <TooltipIcon text="The amount you expect to receive at the current market price. You may receive less or more if the market price changes while your transaction is pending.">
+                <TooltipIcon text="The impact your trade has on the market price of this pool. There may be a large difference between the amount of your input token and what you will receive in the output token">
                   <HelpCircle size={16} color="#3D3D3D" />
                 </TooltipIcon>
               </div>

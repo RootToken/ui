@@ -224,7 +224,7 @@ export default function AppPage() {
                   navigate("/mint");
                 }}
               >
-                Minting
+                Mint
               </MintHeaderButton>
               <MintHeaderButton
                 id="redeem"
