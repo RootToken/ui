@@ -1,9 +1,10 @@
 import { useLayer } from "react-laag";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Settings } from "react-feather";
+import { HelpCircle, Settings } from "react-feather";
 import * as S from "./styled";
 import useAppStore from "../../store";
+import TooltipIcon from "../TooltipIcon";
 
 export default function RedeemSettingsPopver() {
   const [isOpen, setOpen] = useState(false);
@@ -44,7 +45,12 @@ export default function RedeemSettingsPopver() {
               <div className="section">
                 <div className="header">Settings</div>
                 <div className="content">
-                  <div className="text">Slippage Tolerance</div>
+                  <div className="text">
+                    Slippage Tolerance{" "}
+                    <TooltipIcon text="Copy here">
+                      <HelpCircle size={14} color="#838383" />
+                    </TooltipIcon>
+                  </div>
 
                   <div className="slippage">
                     <S.SlippageInput
@@ -62,6 +68,28 @@ export default function RedeemSettingsPopver() {
                       }}
                     />
                     <label htmlFor="slippage">%</label>
+                  </div>
+                </div>
+
+                <div className="content">
+                  <div className="text">
+                    Redeem for Bean Deposit{" "}
+                    <TooltipIcon text="Copy here">
+                      <HelpCircle size={14} color="#838383" />
+                    </TooltipIcon>
+                  </div>
+
+                  <div className="slippage">
+                    <button
+                      onClick={() =>
+                        onChangeRedeemFormStateField(
+                          "redeemToWallet",
+                          !redeemFormState.redeemToWallet
+                        )
+                      }
+                    >
+                      {redeemFormState.redeemToWallet ? "true" : "false"}
+                    </button>
                   </div>
                 </div>
               </div>

@@ -44,40 +44,80 @@ export default function MintSettingsPopover() {
               <div className="section">
                 <div className="header">Slippage Tolerance</div>
 
-                {mintFormState.mintTokens.map((v, idx) => {
-                  if (v.token.slippage === 0) {
-                    return null;
-                  }
-                  return (
-                    <div className="content" key={idx}>
+                {mintFormState.mintTokens.filter((v) => v.token.slippage !== 0)
+                  .length > 0 ? (
+                  <>
+                    {mintFormState.mintTokens.map((v, idx) => {
+                      if (v.token.slippage === 0) {
+                        return null;
+                      }
+                      return (
+                        <div className="content" key={idx}>
+                          <div className="text">
+                            <div className="from">
+                              <img width={16} src={v.token.icon} />{" "}
+                              {v.token.symbol}{" "}
+                            </div>
+                            <ChevronsRight color="#b0b0b0" size={16} />
+                            <img src="/root.svg" width={16} />
+                            ROOT
+                          </div>
+                          <div className="slippage">
+                            <S.SlippageInput
+                              id={`slippage-${v.token.symbol}`}
+                              maxLength={5}
+                              allowNegative={false}
+                              allowLeadingZeros={false}
+                              decimalScale={2}
+                              placeholder="1"
+                              value={v.slippage}
+                              valueIsNumericString
+                              onValueChange={(v) => {
+                                const value = v.value;
+                                const temp = [...mintFormState.mintTokens];
+                                temp[idx].slippage = value;
+                                onChangeMintFormStateField("mintTokens", temp);
+                              }}
+                            />
+                            <label htmlFor={`slippage-${v.token.symbol}`}>
+                              %
+                            </label>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <>
+                    <div className="content">
                       <div className="text">
-                        <img width={16} src={v.token.icon} /> {v.token.symbol}{" "}
+                        <img src="/bean.svg" width={16} />
+                        BEAN
                         <ChevronsRight color="#b0b0b0" size={16} />
                         <img src="/root.svg" width={16} />
                         ROOT
                       </div>
+
                       <div className="slippage">
                         <S.SlippageInput
-                          id={`slippage-${v.token.symbol}`}
+                          id="slippage"
                           maxLength={5}
                           allowNegative={false}
                           allowLeadingZeros={false}
                           decimalScale={2}
                           placeholder="1"
-                          value={v.slippage}
+                          value={mintFormState.slippage}
                           valueIsNumericString
                           onValueChange={(v) => {
                             const value = v.value;
-                            const temp = [...mintFormState.mintTokens];
-                            temp[idx].slippage = value;
-                            onChangeMintFormStateField("mintTokens", temp);
+                            onChangeMintFormStateField("slippage", value);
                           }}
                         />
-                        <label htmlFor={`slippage-${v.token.symbol}`}>%</label>
+                        <label htmlFor="slippage">%</label>
                       </div>
                     </div>
-                  );
-                })}
+                  </>
+                )}
 
                 {/* <div className="content">
                   <div className="text">

@@ -35,6 +35,15 @@ export const PopoverContainer = styled(motion.div)`
         font-size: 14px;
         display: flex;
         align-items: center;
+
+        > .from {
+          display: flex;
+          align-items: center;
+          min-width: 55px;
+          > img {
+            margin-right: 5px;
+          }
+        }
         > img {
           margin-right: 5px;
         }

@@ -90,47 +90,94 @@ export default function RedeemForm() {
         </div>
       </S.Phase>
 
-      <S.Phase>
-        <div className="group">
-          <div className="header">
-            <div>CLAIMABLE AMOUNT</div>
-          </div>
-          <div className="contentContainer">
-            <div className="inputContainer">
-              <NumericFormat
-                decimalScale={2}
-                placeholder="0"
-                id="rootAmount"
-                thousandSeparator
-                valueIsNumericString
-                allowNegative={false}
-                readOnly
-                value={
-                  redeemFormState.redeemAmount !== ""
-                    ? (
-                        parseFloat(redeemFormState.redeemAmount) * 0.5
-                      ).toLocaleString()
-                    : ""
-                }
-              />
-              <div className="rootContainer">
-                <img width={14} height={14} src="/root.svg" />
-                <div>cRoot</div>
+      {redeemFormState.redeemToWallet ? (
+        <>
+          <S.Phase>
+            <div className="group">
+              <div className="header">
+                <div>REDEEM TO</div>
+              </div>
+              <div className="contentContainer">
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={
+                      redeemFormState.redeemAmount !== ""
+                        ? (
+                            parseFloat(redeemFormState.redeemAmount) * 0.5
+                          ).toLocaleString()
+                        : ""
+                    }
+                  />
+                  <div className="rootContainer">
+                    <img width={14} height={14} src="/bean.svg" />
+                    <div>Bean Deposit</div>
+                  </div>
+                </div>
+              </div>
+              <div className="infoContainer">
+                <div />
+                <div className="gas">Est. Gas: 0.03319 ETH</div>
               </div>
             </div>
-          </div>
-          <div className="infoContainer">
-            <div />
-            <div className="gas">Est. Gas: 0.03319 ETH</div>
-          </div>
-        </div>
-      </S.Phase>
+          </S.Phase>
+        </>
+      ) : (
+        <>
+          <S.Phase>
+            <div className="group">
+              <div className="header">
+                <div>CLAIMABLE AMOUNT</div>
+              </div>
+              <div className="contentContainer">
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={
+                      redeemFormState.redeemAmount !== ""
+                        ? (
+                            parseFloat(redeemFormState.redeemAmount) * 0.5
+                          ).toLocaleString()
+                        : ""
+                    }
+                  />
+                  <div className="rootContainer">
+                    <img width={14} height={14} src="/bean.svg" />
+                    <div>
+                      cBean{" "}
+                      <TooltipIcon text="Copy here">
+                        <HelpCircle size={14} color="#838383" />
+                      </TooltipIcon>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="infoContainer">
+                <div />
+                <div className="gas">Est. Gas: 0.03319 ETH</div>
+              </div>
+            </div>
+          </S.Phase>
 
-      <S.Phase>
-        <S.Info>
-          You can Claim your claimable Root at the start of the next hour.
-        </S.Info>
-      </S.Phase>
+          <S.Phase>
+            <S.Info>
+              You can Claim your claimable Bean at the start of the next hour.
+            </S.Info>
+          </S.Phase>
+        </>
+      )}
 
       <S.Phase>
         <S.TxDetails>

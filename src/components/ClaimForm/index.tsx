@@ -68,8 +68,8 @@ export default function ClaimForm() {
                 }}
               />
               <div className="rootContainer">
-                <img width={14} height={14} src="/root.svg" />
-                <div>cRoot</div>
+                <img width={14} height={14} src="/bean.svg" />
+                <div>cBean</div>
               </div>
             </div>
           </div>

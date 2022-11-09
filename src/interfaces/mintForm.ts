@@ -4,7 +4,6 @@ import { IToken, TOKENS } from "./token";
 export interface IMintFormToken {
   amount: string;
   token: IToken;
-  siloDeposit?: ISiloDeposit;
   slippage: string;
 }
 
@@ -27,10 +26,12 @@ export const getDefaultMintFormState = (): IMintFormState => ({
 export interface IRedeemFormState {
   redeemAmount: string;
   slippage: string;
+  redeemToWallet: boolean;
 }
 
 export const getDefaultRedeemFormState = (): IRedeemFormState => ({
   redeemAmount: "",
+  redeemToWallet: false,
   slippage: "0.5",
 });
 

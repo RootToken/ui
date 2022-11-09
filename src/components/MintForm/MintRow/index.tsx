@@ -1,3 +1,4 @@
+import { BigNumber } from "bignumber.js";
 import { useState } from "react";
 import { ChevronDown } from "react-feather";
 import { IMintFormToken } from "../../../interfaces/mintForm";
@@ -29,8 +30,10 @@ export default function MintRow({ index }: { index: number }) {
     onChangeMintFormStateField("mintTokens", clonedArr);
   };
 
-  const tokenBalance = mintItem.siloDeposit
-    ? mintItem.siloDeposit.amount
+  const tokenBalance = mintItem.token.symbol === "BEAN DEPOSIT"
+    ? account?.siloDeposits.reduce((v, cur) => {
+      return v.plus(cur.amount);
+    }, new BigNumber(0))
         .decimalPlaces(mintItem.token.formatDecimals)
         .toNumber()
         .toLocaleString()
@@ -83,11 +86,11 @@ export default function MintRow({ index }: { index: number }) {
         excludes={[]}
         open={openTokenPicker}
         onClose={() => setOpenTokenPicker(false)}
-        onSelect={(newToken, deposit) => {
+        onSelect={(newToken) => {
           onChangeWithValue({
             ...mintItem,
             token: newToken,
-            siloDeposit: deposit,
+            slippage: newToken.slippage.toString(),
           });
         }}
       />

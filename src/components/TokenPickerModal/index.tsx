@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "react-feather";
 import useAppStore from "../../store";
+import { BigNumber } from "bignumber.js";
 
 import * as S from "./styled";
 import { IToken, ITokenSymbol, TOKENS } from "../../interfaces/token";
@@ -34,6 +35,11 @@ export default function TokenPickerModal({
     } else {
       disabledTokens[token.token.symbol] = true;
     }
+  });
+
+  let beanDepositAmount = new BigNumber(0);
+  account?.siloDeposits.forEach((deposit) => {
+    beanDepositAmount = beanDepositAmount.plus(deposit.amount);
   });
 
   useEffect(() => {
@@ -114,37 +120,36 @@ export default function TokenPickerModal({
                 </li>
               );
             })}
-          {!excludes.includes("BEAN DEPOSIT") && (search === "" || "BEAN DEPOSIT".includes(search.toUpperCase())) &&
-            account?.siloDeposits.map((deposit) => {
-              const isDisabled =
-                disabledTokens[TOKENS["BEAN DEPOSIT"].symbol + deposit.season];
-              return (
-                <li key={deposit.season.toString()}>
-                  <S.CoinItem
-                    disabled={isDisabled}
-                    onClick={() => {
-                      if (isDisabled) return;
-                      onSelect(TOKENS["BEAN DEPOSIT"], deposit);
-                      onClose();
-                    }}
-                  >
-                    <div className="content">
-                      <img width={35} height={35} src="/bean.svg" />
-                      <div>
-                        <div>BEAN DEPOSIT</div>
-                        <div>Season: {deposit.season.toString()}</div>
-                      </div>
+          {!excludes.includes("BEAN DEPOSIT") &&
+            (search === "" ||
+              "BEAN DEPOSIT".includes(search.toUpperCase())) && (
+              <li>
+                <S.CoinItem
+                  disabled={disabledTokens[TOKENS["BEAN DEPOSIT"].symbol]}
+                  onClick={() => {
+                    if (disabledTokens[TOKENS["BEAN DEPOSIT"].symbol]) return;
+                    onSelect(TOKENS["BEAN DEPOSIT"]);
+                    onClose();
+                  }}
+                >
+                  <div className="content">
+                    <img width={35} height={35} src="/bean.svg" />
+                    <div>
+                      <div>BEAN DEPOSIT</div>
+                      <div>Bean Deposit</div>
                     </div>
+                  </div>
+                  {account?.siloDeposits && (
                     <div className="balance">
-                      {deposit.amount
+                      {beanDepositAmount
                         .decimalPlaces(TOKENS["BEAN DEPOSIT"].formatDecimals)
                         .toNumber()
                         .toLocaleString()}
                     </div>
-                  </S.CoinItem>
-                </li>
-              );
-            })}
+                  )}
+                </S.CoinItem>
+              </li>
+            )}
         </S.CoinList>
       </S.Body>
     </S.Modal>

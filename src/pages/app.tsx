@@ -76,7 +76,7 @@ const MintHeader = styled.div`
   padding: 25px 53px 14px 53px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
 
   > div {
     width: 0px;
@@ -131,22 +131,9 @@ export default function AppPage() {
     new ResizeObserver((entries) => {
       entries.forEach((entry) => {
         entry.contentRect.width;
-        if (pathname === "/farm") {
-          setTab({
-            offset: entry.target.offsetLeft - 53,
-            width: entry.contentRect.width,
-            active: true,
-          });
-        }
-      });
-    }).observe(document.getElementById("farm")!);
-
-    new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
-        entry.contentRect.width;
         if (pathname === "/mint" || pathname === "/") {
           setTab({
-            offset: entry.target.offsetLeft - 53,
+            offset: -126,
             width: entry.contentRect.width,
             active: true,
           });
@@ -159,7 +146,7 @@ export default function AppPage() {
         entry.contentRect.width;
         if (pathname === "/redeem") {
           setTab({
-            offset: entry.target.offsetLeft - 53,
+            offset: -5,
             width: entry.contentRect.width,
             active: true,
           });
@@ -172,7 +159,7 @@ export default function AppPage() {
         entry.contentRect.width;
         if (pathname === "/claim") {
           setTab({
-            offset: entry.target.offsetLeft - 53,
+            offset: 122,
             width: entry.contentRect.width,
             active: true,
           });
@@ -243,15 +230,6 @@ export default function AppPage() {
                 }}
               >
                 Claim
-              </MintHeaderButton>
-              <MintHeaderButton
-                id="farm"
-                active={pathname === "/farm"}
-                onClick={(e: any) => {
-                  navigate("/farm");
-                }}
-              >
-                Collective Farming
               </MintHeaderButton>
               {tab.active && (
                 <div

@@ -71,6 +71,13 @@ export const Form = styled.form`
           > div {
             font-weight: bold;
             color: #fff;
+            display: flex;
+            align-items: center;
+
+            > div {
+              margin-left: 8px;
+
+            }
           }
         }
       }
