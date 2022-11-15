@@ -29,12 +29,20 @@ const Banner = styled.div`
 
   > .ribbon {
     margin-right: 16px;
+    z-index: 10;
   }
   > .img {
     position: absolute;
     bottom: 0;
     right: -20px;
     width: 369px;
+
+    ${mediaDown("phone")`
+      right: -80px;
+    `}
+    @media (max-width: 400px) {
+      right: -140px;
+    }
   }
   > div {
     position: relative;
@@ -78,6 +86,10 @@ const MintHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-around;
+
+  ${mediaDown('phone')`
+    padding: 25px 20px 14px 20px;
+  `}
 
   > div {
     width: 0px;

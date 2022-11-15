@@ -38,8 +38,7 @@ import toast from "react-hot-toast";
 import TransactionToast from "../Common/TransactionToast";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import useMint from "../../hooks/useMint";
-
-const PRECISION = TokenValue.fromHuman("1", 18);
+import { calculateRoot } from "../../util/root";
 
 export default function MintForm() {
   const [openTx, setOpenTx] = useState(false);
@@ -90,127 +89,6 @@ export default function MintForm() {
       erc20Contracts,
     })
   );
-
-  /// calculate (x * y) % k
-  const mulmod = (
-    x: TokenValue,
-    y: TokenValue,
-    denominator: TokenValue
-  ): TokenValue => {
-    return x.mul(y).mod(denominator);
-  };
-
-  const mulDiv = (
-    x: TokenValue,
-    y: TokenValue,
-    denominator: TokenValue,
-    rounding?: "down" | "up"
-  ): TokenValue => {
-    let result = _mulDiv(x, y, denominator);
-    if (rounding === "up" && mulmod(x, y, denominator).gt(0)) {
-      result = result.add(1);
-    }
-
-    return result;
-  };
-
-  // Calculates floor(x * y / denominator) with full precision
-  const _mulDiv = (x: TokenValue, y: TokenValue, denominator: TokenValue) => {
-    return x.mul(y).div(denominator);
-  };
-  const calculateRoot = (
-    totalStalkFromDeposits: TokenValue,
-    totalSeedsFromDeposits: TokenValue,
-    totalBdvFromDeposits: TokenValue,
-    rootTotalSupply: TokenValue,
-    rootUnderlyingBdvBefore: TokenValue,
-    rootStalkBefore: TokenValue,
-    rootSeedsBefore: TokenValue,
-    isDeposit: boolean
-  ) => {
-    try {
-      const rootStalkAfter = rootStalkBefore.add(totalStalkFromDeposits);
-      const rootSeedsAfter = rootSeedsBefore.add(totalSeedsFromDeposits);
-      const rootUnderlyingBdvAfter = isDeposit
-        ? rootUnderlyingBdvBefore.add(totalBdvFromDeposits)
-        : rootUnderlyingBdvBefore.sub(totalBdvFromDeposits);
-
-      if (rootTotalSupply.eq(0)) {
-        return {
-          amount: TokenValue.fromBlockchain(
-            totalStalkFromDeposits.mul(1e8).toBlockchain(),
-            18
-          ),
-          bdvRatio: TokenValue.fromHuman("1", 18),
-          stalkRatio: TokenValue.fromHuman("1", 18),
-          seedsRatio: TokenValue.fromHuman("1", 18),
-          min: TokenValue.fromHuman("1", 18),
-        };
-      } else if (isDeposit) {
-        const bdvRatio = PRECISION.mulDiv(
-          rootUnderlyingBdvAfter,
-          rootUnderlyingBdvBefore,
-          "down"
-        );
-        const stalkRatio = PRECISION.mulDiv(
-          rootStalkAfter,
-          rootStalkBefore,
-          "down"
-        );
-        const seedsRatio = PRECISION.mulDiv(
-          rootSeedsAfter,
-          rootSeedsBefore,
-          "down"
-        );
-
-        // Root minting uses the minimum of the increase in bdv/stalk/seeds.
-        const min = TokenValue.min(bdvRatio, stalkRatio, seedsRatio);
-        const amount = rootTotalSupply
-          .mulDiv(min, PRECISION, "down")
-          .sub(rootTotalSupply);
-
-        return {
-          amount, // 18 (ROOT)
-          bdvRatio, // 18 (PRECISION)
-          stalkRatio, // 18 (PRECISION)
-          seedsRatio, // 18 (PRECISION)
-          min, // 18 (PRECISION)
-        };
-      }
-
-      const bdvRatio = PRECISION.mulDiv(
-        rootUnderlyingBdvAfter,
-        rootUnderlyingBdvBefore,
-        "up"
-      );
-      const stalkRatio = PRECISION.mulDiv(
-        rootStalkAfter,
-        rootStalkBefore,
-        "up"
-      );
-      const seedsRatio = PRECISION.mulDiv(
-        rootSeedsAfter,
-        rootSeedsBefore,
-        "up"
-      );
-
-      // Root burning uses the maximum of the decrease in bdv/stalk/seeds.
-      const max = TokenValue.max(bdvRatio, stalkRatio, seedsRatio);
-      const amount = rootTotalSupply.sub(
-        rootTotalSupply.mulDiv(max, PRECISION)
-      );
-
-      return {
-        amount, // 18 (ROOT)
-        bdvRatio, // 18 (PRECISION)
-        stalkRatio, // 18 (PRECISION)
-        seedsRatio, // 18 (PRECISION)
-        max, // 18 (PRECISION)
-      };
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const getTokensSwapRate = (
     tokens: IMintFormToken[]
@@ -294,8 +172,7 @@ export default function MintForm() {
           if (!swapOp.isValid())
             throw new Error("Cannot swap between selected tokens");
           const est = await swapOp.estimate(amount);
-
-          console.log('Est: ',est.toHuman())
+          console.log("estimate: ", est.toHuman());
           return {
             path: swapOp.getSimplePath(),
             estimated: est,
@@ -400,15 +277,20 @@ export default function MintForm() {
             TOKENS["BEAN DEPOSIT"].decimals
           );
 
+          const tempDeposits: {
+            deposit: ISiloDeposit;
+            bdv: TokenValue;
+            stalk: TokenValue;
+          }[] = [];
           // Find the most optimal bean deposit
-          account.siloDeposits.forEach((deposit) => {
+          account.siloDeposits.forEach((deposit, idx) => {
             const result = calculateRoot(
               deposit.stalk,
               deposit.seeds,
               deposit.bdv,
               TokenValue.fromHuman("1000", 18),
               TokenValue.fromHuman("1000", 6),
-              TokenValue.fromHuman("1000", 10),
+              TokenValue.fromHuman("1100", 10),
               TokenValue.fromHuman("2000", 6),
               // rootTotalSupply,
               // rootUnderlyingBdvBefore,
@@ -417,43 +299,108 @@ export default function MintForm() {
               true
             );
 
-            // let bdvImpactPercentage;
-            // let stalkImpactPercentage;
+            if (!result) {
+              return;
+            }
+            let bdvImpactPercentage = TokenValue.fromHuman("0", 18);
+            let stalkImpactPercentage = TokenValue.fromHuman("0", 18);
 
-            // if (bdvRatio.lt(stalkRatio)) {
-            //   stalkImpactPercentage = TokenValue.fromHuman("100", 18).sub(
-            //     bdvRatio
-            //       .sub(TokenValue.fromHuman("1", 18))
-            //       .mul(TokenValue.fromHuman("100", 18))
-            //       .div(stalkRatio.sub(TokenValue.fromHuman("1", 18)))
-            //   );
-            // }
-            // if (stalkRatio.lt(bdvRatio)) {
-            //   bdvImpactPercentage = TokenValue.fromHuman("100", 18).sub(
-            //     stalkRatio
-            //       .sub(TokenValue.fromHuman("1", 18))
-            //       .mul(TokenValue.fromHuman("100", 18))
-            //       .div(bdvRatio.sub(TokenValue.fromHuman("1", 18)))
-            //   );
-            // }
+            if (result.bdvRatio.lt(result.stalkRatio)) {
+              stalkImpactPercentage = TokenValue.fromHuman("100", 18).sub(
+                result.bdvRatio
+                  .sub(TokenValue.fromHuman("1", 18))
+                  .mulDiv(
+                    TokenValue.fromHuman("100", 18),
+                    result.stalkRatio.sub(TokenValue.fromHuman("1", 18))
+                  )
+              );
+            }
+            if (result.stalkRatio.lt(result.bdvRatio)) {
+              bdvImpactPercentage = TokenValue.fromHuman("100", 18).sub(
+                result.stalkRatio
+                  .sub(TokenValue.fromHuman("1", 18))
+                  .mulDiv(
+                    TokenValue.fromHuman("100", 18),
+                    result.bdvRatio.sub(TokenValue.fromHuman("1", 18))
+                  )
+              );
+            }
 
-            // console.log({
-            //   inStalks: deposit.stalk.toHuman(),
-            //   inSeeds: deposit.seeds.toHuman(),
-            //   min: result?.min?.toHuman(),
-            //   stalk: result?.stalkImpactPercentage?.toHuman(),
-            //   bdv: result?.bdvImpactPercentage?.toHuman(),
-
-            //   bRatio: result?.bdvRatio.toHuman(),
-            //   sRatio: result?.stalkRatio.toHuman(),
-            //   seedsRatio: result?.seedsRatio.toHuman(),
-            // });
+            console.log({
+              min: result?.min?.toHuman(),
+              bdvImpactPercentage: bdvImpactPercentage.toHuman(),
+              stalkImpactPercentage: stalkImpactPercentage.toHuman(),
+              idx,
+            });
+            tempDeposits.push({
+              deposit,
+              bdv: bdvImpactPercentage,
+              stalk: stalkImpactPercentage,
+            });
           });
+
+          // Find pivot (find lowest bdv/stalk impact)
+          let pivotIndex;
+          let low = TokenValue.fromHuman("100000", 18);
+          tempDeposits.forEach((element, idx) => {
+            if (element.bdv.add(element.stalk).lt(low)) {
+              low = element.bdv.add(element.stalk);
+              pivotIndex = idx;
+            }
+            console.log(element.bdv.add(element.stalk).toHuman())
+
+          });
+
+          const result = calculateRoot(
+            tempDeposits[11].deposit.stalk.add(tempDeposits[12].deposit.stalk),
+            tempDeposits[11].deposit.seeds.add(tempDeposits[11].deposit.seeds),
+            tempDeposits[11].deposit.bdv.add(tempDeposits[12].deposit.bdv),
+            TokenValue.fromHuman("1000", 18),
+            TokenValue.fromHuman("1000", 6),
+            TokenValue.fromHuman("1100", 10),
+            TokenValue.fromHuman("2000", 6),
+            // rootTotalSupply,
+            // rootUnderlyingBdvBefore,
+            // rootStalkBefore,
+            // rootSeedsBefore,
+            true
+          );
+          let bdvImpactPercentage = TokenValue.fromHuman("0", 18);
+          let stalkImpactPercentage = TokenValue.fromHuman("0", 18);
+
+          if (result.bdvRatio.lt(result.stalkRatio)) {
+            stalkImpactPercentage = TokenValue.fromHuman("100", 18).sub(
+              result.bdvRatio
+                .sub(TokenValue.fromHuman("1", 18))
+                .mulDiv(
+                  TokenValue.fromHuman("100", 18),
+                  result.stalkRatio.sub(TokenValue.fromHuman("1", 18))
+                )
+            );
+          }
+          if (result.stalkRatio.lt(result.bdvRatio)) {
+            bdvImpactPercentage = TokenValue.fromHuman("100", 18).sub(
+              result.stalkRatio
+                .sub(TokenValue.fromHuman("1", 18))
+                .mulDiv(
+                  TokenValue.fromHuman("100", 18),
+                  result.bdvRatio.sub(TokenValue.fromHuman("1", 18))
+                )
+            );
+          }
+
+          console.log({
+            min: result?.min?.toHuman(),
+            bdvImpactPercentage: bdvImpactPercentage.toHuman(),
+            stalkImpactPercentage: stalkImpactPercentage.toHuman(),
+          });
+
+          console.log("Pivot:", pivotIndex, low.toHuman())
 
           // Check first and last deposits to see which results more in root token then go from there
           for (let i = account.siloDeposits.length - 1; i >= 0; i--) {
             const deposit = account.siloDeposits[i];
-            if (deposit.amount.gte(amountRemaining)) {
+            if (deposit.amount.gt(amountRemaining)) {
               deposits.push({
                 season: deposit.season,
                 amount: amountRemaining,
@@ -484,14 +431,6 @@ export default function MintForm() {
           totalSeedsFromDeposits = totalSeedsFromDeposits.add(deposit.seeds);
         });
 
-        console.log(rootTotalSupply.toHuman());
-        console.log(rootUnderlyingBdvBefore.toHuman());
-        console.log(rootStalkBefore.toHuman());
-        console.log(rootSeedsBefore.toHuman());
-        console.log(totalBdvFromDeposits.toHuman());
-        console.log(totalStalkFromDeposits.toHuman());
-        console.log(totalSeedsFromDeposits.toHuman());
-
         const result = calculateRoot(
           totalStalkFromDeposits,
           totalSeedsFromDeposits,
@@ -502,12 +441,7 @@ export default function MintForm() {
           rootSeedsBefore,
           true
         );
-        console.log({
-          min: result?.min?.toHuman(),
-          bRatio: result?.bdvRatio.toHuman(),
-          sRatio: result?.stalkRatio.toHuman(),
-          seedsRatio: result?.seedsRatio.toHuman(),
-        });
+
         if (!result) {
           throw new Error("No root output");
         }
@@ -794,7 +728,7 @@ export default function MintForm() {
       }
     }
 
-    return "Mint";
+    return "MINT";
   };
 
   const reset = () => {

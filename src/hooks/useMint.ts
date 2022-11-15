@@ -6,7 +6,6 @@ import {
   Token,
 } from "@beanstalk/sdk";
 import { DepositTransferStruct } from "@beanstalk/sdk/dist/types/constants/generated/Beanstalk/Root";
-import { FarmWorkflow } from "@beanstalk/sdk/dist/types/lib/farm/farm";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import { ethers } from "ethers";
 import TransactionToast from "../components/Common/TransactionToast";

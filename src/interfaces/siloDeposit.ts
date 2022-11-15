@@ -8,3 +8,8 @@ export interface ISiloDeposit {
   stalk: TokenValue;
   seeds: TokenValue;
 }
+
+export interface ISiloClaimable {
+  season: BigNumber;
+  amount: TokenValue;
+}

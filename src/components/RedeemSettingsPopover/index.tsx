@@ -79,18 +79,18 @@ export default function RedeemSettingsPopver() {
                     </TooltipIcon>
                   </div>
 
-                  <div className="slippage">
-                    <button
-                      onClick={() =>
-                        onChangeRedeemFormStateField(
-                          "redeemToWallet",
-                          !redeemFormState.redeemToWallet
-                        )
-                      }
-                    >
-                      {redeemFormState.redeemToWallet ? "true" : "false"}
-                    </button>
-                  </div>
+                  <S.ToggleButton
+                    $active={redeemFormState.redeemToWallet}
+                    className="toggle"
+                    onClick={() =>
+                      onChangeRedeemFormStateField(
+                        "redeemToWallet",
+                        !redeemFormState.redeemToWallet
+                      )
+                    }
+                  >
+                    <div />
+                  </S.ToggleButton>
                 </div>
               </div>
             </S.PopoverContainer>

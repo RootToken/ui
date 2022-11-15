@@ -14,27 +14,6 @@ export default function MintRow() {
     })
   );
 
-  // const mintItem = mintFormState.mintTokens[index];
-
-  // const onChangeWithField = (field: keyof IMintFormToken, value: any) => {
-  //   const clonedArr: any = [...mintFormState.mintTokens];
-  //   clonedArr[index][field] = value;
-  //   onChangeMintFormStateField("mintTokens", clonedArr);
-  // };
-
-  // const onChangeWithValue = (value: IMintFormToken) => {
-  //   const clonedArr = [...mintFormState.mintTokens];
-  //   clonedArr[index] = value;
-  //   onChangeMintFormStateField("mintTokens", clonedArr);
-  // };
-
-  const tokenBalance =
-    account?.balances
-      .get(claimFormState.claimToken.token.address)
-      ?.decimalPlaces(claimFormState.claimToken.token.formatDecimals)
-      .toNumber()
-      .toLocaleString() || "";
-
   return (
     <>
       <S.Row>
@@ -48,13 +27,6 @@ export default function MintRow() {
             allowNegative={false}
             readOnly
             value={parseFloat(claimFormState.claimAmount) * 0.5}
-            // onValueChange={(e) => {
-            //   const value = e.value;
-            //   onChangeClaimFormStateField("claimToken", {
-            //     ...claimFormState.claimToken,
-            //     amount: value,
-            //   });
-            // }}
           />
           <div className="pickerContainer">
             <button onClick={() => setOpenTokenPicker(true)}>

@@ -12,10 +12,10 @@ import {
 } from "./interfaces/mintForm.js";
 import { ITokenSymbol, TOKENS } from "./interfaces/token.js";
 import { createERC20Contract, createRootContract } from "./util/contract.js";
-import { BeanstalkSDK, TokenValue } from "@beanstalk/sdk";
+import { BeanstalkSDK, DataSource, TokenValue } from "@beanstalk/sdk";
 import beanstalkAbi from "./abi/Beanstalk.json";
 import { Signer } from "@wagmi/core";
-import { ISiloDeposit } from "./interfaces/siloDeposit";
+import { ISiloClaimable, ISiloDeposit } from "./interfaces/siloDeposit";
 
 interface AppState {
   onUserConnect: (signer: Signer) => void;
@@ -67,10 +67,20 @@ const getUserBalance = async (
   erc20Contracts: { [key: string]: ethers.Contract }
 ): Promise<IAccount> => {
   const tempDeposits: ISiloDeposit[] = [];
+  const claimableDeposits: ISiloClaimable[] = [];
   const accountAddress = await sdk.getAccount();
+
   try {
-    const balances = await sdk.silo.getBalances();
+    const balances = await sdk.silo.getBalances(undefined, {
+      source: DataSource.LEDGER,
+    });
     balances.get(sdk.tokens.BEAN)?.deposited.crates.forEach((crate) => {
+      claimableDeposits.push({
+        season: crate.season,
+        amount: crate.amount,
+      });
+    });
+    balances.get(sdk.tokens.BEAN_CRV3_LP)?.deposited.crates.forEach((crate) => {
       tempDeposits.push({
         season: crate.season,
         amount: crate.amount,
@@ -155,13 +165,13 @@ const getUserBalance = async (
     address: accountAddress,
     balances,
     siloDeposits: tempDeposits,
+    claimableDeposits: claimableDeposits,
     signer: sdk.signer!,
   };
 };
 
 const setupContracts = (signer?: ethers.Signer) => {
   const sdk: BeanstalkSDK = new BeanstalkSDK({
-    DEBUG: true,
     signer,
     subgraphUrl: ENVIRONMENT.beanstalkSubgraphUrl,
   });

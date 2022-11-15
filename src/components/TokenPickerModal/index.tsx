@@ -78,6 +78,9 @@ export default function TokenPickerModal({
               if (token.symbol == "BEAN DEPOSIT") {
                 return;
               }
+              if (excludes.includes(token.symbol)) {
+                return;
+              }
               return (
                 search === "" ||
                 token.name.toUpperCase().includes(search.toUpperCase()) ||
