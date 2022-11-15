@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { X } from "react-feather";
 import useAppStore from "../../store";
-import { BigNumber } from "bignumber.js";
 
 import * as S from "./styled";
 import { IToken, ITokenSymbol, TOKENS } from "../../interfaces/token";
 import { ISiloDeposit } from "../../interfaces/siloDeposit";
+import { displayBN } from "../../util/bigNumber";
+import { TokenValue } from "@beanstalk/sdk";
 
 interface ModalProps {
   open: boolean;
   onClose: () => void;
   onSelect: (token: IToken, siloDeposit?: ISiloDeposit) => void;
-  excludes: ITokenSymbol[];
+  excludes?: ITokenSymbol[];
 }
 
 export default function TokenPickerModal({
@@ -30,16 +31,12 @@ export default function TokenPickerModal({
   const disabledTokens: { [key: string]: boolean } = {};
 
   mintFormState.mintTokens.forEach((token) => {
-    if (token.siloDeposit) {
-      disabledTokens[`${token.token.symbol}${token.siloDeposit.season}`] = true;
-    } else {
-      disabledTokens[token.token.symbol] = true;
-    }
+    disabledTokens[token.token.symbol] = true;
   });
 
-  let beanDepositAmount = new BigNumber(0);
+  let beanDepositAmount = TokenValue.fromHuman("0", 6);
   account?.siloDeposits.forEach((deposit) => {
-    beanDepositAmount = beanDepositAmount.plus(deposit.amount);
+    beanDepositAmount = beanDepositAmount.add(deposit.amount);
   });
 
   useEffect(() => {
@@ -110,10 +107,7 @@ export default function TokenPickerModal({
                     </div>
                     {balance && (
                       <div className="balance">
-                        {balance
-                          .decimalPlaces(token.formatDecimals)
-                          .toNumber()
-                          .toLocaleString()}
+                        {displayBN(balance, token.formatDecimals)}
                       </div>
                     )}
                   </S.CoinItem>
@@ -121,6 +115,7 @@ export default function TokenPickerModal({
               );
             })}
           {!excludes.includes("BEAN DEPOSIT") &&
+            account &&
             (search === "" ||
               "BEAN DEPOSIT".includes(search.toUpperCase())) && (
               <li>
@@ -141,10 +136,10 @@ export default function TokenPickerModal({
                   </div>
                   {account?.siloDeposits && (
                     <div className="balance">
-                      {beanDepositAmount
-                        .decimalPlaces(TOKENS["BEAN DEPOSIT"].formatDecimals)
-                        .toNumber()
-                        .toLocaleString()}
+                      {displayBN(
+                        beanDepositAmount,
+                        TOKENS["BEAN DEPOSIT"].formatDecimals
+                      )}
                     </div>
                   )}
                 </S.CoinItem>

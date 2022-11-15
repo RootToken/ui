@@ -1,5 +1,6 @@
 import M from "react-modal";
 import styled from "styled-components";
+import { mediaDown } from "../../styled";
 
 export const Modal = styled(M)`
   background: #18181b;
@@ -8,6 +9,10 @@ export const Modal = styled(M)`
   max-width: 450px;
   width: 100%;
   margin: 100px auto 0 auto;
+
+  ${mediaDown("phone")`
+  max-width: 90%;
+`}
 `;
 
 export const Body = styled.div``;
@@ -17,6 +22,10 @@ export const Header = styled.div`
   justify-content: space-between;
   margin-bottom: 20px;
   padding: 26px 22px 0 22px;
+
+  ${mediaDown("phone")`
+    padding: 26px 15px 0 15px;
+  `}
 
   > h4 {
     margin: 0;
@@ -34,6 +43,9 @@ export const Header = styled.div`
 `;
 export const SearchInputContainer = styled.div`
   padding: 0 22px;
+  ${mediaDown("phone")`
+    padding: 0 15px;
+  `}
 `;
 export const SearchInput = styled.input`
   border: none;
@@ -54,6 +66,9 @@ export const CoinList = styled.ul`
   padding: 0 22px 22px;
   max-height: 350px;
   overflow-y: auto;
+  ${mediaDown("phone")`
+    padding: 0 15px 22px 15px;
+  `}
 `;
 
 export const CoinItem = styled.button`
@@ -83,6 +98,9 @@ export const CoinItem = styled.button`
       margin-right: 23.5px;
       width: 35px;
       height: 35px;
+      ${mediaDown("phone")`
+        margin-right: 15px;
+      `}
     }
     > div {
       display: flex;
@@ -93,6 +111,9 @@ export const CoinItem = styled.button`
         font-size: 16px;
         line-height: 23px;
         color: #ffffff;
+        ${mediaDown("phone")`
+        font-size: 14px;
+      `}
       }
       > div:nth-child(2) {
         font-weight: bold;
@@ -112,6 +133,9 @@ export const CoinItem = styled.button`
     font-weight: bold;
 
     color: #ffffff;
+    ${mediaDown("phone")`
+        font-size: 14px;
+      `}
   }
 
   ${(props) =>

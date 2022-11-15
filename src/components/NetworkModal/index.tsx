@@ -9,7 +9,7 @@ export default function NetworkModal() {
 
   useEffect(() => {
     if (chain?.id && chain.id !== 1) {
-      setOpen(true);
+      // setOpen(true);
     } else if (chain?.id === 1) {
       setOpen(false);
     }

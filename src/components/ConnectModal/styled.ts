@@ -1,5 +1,6 @@
 import M from "react-modal";
 import styled from "styled-components";
+import { mediaDown } from "../../styled";
 
 export const Modal = styled(M)`
   background: #18181b;
@@ -9,6 +10,13 @@ export const Modal = styled(M)`
   width: 100%;
   margin: 100px auto 0 auto;
   padding: 26px 22px;
+
+  ${mediaDown("tablet")`
+  max-width: 400px;
+`}
+  ${mediaDown("phone")`
+  max-width: 90%;
+`}
 `;
 
 export const Body = styled.div``;

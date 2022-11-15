@@ -1,3 +1,5 @@
+import { BeanstalkSDK, ERC20Token } from "@beanstalk/sdk";
+
 export type ITokenSymbol =
   | "ETH"
   | "WETH"
@@ -15,6 +17,7 @@ export interface IToken {
   decimals: number;
   formatDecimals: number;
   slippage: number;
+  permit: boolean;
 }
 
 export const TOKENS: { [key in ITokenSymbol]: IToken } = {
@@ -26,16 +29,17 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     decimals: 18,
     formatDecimals: 4,
     slippage: 0.5,
+    permit: false,
   },
   WETH: {
     name: "Wrapped Ether",
     symbol: "WETH",
-    icon: "/eth.svg",
+    icon: "/weth.png",
     address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     decimals: 18,
     formatDecimals: 4,
     slippage: 0.5,
-
+    permit: false,
   },
   BEAN: {
     name: "Bean",
@@ -45,6 +49,7 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     decimals: 6,
     formatDecimals: 2,
     slippage: 0,
+    permit: true,
   },
   USDC: {
     name: "USDC",
@@ -53,8 +58,8 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     decimals: 6,
     formatDecimals: 2,
-    slippage: 0.2,
-
+    slippage: 0.5,
+    permit: true,
   },
   USDT: {
     name: "USDT",
@@ -63,8 +68,8 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     decimals: 6,
     formatDecimals: 2,
-    slippage: 0.2,
-
+    slippage: 0.5,
+    permit: false,
   },
   DAI: {
     name: "DAI",
@@ -73,7 +78,8 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
     decimals: 18,
     formatDecimals: 2,
-    slippage: 0.2,
+    slippage: 0.5,
+    permit: true,
   },
   "BEAN DEPOSIT": {
     name: "Bean Deposit",
@@ -83,5 +89,6 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     decimals: 6,
     formatDecimals: 2,
     slippage: 0,
+    permit: true,
   },
 };

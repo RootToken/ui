@@ -45,35 +45,6 @@ export const Form = styled.form`
         }
       }
     }
-    > .contentContainer {
-      border-radius: 6px;
-      background-color: rgba(255, 255, 255, 0.03);
-      > .inputContainer {
-        position: relative;
-        display: flex;
-        > input {
-          background-color: transparent;
-          border: 0;
-          color: #fff;
-          font-size: 16px;
-          line-height: 19px;
-          padding: 15px 5px 15px 20px;
-          flex: 1;
-        }
-        > .rootContainer {
-          display: flex;
-          align-items: center;
-          padding: 5px 20px 5px 5px;
-          > img {
-            margin-right: 10px;
-          }
-          > div {
-            font-weight: bold;
-            color: #fff;
-          }
-        }
-      }
-    }
     > .infoContainer {
       margin-top: 10px;
       display: flex;
@@ -83,9 +54,6 @@ export const Form = styled.form`
         display: flex;
         align-items: center;
         > div:nth-child(1) {
-          margin-right: 8px;
-        }
-        > div:nth-child(2) {
           font-size: 12px;
           line-height: 20px;
           color: #999999;
@@ -112,7 +80,46 @@ export const Form = styled.form`
     }
   }
 `;
+export const ContentContainer = styled.div<{ isLoading: boolean }>`
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.03);
 
+  ${(props) =>
+    props.isLoading &&
+    `
+    opacity: 0.5;
+  `}
+  > .inputContainer {
+    position: relative;
+    display: flex;
+    > input {
+      background-color: transparent;
+      border: 0;
+      color: #fff;
+      font-size: 16px;
+      line-height: 19px;
+      padding: 15px 5px 15px 20px;
+      flex: 1 1 auto;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+      width: 0px;
+    }
+    > .rootContainer {
+      display: flex;
+      align-items: center;
+      padding: 5px 20px 5px 5px;
+      > img {
+        margin-right: 10px;
+      }
+      > div {
+        font-weight: bold;
+        color: #fff;
+      }
+    }
+  }
+`;
 export const Phase = styled.section`
   margin-bottom: 25px;
 `;
@@ -180,7 +187,7 @@ export const OptionHeader = styled.div<{ active: boolean }>`
   }
 `;
 
-export const MintButton = styled.button`
+export const MintButton = styled.button<{ disabled: boolean }>`
   background: #72f589;
   border-radius: 2.24601px;
   display: flex;
@@ -194,6 +201,14 @@ export const MintButton = styled.button`
   border-radius: 6px;
   line-height: 20px;
   margin: 0 auto;
+
+  ${(props) =>
+    props.disabled &&
+    `
+    background-color: rgba(255,255,255,0.03);
+    color: #757880;
+    opacity: 0.5;
+  `}
 `;
 
 export const Graph = styled.div`
@@ -213,38 +228,129 @@ export const TxDetails = styled.div`
   border-radius: 6px;
 
   > .collapse {
-    height: 0px;
-    overflow: hidden;
-    transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-    visibility: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
 
     > div {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-size: 14px;
+      padding: 12px 15px 20px 15px;
 
-      > div:nth-child(1) {
+      > .loading {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(24, 24, 27, 0.5);
+        left: 0;
+        top: 0;
+        z-index: 100;
         display: flex;
         align-items: center;
-        font-weight: bold;
-        > div {
-          margin-left: 6px;
-        }
-      }
-      > div:nth-child(2) {
-        display: flex;
-        align-items: center;
-        > img {
-          margin-right: 6px;
-        }
+        justify-content: center;
+        border-radius: 6px;
       }
 
-      &:last-child {
-        margin-bottom: 0;
+      > .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 14px;
+
+        > div:nth-child(1) {
+          display: flex;
+          align-items: center;
+          font-weight: bold;
+          > div {
+            margin-left: 6px;
+          }
+        }
+        > div:nth-child(2) {
+          display: flex;
+          align-items: center;
+          > img {
+            margin-right: 6px;
+          }
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+      > .routesText {
+        display: flex;
+        flex-direction: column;
+        > p {
+          margin: 0 0 7px 0;
+          font-size: 14px;
+          font-weight: bold;
+
+          &:last-child {
+            margin: 0;
+          }
+        }
+      }
+      > .routes {
+        position: relative;
+        margin: 20px 0 15px 0;
+        display: flex;
+        align-items: center;
+        overflow-x: auto;
+        justify-content: space-between;
+        > .line {
+          border-color: rgba(255, 255, 255, 0.03);
+          border-bottom-style: dotted;
+          border-bottom-width: 5px;
+          width: 100%;
+          position: absolute;
+          left: 0px;
+          z-index: 1;
+        }
+        > .list {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          margin: 0 0 0 0;
+
+          > .to {
+            margin-left: 12px;
+            display: flex;
+            align-items: center;
+
+            > img {
+              width: 20px;
+              height: 20px;
+              margin-left: 5px;
+            }
+
+            > :nth-child(1) {
+              margin-left: 0;
+            }
+          }
+
+          > .token {
+            margin-right: -8px;
+          }
+
+          > div:nth-child(1) {
+            margin-left: 0;
+          }
+        }
+        .token {
+          position: relative;
+          z-index: 2;
+          display: flex;
+          align-items: center;
+
+          > img {
+            width: 20px;
+            height: 20px;
+            margin-right: 3px;
+
+            &:nth-child(3) {
+              margin: 0 0 0 3px;
+            }
+          }
+        }
       }
     }
   }
@@ -254,7 +360,7 @@ export const TxHeader = styled.div<{ active: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 13px;
+  padding: 10px 15px;
   cursor: pointer;
   user-select: none;
   ${(props) =>
@@ -274,6 +380,7 @@ export const TxHeader = styled.div<{ active: boolean }>`
       font-size: 14px;
       line-height: 20px;
       color: #999999;
+      font-weight: bold;
     }
   }
 `;

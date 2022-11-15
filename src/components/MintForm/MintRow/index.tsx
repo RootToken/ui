@@ -1,8 +1,10 @@
-import { BigNumber } from "bignumber.js";
+import { TokenValue } from "@beanstalk/sdk";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { ChevronDown } from "react-feather";
 import { IMintFormToken } from "../../../interfaces/mintForm";
 import useAppStore from "../../../store";
+import { displayBN } from "../../../util/bigNumber";
 import TokenPickerModal from "../../TokenPickerModal";
 import * as S from "./styled";
 
@@ -30,24 +32,20 @@ export default function MintRow({ index }: { index: number }) {
     onChangeMintFormStateField("mintTokens", clonedArr);
   };
 
-  const tokenBalance = mintItem.token.symbol === "BEAN DEPOSIT"
-    ? account?.siloDeposits.reduce((v, cur) => {
-      return v.plus(cur.amount);
-    }, new BigNumber(0))
-        .decimalPlaces(mintItem.token.formatDecimals)
-        .toNumber()
-        .toLocaleString()
-    : account?.balances
-        .get(mintItem.token.address)
-        ?.decimalPlaces(mintItem.token.formatDecimals)
-        .toNumber()
-        .toLocaleString() || "";
+  const tokenBalance =
+    mintItem.token.symbol === "BEAN DEPOSIT"
+      ? account?.siloDeposits.reduce((v, cur) => {
+          return v.add(cur.amount);
+        }, TokenValue.fromHuman("0", 6)) || TokenValue.fromHuman("0", 6)
+      : account?.balances.get(mintItem.token.address) ||
+        TokenValue.fromHuman("0", mintItem.token.decimals);
 
   return (
     <>
-      <S.Row>
+      <S.Row $connected={!!account}>
         <div className="inputContainer">
           <S.Input
+            $connected={!!account}
             placeholder="0"
             id="rootAmount"
             thousandSeparator
@@ -55,6 +53,15 @@ export default function MintRow({ index }: { index: number }) {
             valueIsNumericString
             allowNegative={false}
             value={mintItem.amount}
+            isAllowed={(v) => {
+              if (v.floatValue) {
+                return !TokenValue.fromHuman(
+                  v.floatValue,
+                  mintItem.token.decimals
+                ).gt(tokenBalance);
+              }
+              return true;
+            }}
             onValueChange={(e) => {
               const value = e.value;
               onChangeWithField("amount", value);
@@ -68,19 +75,53 @@ export default function MintRow({ index }: { index: number }) {
               </div>
               <ChevronDown size={14} color="#999999" />
             </button>
-            {account && (
+          </div>
+        </div>
+      </S.Row>
+      <AnimatePresence>
+        {account && (
+          <motion.div
+            key="content"
+            initial="collapsed"
+            animate="open"
+            exit="collapsed"
+            variants={{
+              open: { opacity: 1, height: "auto" },
+              collapsed: {
+                opacity: 0,
+                height: 0,
+                overflow: "hidden",
+              },
+            }}
+            transition={{
+              duration: 0.8,
+              ease: [0.04, 0.62, 0.23, 0.98],
+            }}
+          >
+            <S.Balance>
               <div className="balance">
-                <span>Balance: {tokenBalance}</span>{" "}
+                <span>
+                  Balance:{" "}
+                  {displayBN(tokenBalance, mintItem.token.formatDecimals)}
+                </span>{" "}
                 <button
-                  onClick={() => onChangeWithField("amount", tokenBalance)}
+                  onClick={() =>
+                    onChangeWithField(
+                      "amount",
+                      displayBN(
+                        tokenBalance,
+                        mintItem.token.formatDecimals
+                      ).replaceAll(",", "")
+                    )
+                  }
                 >
                   Max
                 </button>
               </div>
-            )}
-          </div>
-        </div>
-      </S.Row>
+            </S.Balance>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <TokenPickerModal
         excludes={[]}
@@ -89,6 +130,7 @@ export default function MintRow({ index }: { index: number }) {
         onSelect={(newToken) => {
           onChangeWithValue({
             ...mintItem,
+            amount: "",
             token: newToken,
             slippage: newToken.slippage.toString(),
           });

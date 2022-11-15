@@ -40,6 +40,7 @@ export const PopoverContainer = styled(motion.div)`
           display: flex;
           align-items: center;
           min-width: 55px;
+          line-height: 16px;
           > img {
             margin-right: 5px;
           }
@@ -48,7 +49,7 @@ export const PopoverContainer = styled(motion.div)`
           margin-right: 5px;
         }
         > svg {
-          margin: 3px 6px 0 6px;
+          margin: 2px 6px 0 6px;
         }
       }
       > .slippage {

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { mediaUp } from "../../styled";
+import { mediaDown, mediaUp } from "../../styled";
 
 export const Layout = styled.div`
   display: flex;
@@ -18,6 +18,10 @@ export const Header = styled.div`
   position: fixed;
   width: 100%;
 
+  ${mediaDown("phone")`
+    padding: 11px 20px;
+  `}
+
   > .right {
     display: flex;
     align-items: center;
@@ -29,6 +33,12 @@ export const Header = styled.div`
       display: flex;
       align-items: center;
 
+    
+
+      ${mediaDown("laptop")`
+        display: none;
+      `}
+
       > li {
         font-style: normal;
         font-weight: 300;
@@ -36,6 +46,12 @@ export const Header = styled.div`
         line-height: 24px;
         color: #f4eff4;
         margin-right: 24px;
+
+        ${mediaDown("desktop")`
+          &:last-child {
+            display: none;
+          }
+        `}
 
         &.wc {
           color: #72f589;
@@ -67,6 +83,10 @@ export const Body = styled.div`
     position: relative;
     z-index: 10;
     padding: 20px 30px 100px 30px;
+
+    ${mediaDown("phone")`
+      padding: 20px 20px 100px 20px;
+    `}
   }
   > .bgBottom {
     position: fixed;
@@ -75,17 +95,29 @@ export const Body = styled.div`
     width: 100%;
   }
 `;
-export const ConnectButton = styled.button`
-  margin-left: 32px;
-  background: rgba(0, 249, 124, 0.05);
-  border: 1px solid #00f97c;
-  border-radius: 500px;
-  color: #fff;
-  display: flex;
+
+export const MoreButton = styled.button`
+  color: #123123;
+  font-size: 14px;
+  border-radius: 12px;
+  line-height: 20px;
+  width: 30px;
+  height: 30px;
   align-items: center;
   justify-content: center;
-  padding: 14px 20px;
-  font-weight: bold;
-  line-height: 20px;
-  min-width: 155px;
+  width: 50px;
+  height: 50px;
+  margin-left: 20px;
+  background-color: #18181b;
+
+  display: none;
+
+  ${mediaDown("desktop")`
+    display: flex;
+  `}
+  ${mediaDown("tablet")`
+    margin-left: 10px;
+    height: 42px;
+    width: 42px;
+  `}
 `;

@@ -20,6 +20,7 @@ import useSWR from "swr";
 import { getPrices } from "../../api/coingecko";
 import { useEffect } from "react";
 import useAppStore from "../../store";
+import { Toaster } from "react-hot-toast";
 
 const GlobalStyle = createGlobalStyle`
 
@@ -89,7 +90,15 @@ const GlobalStyle = createGlobalStyle`
       z-index: 1000;
     }
     #layers {
-      z-index: 10;
+      z-index: 1000;
+    }
+    .toaster {
+      > div {
+        font-weight: 500;
+        font-size: 14px;
+
+        word-break: break-word;
+      }
     }
 `;
 
@@ -97,7 +106,7 @@ interface AppProvider {
   children: JSX.Element;
 }
 
-const { chains, provider } = configureChains(defaultChains, [
+const { chains, provider } = configureChains(allChains, [
   jsonRpcProvider({ rpc: (chain) => ({ http: ENVIRONMENT.rpcUrl }) }),
   // alchemyProvider({ apiKey: ENVIRONMENT.alchemyApiKey }),
   // publicProvider(),
@@ -140,12 +149,12 @@ export function AppProvider({ children }: AppProvider): any {
     if (data) {
       setPrices(data);
     }
-
   }, [data]);
 
   return (
     <ThemeProvider theme={{}}>
       <GlobalStyle />
+      <Toaster containerClassName="toaster" />
       <WagmiConfig client={client}>
         <AccountProvider>{children}</AccountProvider>
       </WagmiConfig>

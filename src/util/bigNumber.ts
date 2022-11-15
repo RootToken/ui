@@ -1,5 +1,14 @@
-import { BigNumber } from "@ethersproject/bignumber";
+import { TokenValue } from "@beanstalk/sdk";
 
-export const toBN = (v: number, decimals: number = 18): BigNumber => {
-  return BigNumber.from(Math.ceil(v ** decimals));
+export const displayBN = (
+  v: TokenValue,
+  formatDecimals: number = 2
+): string => {
+  const pow = 10**formatDecimals;
+  return (
+    Math.floor(parseFloat(v.toHuman()) * (pow)) /
+    (pow)
+  ).toLocaleString("en-US", {
+    maximumFractionDigits: formatDecimals,
+  });
 };

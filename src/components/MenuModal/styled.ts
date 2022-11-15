@@ -6,16 +6,17 @@ export const Modal = styled(M)`
   background: #18181b;
   border: 1px solid #323232;
   border-radius: 12px;
-  max-width: 450px;
+  max-width: 500px;
   width: 100%;
-  margin: 100px auto 0 auto;
+  margin: 50px auto 0 auto;
   padding: 26px 22px;
+
   ${mediaDown("tablet")`
-  max-width: 400px;
-`}
-${mediaDown("phone")`
-  max-width: 90%;
-`}
+    max-width: 400px;
+  `}
+  ${mediaDown("phone")`
+    max-width: 90%;
+  `}
 `;
 
 export const Body = styled.div``;
@@ -24,7 +25,6 @@ export const Header = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
-
   > h4 {
     margin: 0;
     color: #757880;
@@ -39,8 +39,7 @@ export const Header = styled.div`
     justify-content: center;
   }
 `;
-
-export const WalletList = styled.ul`
+export const List = styled.ul`
   display: flex;
   flex-direction: column;
   list-style: none;
@@ -52,7 +51,7 @@ export const WalletList = styled.ul`
     &:last-child {
       margin-bottom: 0;
     }
-    > button {
+    button {
       padding: 15px 20px;
       width: 100%;
       background: rgba(255, 255, 255, 0.03);
@@ -70,20 +69,6 @@ export const WalletList = styled.ul`
         font-weight: bold;
         font-size: 16px;
       }
-      > img {
-        width: 35px;
-        height: 35px;
-      }
     }
   }
-`;
-
-export const ErrorMessage = styled.div`
-  margin-top: 20px;
-  border-radius: 12px;
-  padding: 15px 20px;
-  background-color: rgb(253, 237, 237);
-  color: rgb(95, 33, 32);
-  font-size: 16px;
-  font-weight: 500;
 `;

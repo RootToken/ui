@@ -1,4 +1,5 @@
-import { ISiloDeposit } from "./siloDeposit";
+import { Token, TokenValue } from "@beanstalk/sdk";
+import { SwapOperation } from "@beanstalk/sdk/dist/types/lib/swap/SwapOperation";
 import { IToken, TOKENS } from "./token";
 
 export interface IMintFormToken {
@@ -56,3 +57,14 @@ export const getDefaultClaimFormState = (): IClaimFormState => ({
     token: TOKENS.ETH,
   },
 });
+
+export interface ISwapToken {
+  path: string[];
+  estimated: TokenValue;
+  estimatedWithSlippage: TokenValue;
+  token: IMintFormToken;
+  error?: string;
+  swap: SwapOperation;
+  needAllowance: boolean;
+  tokenIn: Token;
+}

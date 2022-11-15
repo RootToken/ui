@@ -1,9 +1,10 @@
-import { BigNumber } from "bignumber.js";
+import { TokenValue } from "@beanstalk/sdk";
+import { BigNumber } from "@ethersproject/bignumber";
 
 export interface ISiloDeposit {
   season: BigNumber;
-  amount: BigNumber;
-  bdv: BigNumber;
-  stalk: BigNumber;
-  seeds: BigNumber;
+  amount: TokenValue;
+  bdv: TokenValue;
+  stalk: TokenValue;
+  seeds: TokenValue;
 }

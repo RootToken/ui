@@ -1,21 +1,11 @@
-import { useEffect, useState } from "react";
-import { useAccount, useDisconnect } from "wagmi";
-import ConnectModal from "../../components/ConnectModal";
-import useAppStore from "../../store";
-import { trimAddress } from "../../util/account";
+import { useState } from "react";
+import { MoreHorizontal } from "react-feather";
+import AccountPopover from "../../components/AccountPopover";
+import MenuModal from "../../components/MenuModal";
 import * as S from "./styled";
 
 export default function MainLayout({ children }: { children: JSX.Element }) {
-  const sdk = useAppStore((v) => v.beanstalkSdk);
-  const [openConnectModal, setOpenConnectModal] = useState(false);
-  const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
-
-  useEffect(() => {
-    if (sdk && isConnected) {
-    }
-  }, [sdk, isConnected]);
-
+  const [open, setOpen] = useState(false);
   return (
     <S.Layout>
       <S.Header>
@@ -31,19 +21,10 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
             <li>Discord</li>
             <li>Beanstalk</li>
           </ul>
-          <S.ConnectButton
-            onClick={() => {
-              if (isConnected) {
-                disconnect();
-              } else {
-                setOpenConnectModal(true);
-              }
-            }}
-          >
-            {isConnected && address
-              ? trimAddress(address).toUpperCase()
-              : "CONNECT"}
-          </S.ConnectButton>
+          <AccountPopover />
+          <S.MoreButton onClick={() => setOpen(true)}>
+            <MoreHorizontal size={26} color="#FFF" />
+          </S.MoreButton>
         </div>
       </S.Header>
       <S.Body>
@@ -51,11 +32,7 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
         <div>{children}</div>
         <img className="bgBottom" src="/bg-bottom.svg" />
       </S.Body>
-
-      <ConnectModal
-        open={openConnectModal}
-        onClose={() => setOpenConnectModal(false)}
-      />
+      <MenuModal open={open} onClose={() => setOpen(false)} />
     </S.Layout>
   );
 }

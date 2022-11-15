@@ -6,6 +6,7 @@ import { Route, Routes, useLocation, useNavigate } from "react-router";
 import RedeemForm from "../components/RedeemForm";
 import ClaimForm from "../components/ClaimForm";
 import FarmForm from "../components/FarmForm";
+import { mediaDown } from "../styled";
 
 const Container = styled.div`
   max-width: 470px;
@@ -112,6 +113,9 @@ const MintHeaderButton = styled.button<{ active: boolean }>`
 `;
 const MintBody = styled.div`
   padding: 35px 53px;
+  ${mediaDown("phone")`
+    padding: 35px 20px;
+  `}
 `;
 
 export default function AppPage() {
