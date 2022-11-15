@@ -12,7 +12,7 @@ import {
 } from "./interfaces/mintForm.js";
 import { ITokenSymbol, TOKENS } from "./interfaces/token.js";
 import { createERC20Contract, createRootContract } from "./util/contract.js";
-import { BeanstalkSDK, DataSource, TokenValue } from "../@beanstalk/sdk/sdk.esm.js";
+import { BeanstalkSDK, DataSource, TokenValue } from "@beanstalk/sdk";
 import beanstalkAbi from "./abi/Beanstalk.json";
 import { Signer } from "@wagmi/core";
 import { ISiloClaimable, ISiloDeposit } from "./interfaces/siloDeposit";

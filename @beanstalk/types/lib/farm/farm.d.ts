@@ -4,7 +4,7 @@ import { LibraryPresets } from "./LibraryPresets";
 import { Step, Workflow } from "../../classes/Workflow";
 import { TokenValue } from "../../TokenValue";
 import { ethers } from "ethers";
-import { AdvancedPipeWorkflow } from "../depot/pipe";
+import { AdvancedPipeWorkflow } from "../../lib/depot/pipe";
 import { AdvancedDataStruct } from "../../constants/generated/Beanstalk/Beanstalk";
 export declare type FarmStep = Step<string>;
 /**

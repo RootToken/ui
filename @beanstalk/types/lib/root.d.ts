@@ -1,6 +1,6 @@
 import { ethers, Overrides } from "ethers";
 import { ERC20Token } from "../classes/Token";
-import { TokenSiloBalance } from "./silo";
+import { TokenSiloBalance } from "../lib/silo";
 import { TokenValue } from "../TokenValue";
 import { DepositTransferStruct } from "../constants/generated/Beanstalk/Root";
 import { BeanstalkSDK } from "./BeanstalkSDK";

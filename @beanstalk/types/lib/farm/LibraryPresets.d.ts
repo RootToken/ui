@@ -1,7 +1,7 @@
 import { ERC20Token } from "../../classes/Token";
 import { RunContext, StepGenerator } from "../../classes/Workflow";
-import { BeanstalkSDK } from "../BeanstalkSDK";
-import { FarmFromMode, FarmToMode } from "./types";
+import { BeanstalkSDK } from "../../lib/BeanstalkSDK";
+import { FarmFromMode, FarmToMode } from "../farm/types";
 import { EIP2612PermitMessage, SignedPermit } from "../permit";
 export declare type ActionBuilder = (fromMode?: FarmFromMode, toMode?: FarmToMode) => StepGenerator<string> | StepGenerator<string>[];
 export declare class LibraryPresets {

@@ -26,7 +26,7 @@ import {
   Token,
   TokenValue,
   Clipboard,
-} from "../../../@beanstalk/sdk/sdk.esm.js";
+} from "@beanstalk/sdk";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ISiloDeposit } from "../../interfaces/siloDeposit";
 import { ITokenSymbol, TOKENS } from "../../interfaces/token";

@@ -4,9 +4,9 @@ import {
   TokenValue,
   Clipboard,
   Token,
-} from "../../@beanstalk/sdk/sdk.esm.js";
-import { DepositTransferStruct } from "../../@beanstalk/sdk/dist/types/constants/generated/Beanstalk/Root";
-import { SignedPermit } from "../../@beanstalk/sdk/dist/types/lib/permit";
+} from "@beanstalk/sdk";
+import { DepositTransferStruct } from "@beanstalk/sdk/dist/types/constants/generated/Beanstalk/Root";
+import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import { ethers } from "ethers";
 import TransactionToast from "../components/Common/TransactionToast";
 import { ISiloDeposit } from "../interfaces/siloDeposit";

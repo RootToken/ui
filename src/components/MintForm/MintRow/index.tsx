@@ -1,4 +1,4 @@
-import { TokenValue } from "../../../../@beanstalk/sdk/sdk.esm.js";
+import { TokenValue } from "@beanstalk/sdk";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { ChevronDown } from "react-feather";
