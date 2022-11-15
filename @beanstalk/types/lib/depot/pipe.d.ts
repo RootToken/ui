@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { Step, Workflow } from "../../classes/Workflow";
-import { BeanstalkSDK } from "../../lib/BeanstalkSDK";
-import { AdvancedPipeStruct } from "../../lib/depot/depot";
+import { BeanstalkSDK } from "../BeanstalkSDK";
+import { AdvancedPipeStruct } from "./depot";
 import { TokenValue } from "../../TokenValue";
 /**
  * The "AdvancedPipe" is a Workflow that encodes a call to `beanstalk.advancedPipe()`.

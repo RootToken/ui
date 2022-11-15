@@ -1,6 +1,6 @@
-import { BeanstalkSDK } from "../../lib/BeanstalkSDK";
+import { BeanstalkSDK } from "../BeanstalkSDK";
 import { Token } from "../../classes/Token";
-import { FarmFromMode, FarmToMode } from "../../lib/farm/types";
+import { FarmFromMode, FarmToMode } from "../farm/types";
 import { StepClass } from "../../classes/Workflow";
 declare type RouterResult = {
     step: (account: string, fromMode?: FarmFromMode, toMode?: FarmToMode) => StepClass;

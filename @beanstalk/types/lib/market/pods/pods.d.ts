@@ -1,5 +1,5 @@
 import { DataSource } from "../../../types";
-import { BeanstalkSDK } from "../../../lib/BeanstalkSDK";
+import { BeanstalkSDK } from "../../BeanstalkSDK";
 export declare class PodsMarket {
     static sdk: BeanstalkSDK;
     constructor(sdk: BeanstalkSDK);

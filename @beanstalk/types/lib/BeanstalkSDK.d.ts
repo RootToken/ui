@@ -10,7 +10,7 @@ import { Farm } from "./farm/farm";
 import { Permit } from "./permit";
 import { Root } from "./root";
 import { Sdk as Queries } from "../constants/generated-gql/graphql";
-import { Swap } from "../lib/swap/Swap";
+import { Swap } from "./swap/Swap";
 export declare class BeanstalkSDK {
     DEBUG: boolean;
     signer?: Signer;

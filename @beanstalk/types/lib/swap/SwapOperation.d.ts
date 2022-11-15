@@ -2,7 +2,7 @@ import { ContractTransaction, BigNumber } from "ethers";
 import { Workflow } from "../../classes/Workflow";
 import { TokenValue } from "../../TokenValue";
 import { Token } from "../../classes/Token";
-import { BeanstalkSDK } from "../../lib/BeanstalkSDK";
+import { BeanstalkSDK } from "../BeanstalkSDK";
 declare type PathSegment = {
     from: string;
     to: string;

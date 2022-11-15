@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { FarmToMode } from "../../lib/farm/types";
+import { FarmToMode } from "../farm/types";
 export declare enum MarketStatus {
     Active = "ACTIVE",
     Cancelled = "CANCELLED",

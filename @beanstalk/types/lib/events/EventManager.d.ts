@@ -1,4 +1,4 @@
-import { BeanstalkSDK } from "../../lib/BeanstalkSDK";
+import { BeanstalkSDK } from "../BeanstalkSDK";
 import { EventType } from "./utils";
 import { Event } from "ethers";
 export declare class EventManager {

@@ -1,6 +1,6 @@
-import { BeanstalkSDK } from "../../lib/BeanstalkSDK";
+import { BeanstalkSDK } from "../BeanstalkSDK";
 import { Token } from "../../classes/Token";
-import { FarmFromMode, FarmToMode } from "../../lib/farm/types";
+import { FarmFromMode, FarmToMode } from "../farm/types";
 import { Router } from "./Router";
 import { SwapOperation } from "./SwapOperation";
 export declare class Swap {

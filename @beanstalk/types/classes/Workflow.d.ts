@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { Token } from "../classes/Token";
+import { Token } from "./Token";
 import { BeanstalkSDK } from "../lib/BeanstalkSDK";
 import { TokenValue } from "../TokenValue";
 /**

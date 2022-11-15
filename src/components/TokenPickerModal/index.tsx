@@ -6,7 +6,7 @@ import * as S from "./styled";
 import { IToken, ITokenSymbol, TOKENS } from "../../interfaces/token";
 import { ISiloDeposit } from "../../interfaces/siloDeposit";
 import { displayBN } from "../../util/bigNumber";
-import { TokenValue } from "@beanstalk/sdk";
+import { TokenValue } from "../../../@beanstalk/sdk/sdk.esm.js";
 
 interface ModalProps {
   open: boolean;

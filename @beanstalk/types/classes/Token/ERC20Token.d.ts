@@ -2,7 +2,7 @@ import { BigNumber, ContractTransaction } from "ethers";
 import { PromiseOrValue } from "../../constants/generated/common";
 import { ERC20Permit } from "../../constants/generated/ERC20Permit";
 import { Token } from "./Token";
-import { TokenValue } from "../../classes/TokenValue";
+import { TokenValue } from "../TokenValue";
 export declare class ERC20Token extends Token {
     contract: ERC20Permit;
     getContract(): ERC20Permit;

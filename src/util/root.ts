@@ -1,4 +1,4 @@
-import { TokenValue } from "@beanstalk/sdk";
+import { TokenValue } from "../../@beanstalk/sdk/sdk.esm.js";
 import { ethers } from "ethers";
 const PRECISION = TokenValue.fromBlockchain(ethers.utils.parseEther("1"), 18);
 

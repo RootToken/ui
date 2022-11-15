@@ -1,2 +1,2 @@
-import { Workflow } from "../classes/Workflow";
+import { Workflow } from "./Workflow";
 export declare const workflowTestSuite: (workflow: Workflow) => void;

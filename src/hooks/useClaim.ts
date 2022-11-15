@@ -4,9 +4,8 @@ import {
   TokenValue,
   Clipboard,
   Token,
-} from "@beanstalk/sdk";
-import { DepositTransferStruct } from "@beanstalk/sdk/dist/types/constants/generated/Beanstalk/Root";
-import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
+} from "../../@beanstalk/sdk/sdk.esm.js";
+import { SignedPermit } from "../../@beanstalk/sdk/dist/types/lib/permit";
 import TransactionToast from "../components/Common/TransactionToast";
 import { ISiloClaimable, ISiloDeposit } from "../interfaces/siloDeposit";
 import useAppStore from "../store";

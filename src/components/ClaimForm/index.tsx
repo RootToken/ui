@@ -1,4 +1,4 @@
-import { FarmFromMode, FarmToMode, Token, TokenValue } from "@beanstalk/sdk";
+import { FarmFromMode, FarmToMode, Token, TokenValue } from "../../../@beanstalk/sdk/sdk.esm.js";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";

@@ -1,4 +1,4 @@
-import { DataSource, TokenValue } from "@beanstalk/sdk";
+import { DataSource, TokenValue } from "../../../@beanstalk/sdk/sdk.esm.js";
 import { useCallback, useEffect, useState } from "react";
 import {
   ChevronDown,
