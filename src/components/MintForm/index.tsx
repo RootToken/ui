@@ -368,26 +368,26 @@ export default function MintForm() {
           let bdvImpactPercentage = TokenValue.fromHuman("0", 18);
           let stalkImpactPercentage = TokenValue.fromHuman("0", 18);
 
-          if (result.bdvRatio.lt(result.stalkRatio)) {
-            stalkImpactPercentage = TokenValue.fromHuman("100", 18).sub(
-              result.bdvRatio
-                .sub(TokenValue.fromHuman("1", 18))
-                .mulDiv(
-                  TokenValue.fromHuman("100", 18),
-                  result.stalkRatio.sub(TokenValue.fromHuman("1", 18))
-                )
-            );
-          }
-          if (result.stalkRatio.lt(result.bdvRatio)) {
-            bdvImpactPercentage = TokenValue.fromHuman("100", 18).sub(
-              result.stalkRatio
-                .sub(TokenValue.fromHuman("1", 18))
-                .mulDiv(
-                  TokenValue.fromHuman("100", 18),
-                  result.bdvRatio.sub(TokenValue.fromHuman("1", 18))
-                )
-            );
-          }
+          // if (result.bdvRatio.lt(result.stalkRatio)) {
+          //   stalkImpactPercentage = TokenValue.fromHuman("100", 18).sub(
+          //     result.bdvRatio
+          //       .sub(TokenValue.fromHuman("1", 18))
+          //       .mulDiv(
+          //         TokenValue.fromHuman("100", 18),
+          //         result.stalkRatio.sub(TokenValue.fromHuman("1", 18))
+          //       )
+          //   );
+          // }
+          // if (result.stalkRatio.lt(result.bdvRatio)) {
+          //   bdvImpactPercentage = TokenValue.fromHuman("100", 18).sub(
+          //     result.stalkRatio
+          //       .sub(TokenValue.fromHuman("1", 18))
+          //       .mulDiv(
+          //         TokenValue.fromHuman("100", 18),
+          //         result.bdvRatio.sub(TokenValue.fromHuman("1", 18))
+          //       )
+          //   );
+          // }
 
           console.log({
             min: result?.min?.toHuman(),
