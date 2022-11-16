@@ -1,7 +1,8 @@
 import { useLayer } from "react-laag";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { ArrowRight, ChevronsRight, Settings } from "react-feather";
+import { HelpCircle, ArrowRight, ChevronsRight, Settings } from "react-feather";
+import TooltipIcon from "../TooltipIcon";
 import * as S from "./styled";
 import useAppStore from "../../store";
 
@@ -42,7 +43,14 @@ export default function MintSettingsPopover() {
           {isOpen && (
             <S.PopoverContainer {...layerProps}>
               <div className="section">
-                <div className="header">Slippage Tolerance</div>
+                <div className="header" style={{display: "flex"}}>
+                  Slippage Tolerance
+                  <div style={{marginTop: '7px', marginLeft: '3px'}}>
+                  <TooltipIcon text="Your transaction will fail if the cBean you receive for Redeeming Roots decreases by more than this percentage.">
+                    <HelpCircle size={12} color="#838383" />
+                  </TooltipIcon>
+                  </div>
+                </div>
 
                 {mintFormState.mintTokens.filter((v) => v.token.slippage !== 0)
                   .length > 0 ? (

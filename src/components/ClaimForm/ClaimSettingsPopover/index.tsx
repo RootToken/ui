@@ -1,8 +1,9 @@
 import { useLayer } from "react-laag";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Settings } from "react-feather";
+import { HelpCircle, Settings } from "react-feather";
 import * as S from "./styled";
+import TooltipIcon from "../../TooltipIcon";
 import useAppStore from "../../../store";
 
 export default function ClaimSettingsPopver() {
@@ -44,7 +45,14 @@ export default function ClaimSettingsPopver() {
               <div className="section">
                 <div className="header">Settings</div>
                 <div className="content">
-                  <div className="text">Slippage Tolerance</div>
+                  <div className="text" style={{display: "flex"}}>
+                    Slippage Tolerance
+                    <div style={{marginTop: '7px', marginLeft: '3px'}}>
+                      <TooltipIcon text="Your transaction will fail if the cBean you receive for Redeeming Roots decreases by more than this percentage.">
+                        <HelpCircle size={12} color="#838383" />
+                      </TooltipIcon>
+                    </div>
+                  </div>
 
                   <div className="slippage">
                     <S.SlippageInput
