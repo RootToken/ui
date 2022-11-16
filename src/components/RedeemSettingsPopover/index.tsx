@@ -47,7 +47,7 @@ export default function RedeemSettingsPopver() {
                 <div className="content">
                   <div className="text">
                     Slippage Tolerance{" "}
-                    <TooltipIcon text="Copy here">
+                    <TooltipIcon text="Your transaction will revert if the price changes unfavorably by more than this percentage.">
                       <HelpCircle size={14} color="#838383" />
                     </TooltipIcon>
                   </div>
@@ -74,7 +74,7 @@ export default function RedeemSettingsPopver() {
                 <div className="content">
                   <div className="text">
                     Redeem for Bean Deposit{" "}
-                    <TooltipIcon text="Copy here">
+                    <TooltipIcon text="SDSD">
                       <HelpCircle size={14} color="#838383" />
                     </TooltipIcon>
                   </div>

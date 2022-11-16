@@ -281,7 +281,7 @@ export default function ClaimForm() {
       <S.Phase>
         <div className="group">
           <div className="header">
-            <div>CLAIM AMOUNT</div>
+            <div>CLAIMABLE AMOUNT</div>
             <ClaimSettingsPopver />
           </div>
           <div className="contentContainer">
@@ -317,7 +317,7 @@ export default function ClaimForm() {
               </div>
             </div>
           </div>
-          <AnimatePresence>
+          {/* <AnimatePresence>
             {account && (
               <motion.div
                 key="content"
@@ -363,7 +363,7 @@ export default function ClaimForm() {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
         </div>
       </S.Phase>
 

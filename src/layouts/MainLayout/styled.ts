@@ -40,12 +40,17 @@ export const Header = styled.div`
       `}
 
       > li {
-        font-style: normal;
-        font-weight: 300;
-        font-size: 16px;
-        line-height: 24px;
-        color: #f4eff4;
-        margin-right: 24px;
+        > a {
+          font-style: normal;
+          font-weight: 300;
+          font-size: 16px;
+          line-height: 24px;
+          color: #f4eff4;
+          margin-right: 24px;
+          &.wc {
+            color: #72f589;
+          }
+        }
 
         ${mediaDown("desktop")`
           &:last-child {
@@ -53,9 +58,7 @@ export const Header = styled.div`
           }
         `}
 
-        &.wc {
-          color: #72f589;
-        }
+      
 
         &:last-child {
           margin: 0;
