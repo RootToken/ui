@@ -18,7 +18,6 @@ const Container = styled.div`
   width: 100%;
   flex-direction: column;
   display: flex;
-  padding-top: 40px;
   ${mediaDown("tablet")`
     padding-top: 10px !important;
   `}
@@ -210,22 +209,29 @@ export default function AppPage() {
     <MainLayout>
       <>
         <Container>
-          <Banner>
-            <img className="ribbon" src="/fifa-wc.svg" width={31} height={54} />
-            <div>
-              <h2>
-                Bet to Earn on the
-                <br /> 2022 FIFA World Cup
-              </h2>
-              <p>
-                <img src="/root-logo.svg" width={47} height={23} />
-                <span>
-                  on <b>Paradox</b>
-                </span>
-              </p>
-            </div>
-            <img className="img" src="/wc.png" width={369} height={101} />
-          </Banner>
+          <a href="https://app.betparadox.com/soccer/root-0" target="_blank">
+            <Banner>
+              <img
+                className="ribbon"
+                src="/fifa-wc.svg"
+                width={31}
+                height={54}
+              />
+              <div>
+                <h2>
+                  Bet to Earn on the
+                  <br /> 2022 FIFA World Cup
+                </h2>
+                <p>
+                  <img src="/root-logo.svg" width={47} height={23} />
+                  <span>
+                    on <b>Paradox</b>
+                  </span>
+                </p>
+              </div>
+              <img className="img" src="/wc.png" width={369} height={101} />
+            </Banner>
+          </a>
           <MintContainer>
             <MintHeader>
               <MintHeaderButton
