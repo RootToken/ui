@@ -39,6 +39,7 @@ import TransactionToast from "../Common/TransactionToast";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import useMint from "../../hooks/useMint";
 import { calculateRoot } from "../../util/root";
+import useMintWorkflow from "../../hooks/useMintWorkflow";
 
 export default function MintForm() {
   const [openTx, setOpenTx] = useState(false);
@@ -61,6 +62,10 @@ export default function MintForm() {
     mintRootsWithBeanDeposit,
     mintRootsWithSwappedBean,
   } = useMint();
+
+  const {
+    mintRootsWithSwappedBean: getMintStrategy
+  } = useMintWorkflow();
 
   const {
     mintFormState,
@@ -96,8 +101,8 @@ export default function MintForm() {
     return Promise.all(
       tokens.map(async (token): Promise<ISwapToken> => {
         try {
-          let tokenIn: Token = beanstalkSdk.tokens.ETH;
-          let amount = beanstalkSdk.tokens.ETH.fromHuman("0");
+          let tokenIn: Token;
+          let amount: TokenValue;
           let allowance = TokenValue.fromBlockchain(
             ethers.constants.MaxInt256.toString(),
             token.token.decimals
@@ -160,28 +165,42 @@ export default function MintForm() {
               throw new Error("Unsupported token");
           }
 
-          const tokenOut = beanstalkSdk.tokens.BEAN;
-
-          const swapOp = beanstalkSdk.swap.buildSwap(
+          const strategy = getMintStrategy(
             tokenIn,
-            tokenOut,
-            account!.address,
             FarmFromMode.EXTERNAL,
-            FarmToMode.INTERNAL
+            FarmToMode.EXTERNAL
           );
-          if (!swapOp.isValid())
-            throw new Error("Cannot swap between selected tokens");
-          const est = await swapOp.estimate(amount);
-          console.log("estimate: ", est.toHuman());
+
+          if (!strategy) throw new Error("Failed to build workflow");
+
+          const { swap, workflow } = strategy;
+
+          const amountOut = await workflow.estimate(amount)
+          const est = beanstalkSdk.tokens.ROOT.fromBlockchain(amountOut);
+
+          // const tokenOut = beanstalkSdk.tokens.BEAN;
+          // const swapOp = beanstalkSdk.swap.buildSwap(
+          //   tokenIn,
+          //   tokenOut,
+          //   account!.address,
+          //   FarmFromMode.EXTERNAL,
+          //   FarmToMode.INTERNAL
+          // );
+          // if (!swapOp.isValid())
+            // throw new Error("Cannot swap between selected tokens");
+          // const est = await swapOp.estimate(amount);
+          
+          console.log("estimate: ", est.toHuman(), est.toBlockchain());
+
           return {
-            path: swapOp.getSimplePath(),
+            path: swap.getSimplePath(),
             estimated: est,
             token,
             tokenIn,
             estimatedWithSlippage: est
               .mul(parseFloat(token.slippage) * 10)
               .div(1000),
-            swap: swapOp,
+            swap,
             needAllowance: allowance.lt(amount),
           };
         } catch (e: any) {

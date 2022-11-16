@@ -23,7 +23,7 @@ export default function useMintWorkflow() {
    * @param fromMode The source of the user's `inputToken`.
    * @param toMode The destination for ROOT
    */
-  const mintRootsWithSwappedBean = async (
+  const mintRootsWithSwappedBean = (
     inputToken: Token,
     fromMode : FarmFromMode = FarmFromMode.EXTERNAL,
     toMode : FarmToMode = FarmToMode.EXTERNAL
@@ -247,7 +247,10 @@ export default function useMintWorkflow() {
     depotFarm.add(pipe);
 
     // Return the depotFarm instance.
-    return depotFarm;
+    return {
+      swap,
+      workflow: depotFarm,
+    };
   };
 
   return {
