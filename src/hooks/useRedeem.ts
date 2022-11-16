@@ -125,6 +125,7 @@ export default function useRedeem() {
       farm.add(
         new beanstalkSdk.farm.actions.WithdrawDeposits(
           beanstalkSdk.tokens.BEAN.address,
+
           seasons,
           amounts
         )

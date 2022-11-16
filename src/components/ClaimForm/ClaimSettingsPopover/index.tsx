@@ -1,9 +1,10 @@
 import { useLayer } from "react-laag";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Settings } from "react-feather";
+import { HelpCircle, Settings } from "react-feather";
 import * as S from "./styled";
 import useAppStore from "../../../store";
+import TooltipIcon from "../../TooltipIcon";
 
 export default function ClaimSettingsPopver() {
   const [isOpen, setOpen] = useState(false);
@@ -44,7 +45,12 @@ export default function ClaimSettingsPopver() {
               <div className="section">
                 <div className="header">Settings</div>
                 <div className="content">
-                  <div className="text">Slippage Tolerance</div>
+                  <div className="text">
+                    Slippage Tolerance
+                    <TooltipIcon text="Your transaction will revert if the price changes unfavorably by more than this percentage.">
+                      <HelpCircle size={14} color="#838383" />
+                    </TooltipIcon>
+                  </div>
 
                   <div className="slippage">
                     <S.SlippageInput

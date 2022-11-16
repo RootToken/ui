@@ -44,10 +44,11 @@ export default function useClaim() {
         FarmFromMode.EXTERNAL,
         FarmToMode.EXTERNAL
       );
+
       farm.add(
         // @ts-ignore
         ...swap.getFarm().generators
-      )
+      );
 
       const txn = await farm.execute(tokenInAmount, { slippage });
       txToast.confirming(txn);

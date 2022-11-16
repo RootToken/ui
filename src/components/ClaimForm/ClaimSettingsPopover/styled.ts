@@ -33,6 +33,12 @@ export const PopoverContainer = styled(motion.div)`
       > .text {
         color: #b0b0b0;
         font-size: 14px;
+
+        display: flex;
+        align-items: center;
+        > div {
+          margin-left: 8px;
+        }
       }
       > .slippage {
         display: flex;

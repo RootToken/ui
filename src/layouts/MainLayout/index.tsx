@@ -37,7 +37,11 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
                 Twitter
               </a>
             </li>
-            {/* <li>Discord</li> */}
+            <li>
+              <a target="_blank" href="https://docs.roottoken.org">
+                Docs
+              </a>
+            </li>
             <li>
               <a href="https://bean.money" target="_blank">
                 Beanstalk
