@@ -1,4 +1,5 @@
 import { ExternalLink, X } from "react-feather";
+import { Link } from "react-router-dom";
 
 import * as S from "./styled";
 
@@ -25,6 +26,24 @@ export default function MenuModal({ open, onClose }: ModalProps) {
           </button>
         </S.Header>
         <S.List>
+        <li>
+            <Link to="/" onClick={() => onClose()}>
+              <a>
+                <button>
+                  <span>Home</span>
+                </button>
+              </a>
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard" onClick={() => onClose()}>
+              <a>
+                <button>
+                  <span>Dashboard</span>
+                </button>
+              </a>
+            </Link>
+          </li>
           <li>
             <a href="https://betparadox.com" target="_blank">
               <button>
@@ -34,10 +53,7 @@ export default function MenuModal({ open, onClose }: ModalProps) {
             </a>
           </li>
           <li>
-            <a
-              target="_blank"
-              href="https://46kcia6hnco4xe5n3xj54nm7fypseqdnf5xifprcwyiyvambjumq.arweave.net/55QkA8doncuTrd3T3jWfLh8iQG0vboK-IrYRioGBTRk"
-            >
+            <a target="_blank" href="https://roottoken.org/root.pdf">
               <button>
                 <span>Root Token Whitepaper</span>
                 <ExternalLink size={18} color="#FFF" />
