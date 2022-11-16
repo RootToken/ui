@@ -35,7 +35,7 @@ export default function useClaim() {
           FarmToMode.EXTERNAL
         )
       );
-      farm.add(new beanstalkSdk.farm.actions.AttachPermitERC20(permit));
+      farm.add(new beanstalkSdk.farm.actions.PermitERC20(permit));
 
       const swap = beanstalkSdk.swap.buildSwap(
         tokenIn,
@@ -45,6 +45,7 @@ export default function useClaim() {
         FarmToMode.EXTERNAL
       );
       farm.add(
+        // @ts-ignore
         ...swap.getFarm().generators
       )
 
