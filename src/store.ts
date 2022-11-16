@@ -182,17 +182,19 @@ const getUserBalance = async (
 };
 
 const setupContracts = (signer?: ethers.Signer) => {
+  const provider = new ethers.providers.JsonRpcProvider(ENVIRONMENT.rpcUrl);
   const sdk: BeanstalkSDK = new BeanstalkSDK({
     signer,
     rpcUrl: ENVIRONMENT.rpcUrl,
     subgraphUrl: ENVIRONMENT.beanstalkSubgraphUrl,
+    provider,
   });
   return {
     beanstalkSdk: sdk,
     beanstalkContract: new ethers.Contract(
       ENVIRONMENT.beanstalkContractAddress,
       beanstalkAbi,
-      signer
+      signer || provider
     ),
     erc20Contracts: {
       [ENVIRONMENT.rootContractAddress]: createRootContract(signer),

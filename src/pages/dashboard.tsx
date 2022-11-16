@@ -5,6 +5,8 @@ import { mediaDown } from "../styled";
 import useAppStore from "../store";
 import { displayBN } from "../util/bigNumber";
 import { TokenValue } from "@beanstalk/sdk";
+import ENVIRONMENT from "../config";
+import { toast } from "react-hot-toast";
 
 const Container = styled.div`
   max-width: 750px;
@@ -106,8 +108,8 @@ const MintContainer = styled.div`
       font-weight: bold;
       color: #fff;
       flex: 1;
-    display: flex;
-    align-items: flex-end;
+      display: flex;
+      align-items: flex-end;
     }
   }
 `;
@@ -168,25 +170,57 @@ export default function DashboardPage() {
     underlyingBdv: TokenValue.fromHuman("0", 6),
     seeds: TokenValue.fromHuman("0", 6),
     stalk: TokenValue.fromHuman("0", 10),
+    isLoading: false,
   });
-  const sdk = useAppStore((v) => v.beanstalkSdk);
+  const { beanstalkSdk, beanstalkContract, erc20Contracts } = useAppStore(
+    (v) => ({
+      beanstalkSdk: v.beanstalkSdk,
+      beanstalkContract: v.beanstalkContract,
+      erc20Contracts: v.erc20Contracts,
+    })
+  );
 
   const getData = async () => {
-    const totalSupply = await sdk.tokens.ROOT.getTotalSupply();
-    const underlyingBdv = await sdk.root.underlyingBdv();
-    const seeds = await sdk.silo.balanceOfSeeds(sdk.tokens.ROOT.address);
-    const stalk = await sdk.silo.balanceOfStalk(sdk.tokens.ROOT.address);
+    setState((s) => ({
+      ...s,
+      isLoading: true,
+    }));
 
-    setState({
-      totalSupply,
-      underlyingBdv,
-      seeds,
-      stalk,
-    });
+    try {
+      const totalSupply = TokenValue.fromBlockchain(
+        await erc20Contracts[ENVIRONMENT.rootContractAddress].totalSupply(),
+        18
+      );
+      const underlyingBdv = TokenValue.fromBlockchain(
+        await erc20Contracts[ENVIRONMENT.rootContractAddress].underlyingBdv(),
+        6
+      );
+      const seeds = TokenValue.fromBlockchain(
+        await beanstalkContract.balanceOfSeeds(ENVIRONMENT.rootContractAddress),
+        6
+      );
+      const stalk = TokenValue.fromBlockchain(
+        await beanstalkContract.balanceOfStalk(ENVIRONMENT.rootContractAddress),
+        10
+      );
+      setState({
+        totalSupply,
+        underlyingBdv,
+        seeds,
+        stalk,
+        isLoading: false,
+      });
+    } catch (e: any) {
+      setState((s) => ({
+        ...s,
+        isLoading: false,
+      }));
+      // toast.error(e.message);
+    }
   };
   useEffect(() => {
     getData();
-  }, [sdk]);
+  }, [erc20Contracts, beanstalkContract]);
   return (
     <MainLayout>
       <>
@@ -211,14 +245,16 @@ export default function DashboardPage() {
             <div>
               <h2>Total Roots</h2>
               <p>The total outstanding Roots.</p>
-              <div>{displayBN(state.totalSupply, 2)}</div>
+              {!state.isLoading && <div>{displayBN(state.totalSupply, 2)}</div>}
             </div>
           </MintContainer>
           <MintContainer>
             <div>
               <h2>Total BDV</h2>
               <p>The total (unupdated) BDV of Silo Deposits owned by Root.</p>
-              <div>{displayBN(state.underlyingBdv, 2)}</div>
+              {!state.isLoading && (
+                <div>{displayBN(state.underlyingBdv, 2)}</div>
+              )}
             </div>
           </MintContainer>
 
@@ -226,7 +262,7 @@ export default function DashboardPage() {
             <div>
               <h2>Total Stalk</h2>
               <p>The total Stalk of Root. Does not include Grown Stalk.</p>
-              <div>{displayBN(state.stalk, 2)}</div>
+              {!state.isLoading && <div>{displayBN(state.stalk, 2)}</div>}
             </div>
           </MintContainer>
 
@@ -234,7 +270,7 @@ export default function DashboardPage() {
             <div>
               <h2>Total Seeds</h2>
               <p>The total Seeds of Root. Does not include Earned Seeds.</p>
-              <div>{displayBN(state.seeds, 2)}</div>
+              {!state.isLoading && <div>{displayBN(state.seeds, 2)}</div>}
             </div>
           </MintContainer>
         </Container>
