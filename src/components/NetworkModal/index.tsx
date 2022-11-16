@@ -8,7 +8,7 @@ export default function NetworkModal() {
   const { switchNetwork } = useSwitchNetwork();
 
   useEffect(() => {
-    if (chain?.id && chain.id !== 1) {
+    if (chain?.id && !(chain.id === 1 || chain.id === 1337)) {
       setOpen(true);
     } else if (chain?.id === 1) {
       setOpen(false);
