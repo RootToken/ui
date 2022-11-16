@@ -23,6 +23,7 @@ import useClaim from "../../hooks/useClaim";
 import { ISiloClaimable } from "../../interfaces/siloDeposit";
 import debounce from "lodash.debounce";
 import TokenPickerModal from "../TokenPickerModal";
+import { BigNumber } from "@ethersproject/bignumber";
 
 export default function ClaimForm() {
   const [openTokenPicker, setOpenTokenPicker] = useState(false);
@@ -57,10 +58,10 @@ export default function ClaimForm() {
     output: "0",
     loading: false,
     minOut: TokenValue.fromHuman("0", 18),
-    claimableDeposits: [] as ISiloClaimable[],
+    seasons: [] as BigNumber[],
   });
 
-  const { claimBeanDepositAndSwap } = useClaim();
+  const { claimBeanDepositAndSwap, claimWithdrawals } = useClaim();
 
   const calculateEstimate = useCallback(
     debounce(async (claimFormState: IClaimFormState) => {
@@ -69,22 +70,41 @@ export default function ClaimForm() {
           throw new Error("account not found");
         }
 
+        const amountIn =
+          account?.claimableDeposits.reduce((prev, claimable) => {
+            return prev.add(claimable.amount);
+          }, TokenValue.fromHuman("0", TOKENS["BEAN DEPOSIT"].decimals)) ||
+          TokenValue.fromHuman("0", TOKENS["BEAN DEPOSIT"].decimals);
+
         // Validate
-        if (claimFormState.claimAmount === "") {
+        if (claimableTokenAmount.eq(0)) {
           throw new Error("Invalid input");
+        }
+
+        const seasons: BigNumber[] = [];
+
+        account.claimableDeposits.forEach((claim) => {
+          seasons.push(claim.season);
+        });
+
+        if (claimFormState.claimToken.token.symbol === "BEAN") {
+          setClaimState((state) => ({
+            ...state,
+            loading: false,
+            output: displayBN(
+              amountIn,
+              claimFormState.claimToken.token.formatDecimals
+            ),
+            minOut: amountIn,
+            seasons,
+          }));
+          return;
         }
 
         let tokenIn = beanstalkSdk.tokens.BEAN;
         let tokenOut: Token = beanstalkSdk.tokens.ETH;
-        let amountIn = TokenValue.fromHuman(
-          claimFormState.claimAmount,
-          TOKENS.BEAN.decimals
-        );
 
         switch (claimFormState.claimToken.token.symbol) {
-          case TOKENS.BEAN.symbol:
-            tokenOut = beanstalkSdk.tokens.BEAN;
-            break;
           case TOKENS.USDC.symbol:
             tokenOut = beanstalkSdk.tokens.USDC;
             break;
@@ -116,24 +136,6 @@ export default function ClaimForm() {
         const est = await swapOp.estimate(amountIn);
         console.log("est: ", est.toHuman());
 
-        const claimableDeposits: ISiloClaimable[] = [];
-
-        account.claimableDeposits.forEach((claim) => {
-          if (amountIn.gt(claim.amount)) {
-            claimableDeposits.push({
-              season: claim.season,
-              amount: claim.amount.sub(amountIn),
-            });
-          } else {
-            amountIn = amountIn.sub(claim.amount);
-            claimableDeposits.push(claim);
-          }
-
-          if (amountIn.eq(0)) {
-            return;
-          }
-        });
-
         const totalSlipage = TokenValue.fromHuman(
           claimFormState.slippage,
           TOKENS["BEAN DEPOSIT"].decimals
@@ -144,7 +146,7 @@ export default function ClaimForm() {
           loading: false,
           output: displayBN(est, tokenOut.displayDecimals),
           minOut: est.sub(est.mul(totalSlipage.mul(10)).div(1000)),
-          claimableDeposits,
+          seasons,
         }));
       } catch (e) {
         setClaimState((state) => ({
@@ -152,7 +154,7 @@ export default function ClaimForm() {
           loading: false,
           output: "0",
           minOut: TokenValue.fromHuman("0", 18),
-          claimableDeposits: [],
+          seasons: [],
         }));
       }
     }, 500),
@@ -164,8 +166,11 @@ export default function ClaimForm() {
       return "Connect Wallet";
     }
     if (claimState.output !== "0") {
+      if (claimFormState.claimToken.token.symbol === "BEAN") {
+        return "CLAIM";
+      }
       if (!permit) {
-        return "Allow Beanstalk to use your Bean";
+        return "Allow Root to use your Bean";
       }
     }
 
@@ -174,6 +179,13 @@ export default function ClaimForm() {
 
   const onClaim = async () => {
     if (claimState.loading || claimState.output === "0") {
+      return;
+    }
+
+    if (claimFormState.claimToken.token.symbol === "BEAN") {
+      await claimWithdrawals(beanstalkSdk.tokens.BEAN, claimState.seasons).then(
+        resetState
+      );
       return;
     }
 
@@ -201,9 +213,6 @@ export default function ClaimForm() {
 
     let tokenOut: Token = beanstalkSdk.tokens.ETH;
     switch (claimFormState.claimToken.token.symbol) {
-      case TOKENS.BEAN.symbol:
-        tokenOut = beanstalkSdk.tokens.BEAN;
-        break;
       case TOKENS.USDC.symbol:
         tokenOut = beanstalkSdk.tokens.USDC;
         break;
@@ -225,12 +234,10 @@ export default function ClaimForm() {
 
     await claimBeanDepositAndSwap(
       permit,
-      TokenValue.fromHuman(
-        claimFormState.claimAmount,
-        TOKENS["BEAN DEPOSIT"].decimals
-      ),
+      beanstalkSdk.tokens.BEAN,
+      TokenValue.fromHuman(claimFormState.claimAmount, TOKENS.BEAN.decimals),
+      claimState.seasons,
       tokenOut,
-      claimState.claimableDeposits,
       parseFloat(parseFloat(claimFormState.slippage).toFixed(2))
     ).then(resetState);
     return;
@@ -257,7 +264,7 @@ export default function ClaimForm() {
     setPermit(undefined);
 
     calculateEstimate(claimFormState);
-  }, [claimFormState]);
+  }, [claimFormState, account]);
 
   const claimableTokenAmount =
     account?.claimableDeposits.reduce((prev, claimable) => {
@@ -286,19 +293,23 @@ export default function ClaimForm() {
                 thousandSeparator
                 valueIsNumericString
                 allowNegative={false}
-                value={claimFormState.claimAmount}
-                onValueChange={(e) => {
-                  onChangeClaimFormStateField("claimAmount", e.value);
-                }}
-                isAllowed={(v) => {
-                  if (v.floatValue) {
-                    return !TokenValue.fromHuman(
-                      v.floatValue,
-                      TOKENS["BEAN DEPOSIT"].decimals
-                    ).gt(claimableTokenAmount);
-                  }
-                  return true;
-                }}
+                value={displayBN(
+                  claimableTokenAmount,
+                  TOKENS["BEAN DEPOSIT"].formatDecimals
+                )}
+                readOnly={true}
+                // onValueChange={(e) => {
+                //   onChangeClaimFormStateField("claimAmount", e.value);
+                // }}
+                // isAllowed={(v) => {
+                //   if (v.floatValue) {
+                //     return !TokenValue.fromHuman(
+                //       v.floatValue,
+                //       TOKENS["BEAN DEPOSIT"].decimals
+                //     ).gt(claimableTokenAmount);
+                //   }
+                //   return true;
+                // }}
               />
               <div className="rootContainer">
                 <img width={14} height={14} src="/bean.svg" />
@@ -531,7 +542,8 @@ export default function ClaimForm() {
       </S.MintButton>
 
       <TokenPickerModal
-        excludes={["BEAN DEPOSIT", "BEAN"]}
+        claim
+        excludes={["BEAN DEPOSIT"]}
         open={openTokenPicker}
         onClose={() => setOpenTokenPicker(false)}
         onSelect={(newToken) => {

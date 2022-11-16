@@ -74,13 +74,13 @@ const getUserBalance = async (
     const balances = await sdk.silo.getBalances(undefined, {
       source: DataSource.LEDGER,
     });
-    balances.get(sdk.tokens.BEAN)?.deposited.crates.forEach((crate) => {
+    balances.get(sdk.tokens.BEAN)?.claimable.crates.forEach((crate) => {
       claimableDeposits.push({
         season: crate.season,
         amount: crate.amount,
       });
     });
-    balances.get(sdk.tokens.BEAN_CRV3_LP)?.deposited.crates.forEach((crate) => {
+    balances.get(sdk.tokens.BEAN)?.deposited.crates.forEach((crate) => {
       tempDeposits.push({
         season: crate.season,
         amount: crate.amount,

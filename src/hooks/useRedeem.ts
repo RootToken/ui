@@ -120,6 +120,7 @@ export default function useRedeem() {
       );
 
       // @TODO add a farm step here to withdraw
+      farm.add(new beanstalkSdk.farm.actions.WithdrawDeposits(transfer.token, transfer.seasons, transfer.amounts))
 
       const txn = await farm.execute(amount, {
         slippage: 0.5,

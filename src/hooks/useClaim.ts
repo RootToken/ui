@@ -1,14 +1,7 @@
-import {
-  FarmFromMode,
-  FarmToMode,
-  TokenValue,
-  Clipboard,
-  Token,
-} from "@beanstalk/sdk";
-import { DepositTransferStruct } from "@beanstalk/sdk/dist/types/constants/generated/Beanstalk/Root";
+import { FarmFromMode, FarmToMode, TokenValue, Token } from "@beanstalk/sdk";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
+import { BigNumber } from "@ethersproject/bignumber";
 import TransactionToast from "../components/Common/TransactionToast";
-import { ISiloClaimable, ISiloDeposit } from "../interfaces/siloDeposit";
 import useAppStore from "../store";
 
 export default function useClaim() {
@@ -21,30 +14,61 @@ export default function useClaim() {
 
   const claimBeanDepositAndSwap = async (
     permit: SignedPermit,
-    amount: TokenValue,
+    tokenIn: Token,
+    tokenInAmount: TokenValue,
+    seasons: BigNumber[],
     tokenOut: Token,
-    claimableDeposits: ISiloClaimable[],
-    slippage: number,
+    slippage: number
   ) => {
     const txToast = new TransactionToast({
-      loading: `Redeeming Root...`,
-      success: "Redeem successful.",
+      loading: `Claiming Bean...`,
+      success: "Claim successful.",
     });
     try {
-      const bean = beanstalkSdk.tokens.BEAN;
-
       // @TODO add a farm step here to claim then swap
+      const farm = beanstalkSdk.farm.create();
 
+      farm.add(
+        new beanstalkSdk.farm.actions.ClaimWithdrawals(
+          tokenIn.address,
+          seasons,
+          FarmToMode.EXTERNAL
+        )
+      );
+      farm.add(new beanstalkSdk.farm.actions.PermitERC20a(permit));
 
       const swap = beanstalkSdk.swap.buildSwap(
+        tokenIn,
         tokenOut,
-        bean,
         account!.address,
         FarmFromMode.EXTERNAL,
         FarmToMode.EXTERNAL
       );
+      farm.add(
+        ...swap.getFarm().generators
+      )
 
-      const txn = await swap.execute(amount, slippage);
+      const txn = await farm.execute(tokenInAmount, { slippage });
+      txToast.confirming(txn);
+      const receipt = await txn.wait();
+      txToast.success(receipt);
+    } catch (e) {
+      txToast.error(e);
+      throw e;
+    }
+  };
+
+  const claimWithdrawals = async (token: Token, seasons: BigNumber[]) => {
+    const txToast = new TransactionToast({
+      loading: `Claiming Bean...`,
+      success: "Claim successful.",
+    });
+    try {
+      const txn = await beanstalkSdk.contracts.beanstalk.claimWithdrawals(
+        token.address,
+        seasons,
+        FarmToMode.EXTERNAL
+      );
       txToast.confirming(txn);
       const receipt = await txn.wait();
       txToast.success(receipt);
@@ -56,5 +80,6 @@ export default function useClaim() {
 
   return {
     claimBeanDepositAndSwap,
+    claimWithdrawals,
   };
 }

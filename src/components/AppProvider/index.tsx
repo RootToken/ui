@@ -142,14 +142,14 @@ const client = createClient({
 });
 
 export function AppProvider({ children }: AppProvider): any {
-  const setPrices = useAppStore((v) => v.setPrices);
-  const { data } = useSWR("prices", getPrices);
+  // const setPrices = useAppStore((v) => v.setPrices);
+  // const { data } = useSWR("prices", getPrices);
 
-  useEffect(() => {
-    if (data) {
-      setPrices(data);
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (data) {
+  //     setPrices(data);
+  //   }
+  // }, [data]);
 
   return (
     <ThemeProvider theme={{}}>

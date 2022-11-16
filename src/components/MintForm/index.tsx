@@ -351,20 +351,20 @@ export default function MintForm() {
 
           });
 
-          const result = calculateRoot(
-            tempDeposits[11].deposit.stalk.add(tempDeposits[12].deposit.stalk),
-            tempDeposits[11].deposit.seeds.add(tempDeposits[11].deposit.seeds),
-            tempDeposits[11].deposit.bdv.add(tempDeposits[12].deposit.bdv),
-            TokenValue.fromHuman("1000", 18),
-            TokenValue.fromHuman("1000", 6),
-            TokenValue.fromHuman("1100", 10),
-            TokenValue.fromHuman("2000", 6),
-            // rootTotalSupply,
-            // rootUnderlyingBdvBefore,
-            // rootStalkBefore,
-            // rootSeedsBefore,
-            true
-          );
+          // const result = calculateRoot(
+          //   tempDeposits[11].deposit.stalk.add(tempDeposits[12].deposit.stalk),
+          //   tempDeposits[11].deposit.seeds.add(tempDeposits[11].deposit.seeds),
+          //   tempDeposits[11].deposit.bdv.add(tempDeposits[12].deposit.bdv),
+          //   TokenValue.fromHuman("1000", 18),
+          //   TokenValue.fromHuman("1000", 6),
+          //   TokenValue.fromHuman("1100", 10),
+          //   TokenValue.fromHuman("2000", 6),
+          //   // rootTotalSupply,
+          //   // rootUnderlyingBdvBefore,
+          //   // rootStalkBefore,
+          //   // rootSeedsBefore,
+          //   true
+          // );
           let bdvImpactPercentage = TokenValue.fromHuman("0", 18);
           let stalkImpactPercentage = TokenValue.fromHuman("0", 18);
 
@@ -389,11 +389,11 @@ export default function MintForm() {
           //   );
           // }
 
-          console.log({
-            min: result?.min?.toHuman(),
-            bdvImpactPercentage: bdvImpactPercentage.toHuman(),
-            stalkImpactPercentage: stalkImpactPercentage.toHuman(),
-          });
+          // console.log({
+          //   min: result?.min?.toHuman(),
+          //   bdvImpactPercentage: bdvImpactPercentage.toHuman(),
+          //   stalkImpactPercentage: stalkImpactPercentage.toHuman(),
+          // });
 
           console.log("Pivot:", pivotIndex, low.toHuman())
 
@@ -559,7 +559,7 @@ export default function MintForm() {
               account!.address,
               beanstalkSdk.tokens.ROOT.address,
               beanstalkSdk.tokens.BEAN.address,
-              tokenAmount.toBlockchain()
+              tokenAmount.toBlockchain(),
             )
           );
           setPermit(permit);

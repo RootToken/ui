@@ -237,7 +237,7 @@ export default function RedeemForm() {
     if (redeemState.output !== "0") {
       if (!redeemFormState.redeemToWallet) {
         if (!permit) {
-          return "Allow Beanstalk Pipeline to use your Root";
+          return "Allow Root to use your Root";
         }
       }
     }
@@ -385,7 +385,7 @@ export default function RedeemForm() {
                     onClick={() =>
                       onChangeRedeemFormStateField(
                         "redeemAmount",
-                        displayBN(tokenBalance, 18).replaceAll(",", "")
+                        displayBN(tokenBalance, 2).replaceAll(",", "")
                       )
                     }
                   >

@@ -13,6 +13,7 @@ interface ModalProps {
   onClose: () => void;
   onSelect: (token: IToken, siloDeposit?: ISiloDeposit) => void;
   excludes?: ITokenSymbol[];
+  claim?: boolean;
 }
 
 export default function TokenPickerModal({
@@ -20,19 +21,25 @@ export default function TokenPickerModal({
   onClose,
   onSelect,
   excludes = [],
+  claim = false,
 }: ModalProps) {
   const [search, setSearch] = useState("");
-  const { account, mintFormState } = useAppStore((state) => ({
+  const { account, mintFormState, claimFormState } = useAppStore((state) => ({
     beanstalkSdk: state.beanstalkSdk,
     account: state.account,
     mintFormState: state.mintFormState,
+    claimFormState: state.claimFormState,
   }));
 
   const disabledTokens: { [key: string]: boolean } = {};
 
-  mintFormState.mintTokens.forEach((token) => {
-    disabledTokens[token.token.symbol] = true;
-  });
+  if (!claim) {
+    mintFormState.mintTokens.forEach((token) => {
+      disabledTokens[token.token.symbol] = true;
+    });
+  } else {
+    disabledTokens[claimFormState.claimToken.token.symbol] = true;
+  }
 
   let beanDepositAmount = TokenValue.fromHuman("0", 6);
   account?.siloDeposits.forEach((deposit) => {
