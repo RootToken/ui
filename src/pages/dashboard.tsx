@@ -69,7 +69,7 @@ const MintContainer = styled.div`
   > div {
     background: #18181b;
     border-radius: 6px;
-    padding: 20px 20px;
+    padding: 20px 30px;
     display: flex;
     flex-direction: column;
     height: 100%;
