@@ -85,7 +85,7 @@ export default function AccountPopover() {
                         placement="bottom-center"
                       >
                         <CopyToClipboard
-                          text=""
+                          text={address}
                           onCopy={() => {
                             setCopy(true);
                             setTimeout(() => {
