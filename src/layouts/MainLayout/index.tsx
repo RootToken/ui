@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MoreHorizontal } from "react-feather";
+import { Link } from "react-router-dom";
 import AccountPopover from "../../components/AccountPopover";
 import MenuModal from "../../components/MenuModal";
 import * as S from "./styled";
@@ -10,7 +11,9 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
     <S.Layout>
       <S.Header>
         <div>
-          <img src="/root-logo.svg" alt="Root Logo" />
+          <Link to="/">
+            <img src="/root-logo.svg" alt="Root Logo" />
+          </Link>
         </div>
         <div className="right">
           <ul className="menu">
@@ -20,10 +23,7 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
               </a>
             </li>
             <li>
-              <a
-                target="_blank"
-                href="https://46kcia6hnco4xe5n3xj54nm7fypseqdnf5xifprcwyiyvambjumq.arweave.net/55QkA8doncuTrd3T3jWfLh8iQG0vboK-IrYRioGBTRk"
-              >
+              <a target="_blank" href="https://roottoken.org/root.pdf">
                 Whitepaper
               </a>
             </li>
@@ -37,11 +37,20 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
                 Twitter
               </a>
             </li>
-            {/* <li>Discord</li> */}
+            <li>
+              <a target="_blank" href="https://docs.roottoken.org">
+                Docs
+              </a>
+            </li>
             <li>
               <a href="https://bean.money" target="_blank">
                 Beanstalk
               </a>
+            </li>
+            <li>
+              <Link to="/dashboard">
+                <a>Dashboard</a>
+              </Link>
             </li>
           </ul>
           <AccountPopover />

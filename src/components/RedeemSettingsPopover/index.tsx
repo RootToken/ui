@@ -75,6 +75,7 @@ export default function RedeemSettingsPopver() {
                   <div className="text">
                     Redeem for Bean Deposit{" "}
                     <TooltipIcon text="Roots are instantly Redeemable for Bean Deposits. To Use Bean Deposits, go to bean.money.">
+
                       <HelpCircle size={14} color="#838383" />
                     </TooltipIcon>
                   </div>

@@ -64,14 +64,12 @@ export default function useRedeem() {
       success: "Redeem successful.",
     });
     try {
-      const transfer: DepositTransferStruct = {
-        token: beanstalkSdk.tokens.BEAN.address,
-        seasons: [],
-        amounts: [],
-      };
+      const seasons: ethers.BigNumberish[] = [];
+      const amounts: ethers.BigNumberish[] = [];
+
       deposits.forEach((deposit) => {
-        transfer.seasons.push(deposit.season.toString());
-        transfer.amounts.push(deposit.amount.toBlockchain());
+        seasons.push(deposit.season.toString());
+        amounts.push(deposit.amount.toBlockchain());
       });
 
       const token = beanstalkSdk.tokens.ROOT;
@@ -95,7 +93,11 @@ export default function useRedeem() {
               "redeem",
               [
                 [
-                  transfer,
+                  {
+                    token: beanstalkSdk.tokens.BEAN.address,
+                    seasons,
+                    amounts,
+                  },
                 ],
                 FarmToMode.EXTERNAL, // send tokens to PIPELINE's external balance
                 maxRootsIn.toBlockchain(),
@@ -111,16 +113,23 @@ export default function useRedeem() {
                 /*  36 */ beanstalkSdk.contracts.pipeline.address,
                 /*  68 */ account!.address,
                 /* 100 */ beanstalkSdk.tokens.BEAN.address, // Will be overwritten by advancedData
-                /* 132 */ transfer.seasons, // use PIPELINE's external balance
-                /* 164 */ transfer.amounts, // TOOD: make this a parameter
+                /* 132 */ seasons, // use PIPELINE's external balance
+                /* 164 */ amounts, // TOOD: make this a parameter
               ],
-              amountInStep,
+              amountInStep
             ),
         ])
       );
 
       // @TODO add a farm step here to withdraw
-      farm.add(new beanstalkSdk.farm.actions.WithdrawDeposits(transfer.token, transfer.seasons, transfer.amounts))
+      farm.add(
+        new beanstalkSdk.farm.actions.WithdrawDeposits(
+          beanstalkSdk.tokens.BEAN.address,
+
+          seasons,
+          amounts
+        )
+      );
 
       const txn = await farm.execute(amount, {
         slippage: 0.5,

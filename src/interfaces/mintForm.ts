@@ -59,13 +59,12 @@ export const getDefaultClaimFormState = (): IClaimFormState => ({
 });
 
 export interface ISwapToken {
-  path: string[];
   estimated: TokenValue;
   estimatedWithSlippage: TokenValue;
   token: IMintFormToken;
   error?: string;
   swap: SwapOperation;
-  workflow: Workflow;
+  workflow?: Workflow;
   needAllowance: boolean;
   tokenIn: Token;
 }

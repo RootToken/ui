@@ -7,8 +7,9 @@ import {
   ERC20Token,
   Workflow,
 } from "@beanstalk/sdk";
-import { Exchange, ExchangeUnderlying } from "@beanstalk/sdk/dist/types/lib/farm/actions";
-import { ethers } from "ethers";
+import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
+import { ethers, BigNumberish } from "ethers";
+import TransactionToast from "../components/Common/TransactionToast";
 import useAppStore from "../store";
 
 export default function useMintWorkflow() {
@@ -26,8 +27,8 @@ export default function useMintWorkflow() {
    */
   const mintRootsWithSwappedBean = (
     inputToken: Token,
-    fromMode : FarmFromMode = FarmFromMode.EXTERNAL,
-    toMode : FarmToMode = FarmToMode.EXTERNAL
+    fromMode: FarmFromMode = FarmFromMode.EXTERNAL,
+    toMode: FarmToMode = FarmToMode.EXTERNAL
   ) => {
     if (!account) return null;
     const depositToken = sdk.tokens.BEAN; // always deposit BEAN
@@ -44,7 +45,7 @@ export default function useMintWorkflow() {
 
     // DEPOT sends assets to PIPELINE on behalf of the signer.
     depotFarm.add(
-      sdk.farm.presets.loadPipeline(inputToken as ERC20Token, fromMode), 
+      sdk.farm.presets.loadPipeline(inputToken as ERC20Token, fromMode),
       { onlyExecute: true }
     );
 
@@ -58,12 +59,17 @@ export default function useMintWorkflow() {
           (inputToken as ERC20Token).getContract(),
           "approve",
           [sdk.contracts.beanstalk.address, ethers.constants.MaxUint256],
-          amountInStep,
+          amountInStep
         );
       },
       {
         // `hasEnoughAllowance()` will return true if `inputToken instanceof NativeToken`
-        skip: (amountInStep) => inputToken.hasEnoughAllowance(sdk.contracts.pipeline.address, sdk.contracts.beanstalk.address, amountInStep)
+        skip: (amountInStep) =>
+          inputToken.hasEnoughAllowance(
+            sdk.contracts.pipeline.address,
+            sdk.contracts.beanstalk.address,
+            amountInStep
+          ),
       }
     );
 
@@ -73,25 +79,24 @@ export default function useMintWorkflow() {
       depositToken,
       account.address,
       FarmFromMode.EXTERNAL, // The loadPipeline step always sends to EXTERNAL
-      FarmToMode.EXTERNAL, // swap to the EXTERNAL balance in PIPELINE
+      FarmToMode.EXTERNAL // swap to the EXTERNAL balance in PIPELINE
     );
 
     // Swap from `inputToken` -> `depositToken` through Beanstalk.
     // No need to do this if the user is starting with BEAN.
-    pipe.add(
-      [...(swap.getFarm().generators as unknown as any)],
-      { skip: inputToken === sdk.tokens.BEAN }
-    );
-    
+    pipe.add([...(swap.getFarm().generators as unknown as any)], {
+      skip: inputToken === sdk.tokens.BEAN,
+    });
+
     // Now that we just performed the swap, get PIPELINE's balance of `depositToken`.
     // We'll use this to make sure we Deposit all of our available tokens.
     pipe.add(
       () => ({
         target: sdk.contracts.beanstalk.address,
-        callData: sdk.contracts.beanstalk.interface.encodeFunctionData("getExternalBalance", [
-          sdk.contracts.pipeline.address,
-          depositToken.address
-        ])
+        callData: sdk.contracts.beanstalk.interface.encodeFunctionData(
+          "getExternalBalance",
+          [sdk.contracts.pipeline.address, depositToken.address]
+        ),
       }),
       { tag: "amountToDeposit" }
     );
@@ -103,45 +108,50 @@ export default function useMintWorkflow() {
           depositToken.getContract(),
           "approve",
           [sdk.contracts.beanstalk.address, ethers.constants.MaxUint256],
-          amountInStep,
+          amountInStep
         );
       },
       {
-        skip: (amountInStep) => depositToken.hasEnoughAllowance(sdk.contracts.pipeline.address, sdk.contracts.beanstalk.address, amountInStep)
+        skip: (amountInStep) =>
+          depositToken.hasEnoughAllowance(
+            sdk.contracts.pipeline.address,
+            sdk.contracts.beanstalk.address,
+            amountInStep
+          ),
       }
     );
 
     // Approve ROOT to use PIPELINE's `depositToken` Deposit.
-    pipe.add(
-      function approveDeposit(amountInStep) {
-        return pipe.wrap(
-          sdk.contracts.beanstalk,
-          "approveDeposit",
-          [sdk.contracts.root.address, depositToken.address, ethers.constants.MaxUint256],
-          amountInStep
-        );
-      }
-    );
+    pipe.add(function approveDeposit(amountInStep) {
+      return pipe.wrap(
+        sdk.contracts.beanstalk,
+        "approveDeposit",
+        [
+          sdk.contracts.root.address,
+          depositToken.address,
+          ethers.constants.MaxUint256,
+        ],
+        amountInStep
+      );
+    });
 
     // Deposit `depositToken` into the Silo
-    pipe.add(
-      async function deposit(amountInStep, context) {
-        return pipe.wrap(
-          sdk.contracts.beanstalk,
-          "deposit",
-          [
-            /* 0 */ depositToken.address,
-            /* 1 */ amountInStep, // PASTE HERE
-            /* 2 */ FarmFromMode.EXTERNAL
-          ],
-          amountInStep,
-          // Find the step tagged `amountToDeposit`
-          // Copy from the first return return value (0)
-          // Paste into the second argument of `deposit` (1).
-          Clipboard.encodeSlot(context.step.findTag("amountToDeposit"), 0, 1)
-        );
-      }
-    );
+    pipe.add(async function deposit(amountInStep, context) {
+      return pipe.wrap(
+        sdk.contracts.beanstalk,
+        "deposit",
+        [
+          /* 0 */ depositToken.address,
+          /* 1 */ amountInStep, // PASTE HERE
+          /* 2 */ FarmFromMode.EXTERNAL,
+        ],
+        amountInStep,
+        // Find the step tagged `amountToDeposit`
+        // Copy from the first return return value (0)
+        // Paste into the second argument of `deposit` (1).
+        Clipboard.encodeSlot(context.step.findTag("amountToDeposit"), 0, 1)
+      );
+    });
 
     // Mint ROOT
     pipe.add(
@@ -161,23 +171,32 @@ export default function useMintWorkflow() {
       async function mintRoots(amountInStep, context) {
         const [currentSeason, estimatedDepositBDV] = await Promise.all([
           sdk.sun.getSeason(),
-          sdk.silo.bdv(depositToken, depositToken.fromBlockchain(amountInStep))
+          sdk.silo.bdv(depositToken, depositToken.fromBlockchain(amountInStep)),
         ]);
-  
+
         const estimate = await sdk.root.estimateRoots(
           depositToken,
           [
-            // Mock Deposit for estimation. Note that the season of deposit is expected to 
+            // Mock Deposit for estimation. Note that the season of deposit is expected to
             // equal the current season since we're depositing and minting in one transaction.
-            sdk.silo.makeDepositCrate(depositToken, currentSeason, amountInStep.toString(), estimatedDepositBDV.toBlockchain(), currentSeason)
+            sdk.silo.makeDepositCrate(
+              depositToken,
+              currentSeason,
+              amountInStep.toString(),
+              estimatedDepositBDV.toBlockchain(),
+              currentSeason
+            ),
           ],
           true // isDeposit
         );
-  
+
         // `estimate.amount` contains the expected number of ROOT as a TokenValue.
         const amountOut = estimate.amount.toBigNumber();
-        const minRootsOut = Workflow.slip(amountOut, context.data.slippage || 0);
-  
+        const minRootsOut = Workflow.slip(
+          amountOut,
+          context.data.slippage || 0
+        );
+
         return pipe.wrap(
           sdk.contracts.root,
           "mint",
@@ -186,17 +205,17 @@ export default function useMintWorkflow() {
               {
                 token: depositToken.address,
                 seasons: [currentSeason],
-                amounts: ["0" /* PASTE HERE */]
-              }
+                amounts: ["0" /* PASTE HERE */],
+              },
             ],
             FarmToMode.EXTERNAL, // deliver ROOT to EXTERNAL
-            minRootsOut
+            minRootsOut,
           ] as Parameters<typeof sdk.contracts.root["mint"]>,
           amountOut,
           // Find the step tagged `amountToDeposit`
           // Copy from the first return return value (0)
           // Paste into the 12th slot of `deposit` (11).
-          //  ^ the index is high here because of the nested struct encoding. 
+          //  ^ the index is high here because of the nested struct encoding.
           //    See `examples/pipeline/assembly.ts`.
           Clipboard.encodeSlot(context.step.findTag("amountToDeposit"), 0, 11) // slot 11 = `amounts[0]`
         );
@@ -212,37 +231,39 @@ export default function useMintWorkflow() {
           sdk.tokens.ROOT.getContract(),
           "approve",
           [sdk.contracts.beanstalk.address, ethers.constants.MaxUint256],
-          amountInStep,
+          amountInStep
         );
       },
       {
         skip: (amountInStep) =>
-          sdk.tokens.ROOT.hasEnoughAllowance(sdk.contracts.pipeline.address, sdk.contracts.beanstalk.address, amountInStep)
+          sdk.tokens.ROOT.hasEnoughAllowance(
+            sdk.contracts.pipeline.address,
+            sdk.contracts.beanstalk.address,
+            amountInStep
+          ),
       }
     );
 
     // Perform the unload
-    pipe.add(
-      function unloadPipeline(amountInStep, context) {
-        return pipe.wrap(
-          sdk.contracts.beanstalk,
-          "transferToken",
-          [
-            /* 0 */ sdk.tokens.ROOT.address,
-            /* 1 */ account.address,
-            /* 2 */ "0", // PASTE HERE
-            /* 3 */ FarmFromMode.EXTERNAL, // use PIPELINE's external balance
-            /* 4 */ toMode,
-          ],
-          amountInStep,
-          // Find the step tagged `mint`
-          // Copy from the 1st return return value (0)
-          // Paste into the 3rd slot (2).
-          Clipboard.encodeSlot(context.step.findTag("mint"), 0, 2)
-        );
-      }
-    );
-  
+    pipe.add(function unloadPipeline(amountInStep, context) {
+      return pipe.wrap(
+        sdk.contracts.beanstalk,
+        "transferToken",
+        [
+          /* 0 */ sdk.tokens.ROOT.address,
+          /* 1 */ account.address,
+          /* 2 */ "0", // PASTE HERE
+          /* 3 */ FarmFromMode.EXTERNAL, // use PIPELINE's external balance
+          /* 4 */ toMode,
+        ],
+        amountInStep,
+        // Find the step tagged `mint`
+        // Copy from the 1st return return value (0)
+        // Paste into the 3rd slot (2).
+        Clipboard.encodeSlot(context.step.findTag("mint"), 0, 2)
+      );
+    });
+
     // Tell Depot to execute this Pipeline.
     depotFarm.add(pipe);
 
@@ -253,8 +274,39 @@ export default function useMintWorkflow() {
     };
   };
 
+  const mintRootsWithBeanDeposit = async (
+    permit: SignedPermit,
+    seasons: BigNumberish[],
+    amounts: BigNumberish[],
+    minRootsOut: TokenValue
+  ) => {
+    const txToast = new TransactionToast({
+      loading: `Minting Root...`,
+      success: "Mint successful.",
+    });
+    try {
+      const txn = await sdk.root.mint(
+        [{
+          token: sdk.tokens.BEAN.address,
+          seasons,
+          amounts,
+        }],
+        FarmToMode.EXTERNAL,
+        minRootsOut.toBigNumber(),
+        permit
+      );
+      txToast.confirming(txn);
+      const receipt = await txn.wait();
+      txToast.success(receipt);
+    } catch (e) {
+      txToast.error(e);
+      throw e;
+    }
+  };
+
   return {
     // Works for BEAN, ETH, WETH, USDC, USDT, DAI
     mintRootsWithSwappedBean,
+    mintRootsWithBeanDeposit
   };
 }

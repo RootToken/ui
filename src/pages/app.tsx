@@ -1,12 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import styled from "styled-components";
 import MainLayout from "../layouts/MainLayout";
 import MintForm from "../components/MintForm";
 import { Route, Routes, useLocation, useNavigate } from "react-router";
-import RedeemForm from "../components/RedeemForm";
-import ClaimForm from "../components/ClaimForm";
-import FarmForm from "../components/FarmForm";
+// import RedeemForm from "../components/RedeemForm";
+// import ClaimForm from "../components/ClaimForm";
+// import FarmForm from "../components/FarmForm";
 import { mediaDown } from "../styled";
+
+const FarmForm = lazy(() => import("../components/FarmForm"));
+const ClaimForm = lazy(() => import("../components/ClaimForm"));
+const RedeemForm = lazy(() => import("../components/RedeemForm"));
 
 const Container = styled.div`
   max-width: 470px;
@@ -91,7 +95,7 @@ const MintHeader = styled.div`
   align-items: center;
   justify-content: space-around;
 
-  ${mediaDown('phone')`
+  ${mediaDown("phone")`
     padding: 25px 20px 14px 20px;
   `}
 
@@ -261,12 +265,14 @@ export default function AppPage() {
               )}
             </MintHeader>
             <MintBody>
-              <Routes>
-                <Route path="/redeem" element={<RedeemForm />} />
-                <Route path="/claim" element={<ClaimForm />} />
-                <Route path="/farm" element={<FarmForm />} />
-                <Route path="*" element={<MintForm />} />
-              </Routes>
+              <Suspense fallback={<div>Loading...</div>}>
+                <Routes>
+                  <Route path="/redeem" element={<RedeemForm />} />
+                  <Route path="/claim" element={<ClaimForm />} />
+                  <Route path="/farm" element={<FarmForm />} />
+                  <Route path="*" element={<MintForm />} />
+                </Routes>
+              </Suspense>
             </MintBody>
           </MintContainer>
         </Container>

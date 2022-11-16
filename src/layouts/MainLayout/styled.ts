@@ -55,7 +55,7 @@ export const Header = styled.div`
           }
         }
 
-        ${mediaDown("desktop")`
+        ${mediaDown("laptop")`
           &:last-child {
             display: none;
           }
