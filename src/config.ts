@@ -1,6 +1,6 @@
 const ENVIRONMENT = {
   alchemyApiKey: "ZUcOrL8AFTxGkYrDN1JJJqFSN7Kw3KfL",
-  rpcUrl: import.meta.env.DEV ? "http://127.0.0.1:8545" : "https://eth-mainnet.g.alchemy.com/v2/ZUcOrL8AFTxGkYrDN1JJJqFSN7Kw3KfL",
+  rpcUrl: "https://eth-mainnet.g.alchemy.com/v2/ZUcOrL8AFTxGkYrDN1JJJqFSN7Kw3KfL",
   beanstalkSubgraphUrl:
     "https://graph.node.bean.money/subgraphs/name/beanstalk",
   connectorLogos: {
