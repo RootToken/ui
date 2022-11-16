@@ -23,26 +23,20 @@ import Loading from "../Loading";
 import {
   FarmFromMode,
   FarmToMode,
-  Token,
   TokenValue,
-  Clipboard,
-  FarmWorkflow,
   Workflow,
   ERC20Token,
 } from "@beanstalk/sdk";
 import { BigNumber } from "@ethersproject/bignumber";
-import { ISiloDeposit } from "../../interfaces/siloDeposit";
 import { ITokenSymbol, TOKENS } from "../../interfaces/token";
-import ENVIRONMENT from "../../config";
 import { displayBN } from "../../util/bigNumber";
 import { AnimatePresence, motion } from "framer-motion";
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
 import TransactionToast from "../Common/TransactionToast";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
-import useMint from "../../hooks/useMint";
-import { calculateRoot } from "../../util/root";
 import useMintWorkflow from "../../hooks/useMintWorkflow";
+import { DepositCrate } from "@beanstalk/sdk/dist/types/lib/silo";
 
 export default function MintForm() {
   const [openTx, setOpenTx] = useState(false);
@@ -53,22 +47,17 @@ export default function MintForm() {
     minRootsOut: TokenValue.fromHuman("0", 18),
     priceImpact: TokenValue.fromHuman("0", 18),
     swaps: [] as ISwapToken[],
-    totalBdvFromDeposits: "0",
-    totalBeanFromDeposit: "0",
-    totalBeanIntoSilo: "0",
-    deposits: [] as ISiloDeposit[],
-    workflow: undefined as undefined | Workflow,
+    workflow: undefined as undefined | Workflow | null,
+    seasons: [] as BigNumber[],
+    amounts: [] as BigNumber[],
+    totalBeanIntoSilo: "",
+    totalBdvFromDeposits: "",
   });
   const [permit, setPermit] = useState<SignedPermit | undefined>(undefined);
 
   const {
-    mintRootsWithBean,
+    mintRootsWithSwappedBean: getMintStrategy,
     mintRootsWithBeanDeposit,
-    mintRootsWithSwappedBean,
-  } = useMint();
-
-  const {
-    mintRootsWithSwappedBean: getMintStrategy
   } = useMintWorkflow();
 
   const {
@@ -105,13 +94,19 @@ export default function MintForm() {
     return Promise.all(
       tokens.map(async (token): Promise<ISwapToken> => {
         try {
-          const spender = beanstalkSdk.contracts.beanstalk.address;
-          const symbol = token.token.symbol as "BEAN" | "USDC" | "USDT" | "DAI" | "ETH" | "WETH";
+          const spender = beanstalkSdk.contracts.depot.address;
+          const symbol = token.token.symbol as
+            | "BEAN"
+            | "USDC"
+            | "USDT"
+            | "DAI"
+            | "ETH"
+            | "WETH";
           const tokenIn = beanstalkSdk.tokens[symbol];
           const amount = tokenIn.fromHuman(token.amount);
           const allowance = await tokenIn.getAllowance(
             account!.address,
-            spender,
+            spender
           );
 
           const strategy = getMintStrategy(
@@ -123,20 +118,19 @@ export default function MintForm() {
           if (!strategy) throw new Error("Failed to build workflow");
 
           const { swap, workflow } = strategy;
-          const amountOut = await workflow.estimate(amount)
+          const amountOut = await workflow.estimate(amount);
           const est = beanstalkSdk.tokens.ROOT.fromBlockchain(amountOut);
-          const needAllowance =  allowance ? allowance.lt(amount.toBigNumber()) : false;
-
-          console.log("estimate: ", est.toHuman(), est.toBlockchain(), 'allowance =', allowance?.toBlockchain(), 'needAllowance', needAllowance);
-
+          const needAllowance = allowance
+            ? allowance.lt(amount.toBigNumber())
+            : false;
+        
           return {
-            path: swap.getSimplePath(),
             token,
             tokenIn,
-            estimated: est, 
-            estimatedWithSlippage: est
-              .mul(parseFloat(token.slippage) * 10) // per-token basis
-              .div(1000),
+            estimated: est,
+            estimatedWithSlippage: est.sub(est
+              .mul(parseFloat(token.slippage) * 10)
+              .div(1000)),
             swap,
             workflow,
             needAllowance,
@@ -163,30 +157,119 @@ export default function MintForm() {
           throw new Error("Invalid input");
         }
 
+        // If Bean deposit
+        if (state.mintTokens[0].token.symbol === "BEAN DEPOSIT") {
+         
+          // Find the best crate
+          let amountRemaining = TokenValue.fromHuman(
+            state.mintTokens[0].amount,
+            TOKENS["BEAN DEPOSIT"].decimals
+          );
+          let totalBeanFromDeposit = TokenValue.fromHuman(
+            "0",
+            beanstalkSdk.tokens.BEAN.decimals
+          );
+          let deposits: DepositCrate<TokenValue>[] = [];
+          const accountDeposits =
+            account.siloBalances.get(beanstalkSdk.tokens.BEAN)?.deposited
+              .crates || [];
+          for (let i = accountDeposits.length - 1; i >= 0; i--) {
+            const deposit = accountDeposits[i];
+            if (deposit.amount.gt(amountRemaining)) {
+              deposits.push({
+                season: deposit.season,
+                amount: amountRemaining,
+                bdv: amountRemaining,
+                stalk: deposit.stalk.mulDiv(amountRemaining, deposit.amount),
+                grownStalk: deposit.grownStalk.mulDiv(
+                  amountRemaining,
+                  deposit.amount
+                ),
+                baseStalk: deposit.baseStalk.mulDiv(
+                  amountRemaining,
+                  deposit.amount
+                ),
+                seeds: deposit.seeds.mulDiv(amountRemaining, deposit.amount),
+              });
+              totalBeanFromDeposit = totalBeanFromDeposit.add(amountRemaining);
+              amountRemaining = amountRemaining.sub(deposit.amount);
+            } else {
+              deposits.push(deposit);
+              totalBeanFromDeposit = totalBeanFromDeposit.add(deposit.amount);
+              amountRemaining = amountRemaining.sub(deposit.amount);
+            }
+            if (amountRemaining.lte(0)) {
+              break;
+            }
+          }
+
+          const result = await beanstalkSdk.root.estimateRoots(
+            beanstalkSdk.tokens.BEAN,
+            deposits,
+            true
+          );
+
+          // Estimate
+          setMintState({
+            output: displayBN(result.amount, 2),
+            loading: false,
+            minRootsOut: result.amount.sub(result.amount
+              .mul(parseFloat(state.slippage) * 10)
+              .div(1000)),
+            priceImpact: TokenValue.fromBlockchain("0", 18),
+            swaps: [],
+            workflow: undefined,
+            seasons: deposits.map((v) => v.season),
+            amounts: deposits.map((v) => v.amount.toBigNumber()),
+            totalBdvFromDeposits: displayBN(totalBeanFromDeposit, 2),
+            totalBeanIntoSilo: displayBN(totalBeanFromDeposit, 2),
+          });
+
+          return;
+        }
+
         const swaps = await getTokensSwapRate(state.mintTokens);
         const swap = swaps[0];
         const amount = swap.estimated;
+        const beanEstimated = await swap.swap.estimate(
+          TokenValue.fromHuman(
+            state.mintTokens[0].amount,
+            swap.tokenIn.decimals
+          )
+        );
+
+        const underlyingBdv = await beanstalkSdk.root.underlyingBdv();
+        const totalSupply = await beanstalkSdk.tokens.ROOT.getTotalSupply();
+
+        console.log(
+          underlyingBdv
+            .add(beanEstimated)
+            .mulDiv(
+              TokenValue.fromHuman("1", 18),
+              totalSupply.add(swap.estimated).mul(amount)
+            )
+            .toHuman()
+        );
+
+        const bdvPerRoot = underlyingBdv
+          .add(beanEstimated)
+          .mulDiv(
+            TokenValue.fromHuman("1", 18),
+            totalSupply.add(swap.estimated)
+          )
+          .mul(amount);
 
         setMintState({
           output: displayBN(amount, 2),
           loading: false,
-          minRootsOut: amount, // FIXME
-          priceImpact: TokenValue.fromBlockchain('0', 18),
+          minRootsOut: swap.estimatedWithSlippage,
+          priceImpact: TokenValue.fromHuman("0", 18),
           swaps,
-          totalBeanFromDeposit: displayBN(
-            TokenValue.fromBlockchain('0', 6), // FIXME
-            TOKENS["BEAN DEPOSIT"].formatDecimals
-          ),
-          totalBdvFromDeposits: displayBN(
-            TokenValue.fromBlockchain('0', 6), // FIXME
-            TOKENS.BEAN.formatDecimals
-          ),
-          totalBeanIntoSilo: displayBN(
-            TokenValue.fromBlockchain('0', 6), // FIXME
-            TOKENS.BEAN.formatDecimals
-          ),
-          deposits: [],
-          workflow: swap.workflow
+          workflow: swap.workflow,
+          amounts: [],
+          seasons: [],
+          totalBdvFromDeposits: displayBN(beanEstimated, 2),
+          totalBeanIntoSilo: displayBN(beanEstimated, 2),
         });
       } catch (e) {
         console.log(e);
@@ -196,12 +279,12 @@ export default function MintForm() {
           loading: false,
           minRootsOut: TokenValue.fromHuman("0", 18),
           priceImpact: TokenValue.fromHuman("0", 18),
-          totalBdvFromDeposits: "0",
-          totalBeanFromDeposit: "0",
-          totalBeanIntoSilo: "0",
           swaps: [],
-          deposits: [],
           workflow: undefined,
+          amounts: [],
+          seasons: [],
+          totalBdvFromDeposits: "",
+          totalBeanIntoSilo: "",
         });
       }
     }, 500),
@@ -209,7 +292,7 @@ export default function MintForm() {
   );
 
   const onMint = async () => {
-    if (mintState.output === "0" || !mintState.workflow) {
+    if (mintState.output === "0") {
       return;
     }
 
@@ -219,17 +302,53 @@ export default function MintForm() {
       token.amount,
       token.token.decimals
     );
-    const swap = mintState.swaps[0];
 
     try {
+      if (token.token.symbol === "BEAN DEPOSIT") {
+        if (!permit) {
+          try {
+            const permit = await beanstalkSdk.permit.sign(
+              account!.address,
+              beanstalkSdk.silo.permitDepositToken(
+                account!.address,
+                beanstalkSdk.tokens.ROOT.address,
+                beanstalkSdk.tokens.BEAN.address,
+                mintState.amounts
+                  .reduce((p, d) => {
+                    return p.add(d);
+                  }, BigNumber.from(0))
+                  .toString()
+              )
+            );
+            setPermit(permit);
+            return;
+          } catch (e: any) {
+            toast.error(e.reason);
+            return;
+          }
+        }
+
+        mintRootsWithBeanDeposit(
+          permit,
+          mintState.seasons,
+          mintState.amounts,
+          mintState.minRootsOut
+        ).then(resetState);
+        return;
+      }
+    } catch (e) {}
+
+    try {
+      const swap = mintState.swaps[0];
+
       // Get allowance
-      if (swap.needAllowance) {
+      if (swap?.needAllowance) {
         if (swap.tokenIn instanceof ERC20Token) {
           txToast = new TransactionToast({
             loading: `Approving ${token.token.symbol}...`,
             success: "Approve successful.",
           });
-          
+
           const approval = await swap.tokenIn.approve(
             beanstalkSdk.contracts.depot.address, // DEPOT is the spender
             ethers.constants.MaxUint256
@@ -237,55 +356,27 @@ export default function MintForm() {
           txToast.confirming(approval);
           const receipt = await approval.wait();
           txToast.success(receipt);
-  
           calculate(mintFormState);
+          return;
         }
       }
-  
+
       // Execute
       txToast = new TransactionToast({
         loading: `Minting ${displayBN(swap.estimated, 2)} ROOT...`,
         success: "Minting successful.",
       });
-      const txn = await mintState.workflow.execute(tokenAmount, {
+      const txn = await mintState.workflow!.execute(tokenAmount, {
         slippage: parseFloat(token.slippage),
-      })
+      });
       txToast.confirming(txn);
       const receipt = await txn.wait();
       txToast.success(receipt);
-    } catch(e) {
+      return;
+    } catch (e) {
       txToast?.error(e);
       console.error(e);
     }
-    
-    // } else if (token.token.symbol === "BEAN DEPOSIT") {
-    //   if (!permit) {
-    //     try {
-    //       const permit = await beanstalkSdk.permit.sign(
-    //         account!.address,
-    //         beanstalkSdk.silo.permitDepositToken(
-    //           account!.address,
-    //           beanstalkSdk.tokens.ROOT.address,
-    //           beanstalkSdk.tokens.BEAN.address,
-    //           tokenAmount.toBlockchain(),
-    //         )
-    //       );
-    //       setPermit(permit);
-    //       return;
-    //     } catch (e: any) {
-    //       toast.error(e.reason);
-    //       return;
-    //     }
-    //   }
-
-    //   mintRootsWithBeanDeposit(
-    //     permit,
-    //     mintState.deposits,
-    //     mintState.minRootsOut
-    //   ).then(resetState);
-
-    //   return;
-    // }
   };
 
   const renderMintText = () => {
@@ -296,28 +387,14 @@ export default function MintForm() {
       const token = mintFormState.mintTokens[0];
       const swap = mintState.swaps[0];
 
-      if (swap.needAllowance) {
+      if (swap?.needAllowance) {
         return `Approve ${swap.token.token.symbol}`;
       }
 
       // Check for permit
-      // if (
-      //   (token.token.symbol === "BEAN" ||
-      //     token.token.symbol === "BEAN DEPOSIT") &&
-      //   !permit
-      // ) {
-      //   return `Allow Root to use your ${token.token.symbol}`;
-      // }
-
-      // if (
-      //   swap?.needAllowance &&
-      //   (swap.token.token.symbol === "WETH" ||
-      //     swap.token.token.symbol === "USDC" ||
-      //     swap.token.token.symbol === "DAI" ||
-      //     swap.token.token.symbol === "USDT")
-      // ) {
-      //   return `Approve ${swap.token.token.symbol}`;
-      // }
+      if (token.token.symbol === "BEAN DEPOSIT" && !permit) {
+        return `Allow Root to use your ${token.token.symbol}`;
+      }
     }
 
     return "MINT";
@@ -577,6 +654,9 @@ export default function MintForm() {
                         </div>
                         <div className="routesText">
                           {mintState.swaps.map((swap) => {
+                            if (swap.tokenIn.symbol === "BEAN") {
+                              return;
+                            }
                             return (
                               <p key={swap.token.token.symbol}>
                                 Swap{" "}
