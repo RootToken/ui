@@ -14,7 +14,7 @@ export default function TooltipIcon({
   placement?: Placement;
 }) {
   const [isOpen, hoverProps] = useHover({
-    delayLeave: 300
+    delayLeave: 50
   });
 
   const { renderLayer, triggerProps, layerProps } = useLayer({
