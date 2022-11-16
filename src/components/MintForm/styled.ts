@@ -111,7 +111,7 @@ export const ContentContainer = styled.div<{ isLoading: boolean }>`
       align-items: center;
       padding: 5px 20px 5px 5px;
 
-      > .apy {
+      .apy {
         color: #00f97c;
         border-radius: 20px;
         background: #212623;

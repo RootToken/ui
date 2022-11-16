@@ -545,7 +545,26 @@ export default function MintForm() {
               />
 
               <div className="rootContainer">
-                {apys?.seeds && <div className="apy">{apys?.seeds}% vAPY</div>}
+                {apys?.seeds && (
+                  <TooltipIcon
+                    element={
+                      <p>
+                        The Variable Bean APY uses a moving average of Beans
+                        earned by Stalkholders during recent Seasons to estimate
+                        a future rate of return, accounting for Stalk growth.{" "}
+                        <br/>
+                        <a
+                          href="https://docs.bean.money/guides/silo/understand-vapy"
+                          target="_blank"
+                        >
+                          Learn more
+                        </a>
+                      </p>
+                    }
+                  >
+                    <div className="apy">{apys?.seeds}% vAPY</div>
+                  </TooltipIcon>
+                )}
                 <img width={14} height={14} src="/root.svg" />
                 <div>Root</div>
               </div>

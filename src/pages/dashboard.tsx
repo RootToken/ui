@@ -8,6 +8,7 @@ import { TokenValue } from "@beanstalk/sdk";
 import ENVIRONMENT from "../config";
 import useSWR from "swr";
 import { getAPY } from "../api/subgraph";
+import TooltipIcon from "../components/TooltipIcon";
 
 const Container = styled.div`
   max-width: 750px;
@@ -141,7 +142,7 @@ const MintBody = styled.div`
 `;
 
 export default function DashboardPage() {
-  const { data } = useSWR('apys', getAPY)
+  const { data } = useSWR("apys", getAPY);
   const [state, setState] = useState({
     totalSupply: TokenValue.fromHuman("0", 18),
     underlyingBdv: TokenValue.fromHuman("0", 6),
@@ -205,7 +206,25 @@ export default function DashboardPage() {
           <Banner>
             <div>
               <img src="/root-logo.svg" />
-              {data && <div>{data.seeds}% vAPY</div>}
+              {data && (
+                <TooltipIcon
+                  element={
+                    <p>
+                      The Variable Bean APY uses a moving average of Beans
+                      earned by Stalkholders during recent Seasons to estimate a
+                      future rate of return, accounting for Stalk growth. <br />
+                      <a
+                        href="https://docs.bean.money/guides/silo/understand-vapy"
+                        target="_blank"
+                      >
+                        Learn more
+                      </a>
+                    </p>
+                  }
+                >
+                  <div className="apy">{data?.seeds}% vAPY</div>
+                </TooltipIcon>
+              )}
             </div>
           </Banner>
 

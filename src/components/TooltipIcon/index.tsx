@@ -13,7 +13,9 @@ export default function TooltipIcon({
   element?: JSX.Element;
   placement?: Placement;
 }) {
-  const [isOpen, hoverProps] = useHover();
+  const [isOpen, hoverProps] = useHover({
+    delayLeave: 300
+  });
 
   const { renderLayer, triggerProps, layerProps } = useLayer({
     isOpen,
@@ -35,7 +37,7 @@ export default function TooltipIcon({
       {renderLayer(
         <AnimatePresence>
           {isOpen && (
-            <S.PopoverContainer {...layerProps}>
+            <S.PopoverContainer {...hoverProps} {...layerProps}>
               {text && <p>{text}</p>}
               {element && element}
             </S.PopoverContainer>
