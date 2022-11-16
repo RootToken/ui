@@ -7,6 +7,7 @@ import {
   ERC20Token,
   Workflow,
 } from "@beanstalk/sdk";
+import { Exchange, ExchangeUnderlying } from "@beanstalk/sdk/dist/types/lib/farm/actions";
 import { ethers } from "ethers";
 import useAppStore from "../store";
 
@@ -36,10 +37,10 @@ export default function useMintWorkflow() {
     const depotFarm = sdk.farm.create<{ permit: any }>("DepotMint", "depot");
 
     // Give DEPOT permission to use `inputToken`.
-    depotFarm.add(new sdk.farm.actions.PermitERC20((context) => context.data.permit), {
-      onlyExecute: true,
-      skip: (amountInStep) => inputToken.hasEnoughAllowance(account.address, spender, amountInStep)
-    });
+    // depotFarm.add(new sdk.farm.actions.PermitERC20(), {
+    //   onlyExecute: true,
+    //   skip: (amountInStep) => inputToken.hasEnoughAllowance(account.address, spender, amountInStep)
+    // });
 
     // DEPOT sends assets to PIPELINE on behalf of the signer.
     depotFarm.add(
@@ -109,7 +110,6 @@ export default function useMintWorkflow() {
         skip: (amountInStep) => depositToken.hasEnoughAllowance(sdk.contracts.pipeline.address, sdk.contracts.beanstalk.address, amountInStep)
       }
     );
-
 
     // Approve ROOT to use PIPELINE's `depositToken` Deposit.
     pipe.add(
@@ -254,6 +254,7 @@ export default function useMintWorkflow() {
   };
 
   return {
+    // Works for BEAN, ETH, WETH, USDC, USDT, DAI
     mintRootsWithSwappedBean,
   };
 }

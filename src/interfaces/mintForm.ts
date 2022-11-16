@@ -1,4 +1,4 @@
-import { Token, TokenValue } from "@beanstalk/sdk";
+import { Token, TokenValue, Workflow } from "@beanstalk/sdk";
 import { SwapOperation } from "@beanstalk/sdk/dist/types/lib/swap/SwapOperation";
 import { IToken, TOKENS } from "./token";
 
@@ -65,6 +65,7 @@ export interface ISwapToken {
   token: IMintFormToken;
   error?: string;
   swap: SwapOperation;
+  workflow: Workflow;
   needAllowance: boolean;
   tokenIn: Token;
 }
