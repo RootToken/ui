@@ -101,12 +101,15 @@ export default function RedeemForm() {
         const deposits: ISiloDeposit[] = [];
 
         const balances = await beanstalkSdk.silo.getBalances(
-          ENVIRONMENT.rootContractAddress
+          ENVIRONMENT.rootContractAddress,
+          {
+            source: DataSource.LEDGER,
+          }
         );
         balances
           .get(beanstalkSdk.tokens.BEAN)
           ?.deposited.crates.forEach((crate) => {
-            console.log(crate.season.toString(), crate.amount.toHuman())
+            console.log(crate.season.toString(), crate.amount.toHuman());
             deposits.push({
               season: crate.season,
               amount: crate.amount,
@@ -115,6 +118,8 @@ export default function RedeemForm() {
               seeds: crate.seeds,
             });
           });
+
+        console.log("ALL DEPOSITS");
 
         // Sort to get the best bdv to stalk ratio (lower the better)
         deposits.sort((a, b) => {
@@ -133,7 +138,9 @@ export default function RedeemForm() {
           18
         );
         const redeemDeposits: ISiloDeposit[] = [];
-        deposits.forEach((deposit) => {
+
+        for (let i = 0; i < deposits.length; i++) {
+          const deposit = deposits[i];
           const result = calculateRoot(
             deposit.stalk,
             deposit.seeds,
@@ -146,9 +153,8 @@ export default function RedeemForm() {
           );
 
           if (!result) {
-            return;
+            continue;
           }
-          console.log('c', result.amount.toHuman(), redeemAmountRemaining.toHuman())
 
           // Partial
           if (result.amount.gt(redeemAmountRemaining)) {
@@ -162,16 +168,18 @@ export default function RedeemForm() {
               stalk: deposit.stalk.mulDiv(redeemAmountRemaining, result.amount),
               seeds: deposit.seeds.mulDiv(redeemAmountRemaining, result.amount),
             });
-            redeemAmountRemaining = redeemAmountRemaining.sub(redeemAmountRemaining);
+            redeemAmountRemaining = redeemAmountRemaining.sub(
+              redeemAmountRemaining
+            );
           } else {
             redeemAmountRemaining = redeemAmountRemaining.sub(result.amount);
             redeemDeposits.push(deposit);
           }
 
           if (redeemAmountRemaining.eq(0)) {
-            return;
+            break;
           }
-        });
+        }
 
         let totalStalkFromDeposits = TokenValue.fromHuman("0", 10);
         let totalSeedsFromDeposits = TokenValue.fromHuman("0", 6);

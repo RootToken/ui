@@ -32,7 +32,7 @@ export interface IRedeemFormState {
 
 export const getDefaultRedeemFormState = (): IRedeemFormState => ({
   redeemAmount: "",
-  redeemToWallet: false,
+  redeemToWallet: true,
   slippage: "0.5",
 });
 

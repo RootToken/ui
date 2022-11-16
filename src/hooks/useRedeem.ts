@@ -29,18 +29,19 @@ export default function useRedeem() {
       success: "Redeem successful.",
     });
     try {
-      const transfer: DepositTransferStruct = {
-        token: beanstalkSdk.tokens.BEAN.address,
-        seasons: [],
-        amounts: [],
-      };
+      const seasons: ethers.BigNumber[] = [];
+      const amounts: ethers.BigNumber[] = [];
       deposits.forEach((deposit) => {
-        transfer.seasons.push(deposit.season.toString());
-        transfer.amounts.push(deposit.amount.toBlockchain());
+        seasons.push(deposit.season);
+        amounts.push(deposit.amount.toBigNumber());
       });
 
       const txn = await beanstalkSdk.contracts.root.redeem(
-        [transfer],
+        [{
+          token: beanstalkSdk.tokens.BEAN.address,
+          seasons,
+          amounts
+        }],
         FarmFromMode.EXTERNAL,
         maxRootsIn.toBlockchain()
       );
@@ -74,14 +75,14 @@ export default function useRedeem() {
 
       const token = beanstalkSdk.tokens.ROOT;
 
-      const farm = beanstalkSdk.farm.create();
+      const farm = beanstalkSdk.farm.create("Redeem", "beanstalk");
       const pipe = beanstalkSdk.farm.createAdvancedPipe();
 
+      farm.add(new beanstalkSdk.farm.actions.PermitERC20(permit));
       farm.add(
         beanstalkSdk.farm.presets.loadPipeline(
           token,
           FarmFromMode.EXTERNAL,
-          permit
         )
       );
       farm.add(
@@ -125,7 +126,6 @@ export default function useRedeem() {
       farm.add(
         new beanstalkSdk.farm.actions.WithdrawDeposits(
           beanstalkSdk.tokens.BEAN.address,
-
           seasons,
           amounts
         )
