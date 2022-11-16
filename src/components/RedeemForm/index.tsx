@@ -465,7 +465,7 @@ export default function RedeemForm() {
                     />
                     <div>
                       cBean{" "}
-                      <TooltipIcon text="Copy here">
+                      <TooltipIcon text="cBean represents the Beans that underly the Deposits that are Redeemed for Roots and then Withdrawn from the Beanstalk Silo. Withdrawals from the Beanstalk Silo are Claimable at the top of the next hour.">
                         <HelpCircle size={14} color="#838383" />
                       </TooltipIcon>
                     </div>
