@@ -46,10 +46,14 @@ export default function AccountPopover() {
       <S.ConnectButton
         {...triggerProps}
         onClick={() => {
-          if (isConnected) {
-            setOpen(true);
+          if (isOpen) {
+            setOpen(false)
           } else {
-            setOpenConnectModal(true);
+            if (isConnected) {
+              setOpen(true);
+            } else {
+              setOpenConnectModal(true);
+            }
           }
         }}
       >

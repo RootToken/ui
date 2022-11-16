@@ -14,6 +14,10 @@ const Container = styled.div`
   width: 100%;
   flex-direction: column;
   display: flex;
+  padding-top: 40px;
+  ${mediaDown("tablet")`
+    padding-top: 10px !important;
+  `}
 `;
 
 const Banner = styled.div`
