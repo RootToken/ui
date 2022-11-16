@@ -37,8 +37,11 @@ import TransactionToast from "../Common/TransactionToast";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import useMintWorkflow from "../../hooks/useMintWorkflow";
 import { DepositCrate } from "@beanstalk/sdk/dist/types/lib/silo";
+import useSWR from "swr";
+import { getAPY } from "../../api/subgraph";
 
 export default function MintForm() {
+  const { data: apys } = useSWR("getApy", getAPY);
   const [openTx, setOpenTx] = useState(false);
   const [openPicker, setOpenPicker] = useState(false);
   const [mintState, setMintState] = useState({
@@ -52,6 +55,7 @@ export default function MintForm() {
     amounts: [] as BigNumber[],
     totalBeanIntoSilo: "",
     totalBdvFromDeposits: "",
+    bdvImpacted: false,
   });
   const [permit, setPermit] = useState<SignedPermit | undefined>(undefined);
 
@@ -123,14 +127,14 @@ export default function MintForm() {
           const needAllowance = allowance
             ? allowance.lt(amount.toBigNumber())
             : false;
-        
+
           return {
             token,
             tokenIn,
             estimated: est,
-            estimatedWithSlippage: est.sub(est
-              .mul(parseFloat(token.slippage) * 10)
-              .div(1000)),
+            estimatedWithSlippage: est.sub(
+              est.mul(parseFloat(token.slippage) * 10).div(1000)
+            ),
             swap,
             workflow,
             needAllowance,
@@ -157,9 +161,11 @@ export default function MintForm() {
           throw new Error("Invalid input");
         }
 
+        const underlyingBdv = await beanstalkSdk.root.underlyingBdv();
+        const totalSupply = await beanstalkSdk.tokens.ROOT.getTotalSupply();
+
         // If Bean deposit
         if (state.mintTokens[0].token.symbol === "BEAN DEPOSIT") {
-         
           // Find the best crate
           let amountRemaining = TokenValue.fromHuman(
             state.mintTokens[0].amount,
@@ -209,20 +215,61 @@ export default function MintForm() {
             true
           );
 
+          const total = deposits.reduce((v, n) => {
+            return n.bdv.add(v);
+          }, TokenValue.fromHuman("0", 6));
+
+          console.log(
+            underlyingBdv
+              .add(total)
+              .mulDiv(
+                TokenValue.fromHuman("1", 18),
+                totalSupply.add(result.amount)
+              )
+              .mul(result.amount)
+              .toHuman()
+          );
+
+          let priceImpact = TokenValue.fromHuman("0", 18);
+          let bdvImpacted = false;
+          if (
+            result.min?.gt(result.stalkRatio.sub(TokenValue.fromHuman("1", 18)))
+          ) {
+            if (result.bdvRatio.lt(result.stalkRatio)) {
+              priceImpact = TokenValue.fromHuman("100", 18).sub(
+                result.bdvRatio
+                  .sub(TokenValue.fromHuman("1", 18))
+                  .mul(TokenValue.fromHuman("100", 18))
+                  .div(result.stalkRatio.sub(TokenValue.fromHuman("1", 18)))
+              );
+            } else if (result.stalkRatio.lt(result.bdvRatio)) {
+              priceImpact = TokenValue.fromHuman("100", 18).sub(
+                result.stalkRatio
+                  .sub(TokenValue.fromHuman("1", 18))
+                  .mul(TokenValue.fromHuman("100", 18))
+                  .div(result.bdvRatio.sub(TokenValue.fromHuman("1", 18)))
+              );
+              bdvImpacted = true;
+            }
+          }
+          console.log(priceImpact.toHuman(), bdvImpacted);
+
           // Estimate
           setMintState({
             output: displayBN(result.amount, 2),
             loading: false,
-            minRootsOut: result.amount.sub(result.amount
-              .mul(parseFloat(state.slippage) * 10)
-              .div(1000)),
-            priceImpact: TokenValue.fromBlockchain("0", 18),
+            minRootsOut: result.amount.sub(
+              result.amount.mul(parseFloat(state.slippage) * 10).div(1000)
+            ),
             swaps: [],
             workflow: undefined,
             seasons: deposits.map((v) => v.season),
             amounts: deposits.map((v) => v.amount.toBigNumber()),
             totalBdvFromDeposits: displayBN(totalBeanFromDeposit, 2),
             totalBeanIntoSilo: displayBN(totalBeanFromDeposit, 2),
+
+            priceImpact,
+            bdvImpacted,
           });
 
           return;
@@ -238,38 +285,41 @@ export default function MintForm() {
           )
         );
 
-        const underlyingBdv = await beanstalkSdk.root.underlyingBdv();
-        const totalSupply = await beanstalkSdk.tokens.ROOT.getTotalSupply();
-
-        console.log(
-          underlyingBdv
-            .add(beanEstimated)
-            .mulDiv(
-              TokenValue.fromHuman("1", 18),
-              totalSupply.add(swap.estimated).mul(amount)
-            )
-            .toHuman()
-        );
-
-        const bdvPerRoot = underlyingBdv
-          .add(beanEstimated)
-          .mulDiv(
-            TokenValue.fromHuman("1", 18),
-            totalSupply.add(swap.estimated)
-          )
-          .mul(amount);
+        let priceImpact = TokenValue.fromHuman("0", 18);
+        let bdvImpacted = false;
+        // if (
+        //   result.min?.gt(result.stalkRatio.sub(TokenValue.fromHuman("1", 18)))
+        // ) {
+        //   if (result.bdvRatio.lt(result.stalkRatio)) {
+        //     priceImpact = TokenValue.fromHuman("100", 18).sub(
+        //       result.bdvRatio
+        //         .sub(TokenValue.fromHuman("1", 18))
+        //         .mul(TokenValue.fromHuman("100", 18))
+        //         .div(result.stalkRatio.sub(TokenValue.fromHuman("1", 18)))
+        //     );
+        //   } else if (result.stalkRatio.lt(result.bdvRatio)) {
+        //     priceImpact = TokenValue.fromHuman("100", 18).sub(
+        //       result.stalkRatio
+        //         .sub(TokenValue.fromHuman("1", 18))
+        //         .mul(TokenValue.fromHuman("100", 18))
+        //         .div(result.bdvRatio.sub(TokenValue.fromHuman("1", 18)))
+        //     );
+        //     bdvImpacted = true;
+        //   }
+        // }
 
         setMintState({
           output: displayBN(amount, 2),
           loading: false,
           minRootsOut: swap.estimatedWithSlippage,
-          priceImpact: TokenValue.fromHuman("0", 18),
+          priceImpact,
           swaps,
           workflow: swap.workflow,
           amounts: [],
           seasons: [],
           totalBdvFromDeposits: displayBN(beanEstimated, 2),
           totalBeanIntoSilo: displayBN(beanEstimated, 2),
+          bdvImpacted,
         });
       } catch (e) {
         console.log(e);
@@ -285,6 +335,7 @@ export default function MintForm() {
           seasons: [],
           totalBdvFromDeposits: "",
           totalBeanIntoSilo: "",
+          bdvImpacted: false,
         });
       }
     }, 500),
@@ -494,6 +545,7 @@ export default function MintForm() {
               />
 
               <div className="rootContainer">
+                {apys?.seeds && <div className="apy">{apys?.seeds}% vAPY</div>}
                 <img width={14} height={14} src="/root.svg" />
                 <div>Root</div>
               </div>

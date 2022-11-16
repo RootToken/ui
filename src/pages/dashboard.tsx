@@ -6,7 +6,8 @@ import useAppStore from "../store";
 import { displayBN } from "../util/bigNumber";
 import { TokenValue } from "@beanstalk/sdk";
 import ENVIRONMENT from "../config";
-import { toast } from "react-hot-toast";
+import useSWR from "swr";
+import { getAPY } from "../api/subgraph";
 
 const Container = styled.div`
   max-width: 750px;
@@ -14,6 +15,10 @@ const Container = styled.div`
   width: 100%;
   display: flex;
   flex-wrap: wrap;
+  > .top {
+    width: 100%;
+    flex-basis: 100%;
+  }
   ${mediaDown("tablet")`
     margin: 10px 0;
   `}
@@ -21,59 +26,30 @@ const Container = styled.div`
 
 const Banner = styled.div`
   width: 100%;
-  background-color: #4b0a62;
-  border-radius: 6px;
-  padding: 21px 16px;
+  padding: 0 15px;
   display: flex;
   align-items: center;
   position: relative;
-  overflow: hidden;
-  margin: 0 0 20px 0;
+  margin-bottom: 25px;
 
-  > .ribbon {
-    margin-right: 16px;
-    z-index: 10;
-  }
-  > .img {
-    position: absolute;
-    bottom: 0;
-    right: -20px;
-    width: 369px;
-
-    ${mediaDown("phone")`
-      right: -80px;
-    `}
-    @media (max-width: 400px) {
-      right: -140px;
-    }
-  }
   > div {
-    position: relative;
-    z-index: 999;
-    > h2 {
-      color: #fff;
+    background: #18181b;
+    border-radius: 6px;
+    padding: 20px 20px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    display: flex;
+
+    > div {
+      color: #00f97c;
+      border-radius: 20px;
+      background: #212623;
       font-weight: bold;
-      margin: 0 0 6px 0;
-
-      font-weight: 700;
-      font-size: 16.6875px;
-      line-height: 19px;
-      display: flex;
-      align-items: center;
-
-      color: #ffffff;
-    }
-    > p {
-      display: flex;
-      align-items: center;
-      > span {
-        margin: 0 0 -3px 3px;
-        color: #fff;
-        font-size: 12.5px;
-        > b {
-          color: #fff;
-        }
-      }
+      font-size: 14px;
+      padding: 5px 10px;
+      margin-left: 10px;
+      margin-top: 6px;
     }
   }
 `;
@@ -165,6 +141,7 @@ const MintBody = styled.div`
 `;
 
 export default function DashboardPage() {
+  const { data } = useSWR('apys', getAPY)
   const [state, setState] = useState({
     totalSupply: TokenValue.fromHuman("0", 18),
     underlyingBdv: TokenValue.fromHuman("0", 6),
@@ -225,22 +202,13 @@ export default function DashboardPage() {
     <MainLayout>
       <>
         <Container>
-          {/* <Banner>
-            <img className="ribbon" src="/fifa-wc.svg" width={31} height={54} />
+          <Banner>
             <div>
-              <h2>
-                Bet to Earn on the
-                <br /> 2022 FIFA World Cup
-              </h2>
-              <p>
-                <img src="/root-logo.svg" width={47} height={23} />
-                <span>
-                  on <b>Paradox</b>
-                </span>
-              </p>
+              <img src="/root-logo.svg" />
+              {data && <div>{data.seeds}% vAPY</div>}
             </div>
-            <img className="img" src="/wc.png" width={369} height={101} />
-          </Banner> */}
+          </Banner>
+
           <MintContainer>
             <div>
               <h2>Total Roots</h2>

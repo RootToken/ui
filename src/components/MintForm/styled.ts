@@ -110,6 +110,17 @@ export const ContentContainer = styled.div<{ isLoading: boolean }>`
       display: flex;
       align-items: center;
       padding: 5px 20px 5px 5px;
+
+      > .apy {
+        color: #00f97c;
+        border-radius: 20px;
+        background: #212623;
+        font-weight: bold;
+        font-size: 12px;
+        padding: 2px 10px;
+        margin-right: 8px;
+        border: 1px solid #00f97c;
+      }
       > img {
         margin-right: 10px;
       }
