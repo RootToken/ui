@@ -18,7 +18,7 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
         <div className="right">
           <ul className="menu">
             <li>
-              <a className="wc" href="https://betparadox.com" target="_blank">
+              <a className="wc" href="https://app.betparadox.com/soccer/root-0" target="_blank">
                 2022 FIFA World Cup Pool
               </a>
             </li>
