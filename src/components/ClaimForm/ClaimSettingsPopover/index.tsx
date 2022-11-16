@@ -5,7 +5,6 @@ import { HelpCircle, Settings } from "react-feather";
 import * as S from "./styled";
 import TooltipIcon from "../../TooltipIcon";
 import useAppStore from "../../../store";
-import TooltipIcon from "../../TooltipIcon";
 
 export default function ClaimSettingsPopver() {
   const [isOpen, setOpen] = useState(false);
