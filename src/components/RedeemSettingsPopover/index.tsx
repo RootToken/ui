@@ -74,7 +74,7 @@ export default function RedeemSettingsPopver() {
                 <div className="content">
                   <div className="text">
                     Redeem for Bean Deposit{" "}
-                    <TooltipIcon text="SDSD">
+                    <TooltipIcon text="Copy">
                       <HelpCircle size={14} color="#838383" />
                     </TooltipIcon>
                   </div>
