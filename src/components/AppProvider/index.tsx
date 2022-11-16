@@ -16,10 +16,6 @@ import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import ENVIRONMENT from "../../config";
 import AccountProvider from "../AccountProvider/index.js";
-import useSWR from "swr";
-import { getPrices } from "../../api/coingecko";
-import { useEffect } from "react";
-import useAppStore from "../../store";
 import { Toaster } from "react-hot-toast";
 
 const GlobalStyle = createGlobalStyle`
@@ -107,9 +103,9 @@ interface AppProvider {
 }
 
 const { chains, provider } = configureChains(allChains, [
-  jsonRpcProvider({ rpc: (chain) => ({ http: ENVIRONMENT.rpcUrl }) }),
-  // alchemyProvider({ apiKey: ENVIRONMENT.alchemyApiKey }),
-  // publicProvider(),
+  // jsonRpcProvider({ rpc: (chain) => ({ http: ENVIRONMENT.rpcUrl }) }),
+  alchemyProvider({ apiKey: ENVIRONMENT.alchemyApiKey }),
+  publicProvider(),
 ]);
 
 const client = createClient({

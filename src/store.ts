@@ -80,9 +80,7 @@ const getUserBalance = async (
   let tokenBalances: Map<Token, TokenBalance> = new Map();
 
   try {
-    siloBalances = await sdk.silo.getBalances(undefined, {
-      source: DataSource.LEDGER,
-    });
+    siloBalances = await sdk.silo.getBalances(undefined);
     siloBalances.get(sdk.tokens.BEAN)?.claimable.crates.forEach((crate) => {
       claimableDeposits.push({
         season: crate.season,
@@ -186,6 +184,7 @@ const getUserBalance = async (
 const setupContracts = (signer?: ethers.Signer) => {
   const sdk: BeanstalkSDK = new BeanstalkSDK({
     signer,
+    rpcUrl: ENVIRONMENT.rpcUrl,
     subgraphUrl: ENVIRONMENT.beanstalkSubgraphUrl,
   });
   return {
@@ -260,7 +259,7 @@ const useAppStore = create<AppState>()((set, get) => ({
   setBeanstalkSdk: (instance) =>
     set((state) => ({ ...state, beanstalkSdk: instance })),
   beanstalkSdk: new BeanstalkSDK({
-    DEBUG: true,
+    rpcUrl: ENVIRONMENT.rpcUrl,
     subgraphUrl: ENVIRONMENT.beanstalkSubgraphUrl,
   }),
   erc20Contracts: {
