@@ -23,7 +23,7 @@ import {
 import beanstalkAbi from "./abi/Beanstalk.json";
 import { Signer } from "@wagmi/core";
 import { ISiloClaimable, ISiloDeposit } from "./interfaces/siloDeposit";
-
+const provider = new ethers.providers.JsonRpcProvider(ENVIRONMENT.rpcUrl);
 interface AppState {
   onUserConnect: (signer: Signer) => void;
   onUserDisconnect: () => void;
@@ -80,7 +80,9 @@ const getUserBalance = async (
   let tokenBalances: Map<Token, TokenBalance> = new Map();
 
   try {
-    siloBalances = await sdk.silo.getBalances(undefined);
+    siloBalances = await sdk.silo.getBalances(undefined, {
+      source: DataSource.LEDGER,
+    });
     siloBalances.get(sdk.tokens.BEAN)?.claimable.crates.forEach((crate) => {
       claimableDeposits.push({
         season: crate.season,
@@ -182,7 +184,6 @@ const getUserBalance = async (
 };
 
 const setupContracts = (signer?: ethers.Signer) => {
-  const provider = new ethers.providers.JsonRpcProvider(ENVIRONMENT.rpcUrl);
   const sdk: BeanstalkSDK = new BeanstalkSDK({
     signer,
     rpcUrl: ENVIRONMENT.rpcUrl,
@@ -263,6 +264,7 @@ const useAppStore = create<AppState>()((set, get) => ({
   beanstalkSdk: new BeanstalkSDK({
     rpcUrl: ENVIRONMENT.rpcUrl,
     subgraphUrl: ENVIRONMENT.beanstalkSubgraphUrl,
+    provider,
   }),
   erc20Contracts: {
     [ENVIRONMENT.rootContractAddress]: createRootContract(),
