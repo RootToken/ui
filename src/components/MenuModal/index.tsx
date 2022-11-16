@@ -26,22 +26,18 @@ export default function MenuModal({ open, onClose }: ModalProps) {
           </button>
         </S.Header>
         <S.List>
-        <li>
+          <li>
             <Link to="/" onClick={() => onClose()}>
-              <a>
-                <button>
-                  <span>Home</span>
-                </button>
-              </a>
+              <button>
+                <span>Home</span>
+              </button>
             </Link>
           </li>
           <li>
             <Link to="/dashboard" onClick={() => onClose()}>
-              <a>
-                <button>
-                  <span>Dashboard</span>
-                </button>
-              </a>
+              <button>
+                <span>Dashboard</span>
+              </button>
             </Link>
           </li>
           <li>

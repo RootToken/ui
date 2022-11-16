@@ -49,7 +49,7 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
             </li>
             <li>
               <Link to="/dashboard">
-                <a>Dashboard</a>
+                Dashboard
               </Link>
             </li>
           </ul>
