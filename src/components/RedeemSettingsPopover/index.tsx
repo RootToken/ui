@@ -47,7 +47,7 @@ export default function RedeemSettingsPopver() {
                 <div className="content">
                   <div className="text">
                     Slippage Tolerance{" "}
-                    <TooltipIcon text="Your transaction will revert if the price changes unfavorably by more than this percentage.">
+                    <TooltipIcon text="Your transaction will fail if the cBean you receive for Redeeming Roots decreases by more than this percentage.">
                       <HelpCircle size={14} color="#838383" />
                     </TooltipIcon>
                   </div>
@@ -74,7 +74,8 @@ export default function RedeemSettingsPopver() {
                 <div className="content">
                   <div className="text">
                     Redeem for Bean Deposit{" "}
-                    <TooltipIcon text="Copy">
+                    <TooltipIcon text="Roots are instantly Redeemable for Bean Deposits. To Use Bean Deposits, go to bean.money.">
+
                       <HelpCircle size={14} color="#838383" />
                     </TooltipIcon>
                   </div>

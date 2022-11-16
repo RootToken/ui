@@ -12,7 +12,14 @@ import {
 } from "./interfaces/mintForm.js";
 import { ITokenSymbol, TOKENS } from "./interfaces/token.js";
 import { createERC20Contract, createRootContract } from "./util/contract.js";
-import { BeanstalkSDK, DataSource, TokenValue } from "@beanstalk/sdk";
+import {
+  BeanstalkSDK,
+  DataSource,
+  TokenValue,
+  Token,
+  TokenSiloBalance,
+  TokenBalance,
+} from "@beanstalk/sdk";
 import beanstalkAbi from "./abi/Beanstalk.json";
 import { Signer } from "@wagmi/core";
 import { ISiloClaimable, ISiloDeposit } from "./interfaces/siloDeposit";
@@ -69,18 +76,20 @@ const getUserBalance = async (
   const tempDeposits: ISiloDeposit[] = [];
   const claimableDeposits: ISiloClaimable[] = [];
   const accountAddress = await sdk.getAccount();
+  let siloBalances: Map<Token, TokenSiloBalance> = new Map();
+  let tokenBalances: Map<Token, TokenBalance> = new Map();
 
   try {
-    const balances = await sdk.silo.getBalances(undefined, {
+    siloBalances = await sdk.silo.getBalances(undefined, {
       source: DataSource.LEDGER,
     });
-    balances.get(sdk.tokens.BEAN)?.claimable.crates.forEach((crate) => {
+    siloBalances.get(sdk.tokens.BEAN)?.claimable.crates.forEach((crate) => {
       claimableDeposits.push({
         season: crate.season,
         amount: crate.amount,
       });
     });
-    balances.get(sdk.tokens.BEAN)?.deposited.crates.forEach((crate) => {
+    siloBalances.get(sdk.tokens.BEAN)?.deposited.crates.forEach((crate) => {
       tempDeposits.push({
         season: crate.season,
         amount: crate.amount,
@@ -89,6 +98,12 @@ const getUserBalance = async (
         seeds: crate.seeds,
       });
     });
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    tokenBalances = await sdk.tokens.getBalances(undefined, undefined);
   } catch (err) {
     console.log(err);
   }
@@ -157,16 +172,14 @@ const getUserBalance = async (
     );
   }
 
-  balances.forEach((v, k) => {
-    console.log(k, v.toHuman(), v.decimals)
-  })
-
   return {
     address: accountAddress,
     balances,
     siloDeposits: tempDeposits,
     claimableDeposits: claimableDeposits,
     signer: sdk.signer!,
+    tokenBalances,
+    siloBalances
   };
 };
 
@@ -184,31 +197,20 @@ const setupContracts = (signer?: ethers.Signer) => {
     ),
     erc20Contracts: {
       [ENVIRONMENT.rootContractAddress]: createRootContract(signer),
-      [TOKENS.BEAN.address]: createERC20Contract(
-        TOKENS.BEAN.address,
-        signer
-      ),
-      [TOKENS.USDC.address]: createERC20Contract(
-        TOKENS.USDC.address,
-        signer
-      ),
-      [TOKENS.USDT.address]: createERC20Contract(
-        TOKENS.USDT.address,
-        signer
-      ),
+      [TOKENS.BEAN.address]: createERC20Contract(TOKENS.BEAN.address, signer),
+      [TOKENS.USDC.address]: createERC20Contract(TOKENS.USDC.address, signer),
+      [TOKENS.USDT.address]: createERC20Contract(TOKENS.USDT.address, signer),
       [TOKENS.DAI.address]: createERC20Contract(TOKENS.DAI.address, signer),
-      [TOKENS.WETH.address]: createERC20Contract(
-        TOKENS.WETH.address,
-        signer
-      ),
+      [TOKENS.WETH.address]: createERC20Contract(TOKENS.WETH.address, signer),
     },
   };
-}
+};
 
 const useAppStore = create<AppState>()((set, get) => ({
   onUserDisconnect: () => {
     try {
-      const { beanstalkContract, beanstalkSdk, erc20Contracts } = setupContracts(undefined);
+      const { beanstalkContract, beanstalkSdk, erc20Contracts } =
+        setupContracts(undefined);
 
       set({
         beanstalkSdk,
@@ -216,13 +218,14 @@ const useAppStore = create<AppState>()((set, get) => ({
         beanstalkContract,
         account: undefined,
       });
-    } catch(e) {
+    } catch (e) {
       throw e;
     }
   },
   onUserConnect: async (signer) => {
     try {
-      const { beanstalkContract, beanstalkSdk, erc20Contracts } = setupContracts(signer);
+      const { beanstalkContract, beanstalkSdk, erc20Contracts } =
+        setupContracts(signer);
 
       const result = await getUserBalance(beanstalkSdk, erc20Contracts);
 

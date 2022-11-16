@@ -1,4 +1,4 @@
-import { TokenValue } from "@beanstalk/sdk";
+import { TokenValue, Token, TokenSiloBalance, TokenBalance } from "@beanstalk/sdk";
 import { ethers } from "ethers";
 import { ISiloClaimable, ISiloDeposit } from "./siloDeposit";
 
@@ -8,4 +8,6 @@ export interface IAccount {
   siloDeposits: ISiloDeposit[];
   claimableDeposits: ISiloClaimable[];
   signer: ethers.Signer;
+  tokenBalances: Map<Token, TokenBalance>;
+  siloBalances: Map<Token, TokenSiloBalance>;
 }

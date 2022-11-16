@@ -64,7 +64,6 @@ export default function useRedeem() {
       success: "Redeem successful.",
     });
     try {
-      const bean = beanstalkSdk.tokens.BEAN.address;
       const seasons: ethers.BigNumberish[] = [];
       const amounts: ethers.BigNumberish[] = [];
 
@@ -93,11 +92,13 @@ export default function useRedeem() {
               beanstalkSdk.contracts.root,
               "redeem",
               [
-                [{
-                  token: bean,
-                  seasons,
-                  amounts
-                }],
+                [
+                  {
+                    token: beanstalkSdk.tokens.BEAN.address,
+                    seasons,
+                    amounts,
+                  },
+                ],
                 FarmToMode.EXTERNAL, // send tokens to PIPELINE's external balance
                 maxRootsIn.toBlockchain(),
               ],
@@ -120,9 +121,11 @@ export default function useRedeem() {
         ])
       );
 
+      // @TODO add a farm step here to withdraw
       farm.add(
         new beanstalkSdk.farm.actions.WithdrawDeposits(
-          bean,
+          beanstalkSdk.tokens.BEAN.address,
+
           seasons,
           amounts
         )

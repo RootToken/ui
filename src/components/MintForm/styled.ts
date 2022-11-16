@@ -121,7 +121,7 @@ export const ContentContainer = styled.div<{ isLoading: boolean }>`
   }
 `;
 export const Phase = styled.section`
-  margin-bottom: 25px;
+  margin-bottom: 30px;
 `;
 export const Option = styled.div<{ active: boolean }>`
   border-radius: 6px;
@@ -201,6 +201,7 @@ export const MintButton = styled.button<{ disabled: boolean }>`
   border-radius: 6px;
   line-height: 20px;
   margin: 0 auto;
+  // margin-top: 30px;
 
   ${(props) =>
     props.disabled &&
