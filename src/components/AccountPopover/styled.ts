@@ -75,6 +75,11 @@ export const ConnectButton = styled.button`
   font-weight: bold;
   line-height: 20px;
   min-width: 155px;
+
+  &:hover {
+    background-color: #212623;
+  }
+
   ${mediaDown("tablet")`
     min-width: 120px;
     padding: 10px 15px;

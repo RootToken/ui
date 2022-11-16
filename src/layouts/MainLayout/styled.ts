@@ -17,6 +17,7 @@ export const Header = styled.div`
   z-index: 15;
   position: fixed;
   width: 100%;
+  border-bottom: 1px solid #091A0A;
 
   ${mediaDown("phone")`
     padding: 11px 20px;
@@ -33,8 +34,6 @@ export const Header = styled.div`
       display: flex;
       align-items: center;
 
-    
-
       ${mediaDown("laptop")`
         display: none;
       `}
@@ -50,6 +49,10 @@ export const Header = styled.div`
           &.wc {
             color: #72f589;
           }
+          opacity: 0.8;
+          &:hover {
+            opacity: 1.0;
+          }
         }
 
         ${mediaDown("laptop")`
@@ -57,8 +60,6 @@ export const Header = styled.div`
             display: none;
           }
         `}
-
-      
 
         &:last-child {
           margin: 0;
@@ -114,6 +115,10 @@ export const MoreButton = styled.button`
   background-color: #18181b;
 
   display: none;
+
+  &:hover {
+    background-color: #393948 !important;
+  }
 
   ${mediaDown("desktop")`
     display: flex;

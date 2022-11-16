@@ -698,14 +698,12 @@ export default function MintForm() {
           </motion.div>
         )}
       </AnimatePresence>
-
       <S.MintButton
         disabled={mintState.loading || mintState.output === "0"}
         onClick={onMint}
       >
         {renderMintText()}
       </S.MintButton>
-
       <TokenPickerModal
         open={openPicker}
         onClose={() => {
