@@ -179,7 +179,7 @@ export default function AppPage() {
             <MintHeader>
               <MintHeaderButton
                 id="mint"
-                active={pathname === "/mint" || pathname === ""}
+                active={pathname === "/mint" || pathname === "/"}
                 onClick={(e: any) => {
                   navigate("/mint");
                 }}
