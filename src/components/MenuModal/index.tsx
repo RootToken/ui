@@ -41,7 +41,7 @@ export default function MenuModal({ open, onClose }: ModalProps) {
             </Link>
           </li>
           <li>
-            <a href="https://app.betparadox.com/soccer/root-1" target="_blank">
+            <a href="https://app.betparadox.com/soccer/root-5" target="_blank">
               <button>
                 <span>2022 FIFA World Cup Pool</span>
                 <ExternalLink size={18} color="#FFF" />
