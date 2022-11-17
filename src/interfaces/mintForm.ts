@@ -59,6 +59,7 @@ export const getDefaultClaimFormState = (): IClaimFormState => ({
 });
 
 export interface ISwapToken {
+  estimatedTokenOut: TokenValue;
   estimated: TokenValue;
   estimatedWithSlippage: TokenValue;
   token: IMintFormToken;

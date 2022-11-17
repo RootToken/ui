@@ -128,9 +128,12 @@ export default function MintForm() {
             ? allowance.lt(amount.toBigNumber())
             : false;
 
+            const estimatedTokenOut = await swap.estimate(amount);
+
           return {
             token,
             tokenIn,
+            estimatedTokenOut,
             estimated: est,
             estimatedWithSlippage: est.sub(
               est.mul(parseFloat(token.slippage) * 10).div(1000)
@@ -278,35 +281,51 @@ export default function MintForm() {
         const swaps = await getTokensSwapRate(state.mintTokens);
         const swap = swaps[0];
         const amount = swap.estimated;
-        const beanEstimated = await swap.swap.estimate(
-          TokenValue.fromHuman(
-            state.mintTokens[0].amount,
-            swap.tokenIn.decimals
-          )
-        );
 
         let priceImpact = TokenValue.fromHuman("0", 18);
         let bdvImpacted = false;
-        // if (
-        //   result.min?.gt(result.stalkRatio.sub(TokenValue.fromHuman("1", 18)))
-        // ) {
-        //   if (result.bdvRatio.lt(result.stalkRatio)) {
-        //     priceImpact = TokenValue.fromHuman("100", 18).sub(
-        //       result.bdvRatio
-        //         .sub(TokenValue.fromHuman("1", 18))
-        //         .mul(TokenValue.fromHuman("100", 18))
-        //         .div(result.stalkRatio.sub(TokenValue.fromHuman("1", 18)))
-        //     );
-        //   } else if (result.stalkRatio.lt(result.bdvRatio)) {
-        //     priceImpact = TokenValue.fromHuman("100", 18).sub(
-        //       result.stalkRatio
-        //         .sub(TokenValue.fromHuman("1", 18))
-        //         .mul(TokenValue.fromHuman("100", 18))
-        //         .div(result.bdvRatio.sub(TokenValue.fromHuman("1", 18)))
-        //     );
-        //     bdvImpacted = true;
-        //   }
-        // }
+
+        const [currentSeason, estimatedDepositBDV] = await Promise.all([
+          beanstalkSdk.sun.getSeason(),
+          beanstalkSdk.silo.bdv(beanstalkSdk.tokens.BEAN, beanstalkSdk.tokens.BEAN.fromBlockchain(swap.estimatedTokenOut.toBlockchain())),
+        ]);
+
+        const result = await beanstalkSdk.root.estimateRoots(
+          beanstalkSdk.tokens.BEAN,
+          [
+            // Mock Deposit for estimation. Note that the season of deposit is expected to
+            // equal the current season since we're depositing and minting in one transaction.
+            beanstalkSdk.silo.makeDepositCrate(
+              beanstalkSdk.tokens.BEAN,
+              currentSeason,
+              swap.estimatedTokenOut.toBlockchain(),
+              estimatedDepositBDV.toBlockchain(),
+              currentSeason
+            ),
+          ],
+          true // isDeposit
+        );
+
+        if (
+          result.min?.gt(result.stalkRatio.sub(TokenValue.fromHuman("1", 18)))
+        ) {
+          if (result.bdvRatio.lt(result.stalkRatio)) {
+            priceImpact = TokenValue.fromHuman("100", 18).sub(
+              result.bdvRatio
+                .sub(TokenValue.fromHuman("1", 18))
+                .mul(TokenValue.fromHuman("100", 18))
+                .div(result.stalkRatio.sub(TokenValue.fromHuman("1", 18)))
+            );
+          } else if (result.stalkRatio.lt(result.bdvRatio)) {
+            priceImpact = TokenValue.fromHuman("100", 18).sub(
+              result.stalkRatio
+                .sub(TokenValue.fromHuman("1", 18))
+                .mul(TokenValue.fromHuman("100", 18))
+                .div(result.bdvRatio.sub(TokenValue.fromHuman("1", 18)))
+            );
+            bdvImpacted = true;
+          }
+        }
 
         setMintState({
           output: displayBN(amount, 2),
@@ -317,8 +336,8 @@ export default function MintForm() {
           workflow: swap.workflow,
           amounts: [],
           seasons: [],
-          totalBdvFromDeposits: displayBN(beanEstimated, 2),
-          totalBeanIntoSilo: displayBN(beanEstimated, 2),
+          totalBdvFromDeposits: displayBN(swap.estimatedTokenOut, 2),
+          totalBeanIntoSilo: displayBN(swap.estimatedTokenOut, 2),
           bdvImpacted,
         });
       } catch (e) {
@@ -740,7 +759,7 @@ export default function MintForm() {
                                 )}{" "}
                                 {swap.token.token.name} for{" "}
                                 {displayBN(
-                                  swap.estimated,
+                                  swap.estimatedTokenOut,
                                   TOKENS.BEAN.formatDecimals
                                 )}{" "}
                                 Bean
