@@ -327,6 +327,8 @@ export default function MintForm() {
           }
         }
 
+        console.log(bdvImpacted, displayBN(priceImpact, 2))
+
         setMintState({
           output: displayBN(amount, 2),
           loading: false,

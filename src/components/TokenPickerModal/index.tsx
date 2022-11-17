@@ -7,6 +7,7 @@ import { IToken, ITokenSymbol, TOKENS } from "../../interfaces/token";
 import { ISiloDeposit } from "../../interfaces/siloDeposit";
 import { displayBN } from "../../util/bigNumber";
 import { TokenValue } from "@beanstalk/sdk";
+import { IAccount } from "../../interfaces/account";
 
 interface ModalProps {
   open: boolean;
@@ -82,9 +83,6 @@ export default function TokenPickerModal({
           {Object.keys(TOKENS)
             .filter((key) => {
               const token = TOKENS[key as ITokenSymbol];
-              if (token.symbol == "BEAN DEPOSIT") {
-                return;
-              }
               if (excludes.includes(token.symbol)) {
                 return;
               }
@@ -96,67 +94,98 @@ export default function TokenPickerModal({
             })
             .map((key) => {
               const token = TOKENS[key as ITokenSymbol];
-              const balance = account?.balances.get(token.address);
-              const isDisabled = disabledTokens[token.symbol];
               return (
-                <li key={token.symbol}>
-                  <S.CoinItem
-                    disabled={isDisabled}
-                    onClick={() => {
-                      if (isDisabled) return;
-                      onSelect(token);
-                      onClose();
-                    }}
-                  >
-                    <div className="content">
-                      <img width={35} height={35} src={token.icon} />
-                      <div>
-                        <div>{token.symbol}</div>
-                        <div>{token.name}</div>
-                      </div>
-                    </div>
-                    {balance && (
-                      <div className="balance">
-                        {displayBN(balance, token.formatDecimals)}
-                      </div>
-                    )}
-                  </S.CoinItem>
-                </li>
-              );
-            })}
-          {!excludes.includes("BEAN DEPOSIT") &&
-            account &&
-            (search === "" ||
-              "BEAN DEPOSIT".includes(search.toUpperCase())) && (
-              <li>
-                <S.CoinItem
-                  disabled={disabledTokens[TOKENS["BEAN DEPOSIT"].symbol]}
-                  onClick={() => {
-                    if (disabledTokens[TOKENS["BEAN DEPOSIT"].symbol]) return;
-                    onSelect(TOKENS["BEAN DEPOSIT"]);
+                <CoinItem
+                  token={token}
+                  search={search}
+                  excludes={excludes}
+                  isDisabled={disabledTokens[token.symbol]}
+                  account={account}
+                  onSelect={(token) => {
+                    onSelect(token);
                     onClose();
                   }}
-                >
-                  <div className="content">
-                    <img width={35} height={35} src="/bean.svg" />
-                    <div>
-                      <div>BEAN DEPOSIT</div>
-                      <div>Bean Deposit</div>
-                    </div>
-                  </div>
-                  {account?.siloDeposits && (
-                    <div className="balance">
-                      {displayBN(
-                        beanDepositAmount,
-                        TOKENS["BEAN DEPOSIT"].formatDecimals
-                      )}
-                    </div>
-                  )}
-                </S.CoinItem>
-              </li>
-            )}
+                />
+              );
+            })}
         </S.CoinList>
       </S.Body>
     </S.Modal>
   );
 }
+
+const CoinItem = ({
+  token,
+  excludes,
+  search,
+  isDisabled,
+  account,
+  onSelect,
+}: {
+  token: IToken;
+  excludes: string[];
+  search: string;
+  isDisabled: boolean;
+  account?: IAccount;
+  onSelect: (token: IToken) => void;
+}) => {
+  const balance = account?.balances.get(token.address);
+  let beanDepositAmount = TokenValue.fromHuman("0", 6);
+
+  if (token.symbol === "BEAN DEPOSIT") {
+    account?.siloDeposits.forEach((deposit) => {
+      beanDepositAmount = beanDepositAmount.add(deposit.amount);
+    });
+  }
+
+  {
+    account?.siloDeposits && (
+      <div className="balance">
+        {displayBN(beanDepositAmount, TOKENS["BEAN DEPOSIT"].formatDecimals)}
+      </div>
+    );
+  }
+
+  if (excludes.includes(token.symbol)) {
+    return null;
+  }
+  if (
+    search === "" ||
+    token.name.toUpperCase().includes(search.toUpperCase()) ||
+    token.symbol.toUpperCase().includes(search.toUpperCase())
+  ) {
+    return (
+      <li key={token.symbol}>
+        <S.CoinItem
+          disabled={isDisabled}
+          onClick={() => {
+            if (isDisabled) return;
+            onSelect(token);
+          }}
+        >
+          <div className="content">
+            <img width={35} height={35} src={token.icon} />
+            <div>
+              <div>{token.symbol}</div>
+              <div>{token.name}</div>
+            </div>
+          </div>
+          {token.symbol === "BEAN DEPOSIT" ? (
+            <>
+              <div className="balance">
+                {displayBN(beanDepositAmount, token.formatDecimals)}
+              </div>
+            </>
+          ) : (
+            balance && (
+              <div className="balance">
+                {displayBN(balance, token.formatDecimals)}
+              </div>
+            )
+          )}
+        </S.CoinItem>
+      </li>
+    );
+  }
+  return null;
+};
