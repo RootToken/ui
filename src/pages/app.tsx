@@ -118,15 +118,23 @@ const MintHeaderButton = styled.button<{ active: boolean }>`
   border: 0;
   background-color: transparent;
 
+  flex-basis: 33.33%;
+  width: 33.33%;
+  border-radius: 10px;
+  padding: 10px 15px;
+
   &:hover {
     color: rgba(255, 255, 255, 0.75);
   }
   ${(props) =>
     props.active &&
     `
-    color: #fff;
+    color: #00f97c;
+    background-color: rgba(255, 255, 255, 0.03);
+
     &:hover {
-      color: rgba(255,255,255,1);
+      
+      color: #00f97c;
     }
   `}
 `;
@@ -140,71 +148,6 @@ const MintBody = styled.div`
 export default function AppPage() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<{
-    offset: number;
-    width: number;
-    active?: boolean;
-  }>({
-    offset: 0,
-    width: 45,
-    active: false,
-  });
-
-  const setTabPosition = () => {
-    new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
-        entry.contentRect.width;
-        if (pathname === "/mint" || pathname === "/") {
-          setTab({
-            offset: -126,
-            width: entry.contentRect.width,
-            active: true,
-          });
-        }
-      });
-    }).observe(document.getElementById("mint")!);
-
-    new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
-        entry.contentRect.width;
-        if (pathname === "/redeem") {
-          setTab({
-            offset: -5,
-            width: entry.contentRect.width,
-            active: true,
-          });
-        }
-      });
-    }).observe(document.getElementById("redeem")!);
-
-    new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
-        entry.contentRect.width;
-        if (pathname === "/claim") {
-          setTab({
-            offset: 122,
-            width: entry.contentRect.width,
-            active: true,
-          });
-        }
-      });
-    }).observe(document.getElementById("claim")!);
-  };
-
-  useEffect(() => {
-    setTabPosition();
-  }, [pathname]);
-
-  useEffect(() => {
-    const resize = (event: any) => {
-      setTabPosition();
-    };
-    addEventListener("resize", resize);
-    return () => {
-      removeEventListener("resize", resize);
-    };
-  }, []);
-
   return (
     <MainLayout>
       <>
@@ -261,14 +204,6 @@ export default function AppPage() {
               >
                 Claim
               </MintHeaderButton>
-              {tab.active && (
-                <div
-                  style={{
-                    transform: `translateX(${tab.offset}px)`,
-                    width: tab.width,
-                  }}
-                />
-              )}
             </MintHeader>
             <MintBody>
               <Suspense fallback={<div>Loading...</div>}>

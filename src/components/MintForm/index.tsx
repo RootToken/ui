@@ -128,7 +128,7 @@ export default function MintForm() {
             ? allowance.lt(amount.toBigNumber())
             : false;
 
-            const estimatedTokenOut = await swap.estimate(amount);
+          const estimatedTokenOut = await swap.estimate(amount);
 
           return {
             token,
@@ -287,7 +287,12 @@ export default function MintForm() {
 
         const [currentSeason, estimatedDepositBDV] = await Promise.all([
           beanstalkSdk.sun.getSeason(),
-          beanstalkSdk.silo.bdv(beanstalkSdk.tokens.BEAN, beanstalkSdk.tokens.BEAN.fromBlockchain(swap.estimatedTokenOut.toBlockchain())),
+          beanstalkSdk.silo.bdv(
+            beanstalkSdk.tokens.BEAN,
+            beanstalkSdk.tokens.BEAN.fromBlockchain(
+              swap.estimatedTokenOut.toBlockchain()
+            )
+          ),
         ]);
 
         const result = await beanstalkSdk.root.estimateRoots(
@@ -327,7 +332,7 @@ export default function MintForm() {
           }
         }
 
-        console.log(bdvImpacted, displayBN(priceImpact, 2))
+        console.log(bdvImpacted, displayBN(priceImpact, 2));
 
         setMintState({
           output: displayBN(amount, 2),
@@ -573,7 +578,7 @@ export default function MintForm() {
                         The Variable Bean APY uses a moving average of Beans
                         earned by Stalkholders during recent Seasons to estimate
                         a future rate of return, accounting for Stalk growth.{" "}
-                        <br/>
+                        <br />
                         <a
                           href="https://docs.bean.money/guides/silo/understand-vapy"
                           target="_blank"
@@ -586,8 +591,25 @@ export default function MintForm() {
                     <div className="apy">{apys?.seeds}% vAPY</div>
                   </TooltipIcon>
                 )}
-                <img width={14} height={14} src="/root.svg" />
-                <div>Root</div>
+                <TooltipIcon
+                  element={
+                    <p>
+                      Roots are ERC-20 Standard Tokens that wrap Bean stablecoin
+                      deposits and continue to earn yield from new Bean mints.{" "}
+                      <a
+                        href="https://docs.bean.money/guides/silo/understand-vapy"
+                        target="_blank"
+                      >
+                        Learn more
+                      </a>
+                    </p>
+                  }
+                >
+                  <>
+                    <img width={14} height={14} src="/root.svg" />
+                    <div>Root</div>
+                  </>
+                </TooltipIcon>
               </div>
             </div>
           </S.ContentContainer>

@@ -121,12 +121,15 @@ export const ContentContainer = styled.div<{ isLoading: boolean }>`
         margin-right: 8px;
         border: 1px solid #00f97c;
       }
-      > img {
-        margin-right: 10px;
-      }
       > div {
-        font-weight: bold;
-        color: #fff;
+        > img {
+          margin-right: 6px;
+          margin-top: 1px;
+        }
+        > div {
+          font-weight: bold;
+          color: #fff;
+        }
       }
     }
   }
