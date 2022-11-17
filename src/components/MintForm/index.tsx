@@ -597,7 +597,7 @@ export default function MintForm() {
                       Roots are ERC-20 Standard Tokens that wrap Bean stablecoin
                       deposits and continue to earn yield from new Bean mints.{" "}
                       <a
-                        href="https://docs.bean.money/guides/silo/understand-vapy"
+                        href="https://docs.roottoken.org/introduction"
                         target="_blank"
                       >
                         Learn more
