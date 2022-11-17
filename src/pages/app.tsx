@@ -89,7 +89,7 @@ const MintContainer = styled.div`
 const MintHeader = styled.div`
   position: relative;
   border-bottom: 1px solid #393939;
-  padding: 25px 53px 14px 53px;
+  padding: 20px 53px 16px 53px;
   display: flex;
   align-items: center;
   justify-content: space-around;
