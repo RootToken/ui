@@ -98,8 +98,6 @@ export default function TokenPickerModal({
                 <CoinItem
                   key={key}
                   token={token}
-                  search={search}
-                  excludes={excludes}
                   isDisabled={disabledTokens[token.symbol]}
                   account={account}
                   onSelect={(token) => {
@@ -117,15 +115,11 @@ export default function TokenPickerModal({
 
 const CoinItem = ({
   token,
-  excludes,
-  search,
   isDisabled,
   account,
   onSelect,
 }: {
   token: IToken;
-  excludes: string[];
-  search: string;
   isDisabled: boolean;
   account?: IAccount;
   onSelect: (token: IToken) => void;
@@ -155,7 +149,7 @@ const CoinItem = ({
             <div>{token.name}</div>
           </div>
         </div>
-        {token.symbol === "BEAN DEPOSIT" ? (
+        {token.symbol === "BEAN DEPOSIT" ? account && (
           <>
             <div className="balance">
               {displayBN(beanDepositAmount, token.formatDecimals)}
