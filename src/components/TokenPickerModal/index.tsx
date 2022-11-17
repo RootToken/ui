@@ -96,6 +96,7 @@ export default function TokenPickerModal({
               const token = TOKENS[key as ITokenSymbol];
               return (
                 <CoinItem
+                  key={key}
                   token={token}
                   search={search}
                   excludes={excludes}
@@ -138,54 +139,36 @@ const CoinItem = ({
     });
   }
 
-  {
-    account?.siloDeposits && (
-      <div className="balance">
-        {displayBN(beanDepositAmount, TOKENS["BEAN DEPOSIT"].formatDecimals)}
-      </div>
-    );
-  }
-
-  if (excludes.includes(token.symbol)) {
-    return null;
-  }
-  if (
-    search === "" ||
-    token.name.toUpperCase().includes(search.toUpperCase()) ||
-    token.symbol.toUpperCase().includes(search.toUpperCase())
-  ) {
-    return (
-      <li key={token.symbol}>
-        <S.CoinItem
-          disabled={isDisabled}
-          onClick={() => {
-            if (isDisabled) return;
-            onSelect(token);
-          }}
-        >
-          <div className="content">
-            <img width={35} height={35} src={token.icon} />
-            <div>
-              <div>{token.symbol}</div>
-              <div>{token.name}</div>
-            </div>
+  return (
+    <li key={token.symbol}>
+      <S.CoinItem
+        disabled={isDisabled}
+        onClick={() => {
+          if (isDisabled) return;
+          onSelect(token);
+        }}
+      >
+        <div className="content">
+          <img width={35} height={35} src={token.icon} />
+          <div>
+            <div>{token.symbol}</div>
+            <div>{token.name}</div>
           </div>
-          {token.symbol === "BEAN DEPOSIT" ? (
-            <>
-              <div className="balance">
-                {displayBN(beanDepositAmount, token.formatDecimals)}
-              </div>
-            </>
-          ) : (
-            balance && (
-              <div className="balance">
-                {displayBN(balance, token.formatDecimals)}
-              </div>
-            )
-          )}
-        </S.CoinItem>
-      </li>
-    );
-  }
-  return null;
+        </div>
+        {token.symbol === "BEAN DEPOSIT" ? (
+          <>
+            <div className="balance">
+              {displayBN(beanDepositAmount, token.formatDecimals)}
+            </div>
+          </>
+        ) : (
+          balance && (
+            <div className="balance">
+              {displayBN(balance, token.formatDecimals)}
+            </div>
+          )
+        )}
+      </S.CoinItem>
+    </li>
+  );
 };
