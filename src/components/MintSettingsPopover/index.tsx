@@ -46,7 +46,7 @@ export default function MintSettingsPopover() {
                 <div className="header" style={{display: "flex"}}>
                   Slippage Tolerance
                   <div style={{marginTop: '7px', marginLeft: '3px'}}>
-                  <TooltipIcon text="Your transaction will fail if the cBean you receive for Redeeming Roots decreases by more than this percentage.">
+                  <TooltipIcon text="Your transaction will fail if the Roots you receive upon Minting decreases by more than this percentage.">
                     <HelpCircle size={12} color="#838383" />
                   </TooltipIcon>
                   </div>

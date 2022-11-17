@@ -47,7 +47,7 @@ export default function RedeemSettingsPopver() {
                 <div className="content">
                   <div className="text">
                     Slippage Tolerance{" "}
-                    <TooltipIcon text="Your transaction will fail if the cBean you receive for Redeeming Roots decreases by more than this percentage.">
+                    <TooltipIcon text="Your transaction will fail if the cBean/Bean Deposit you receive for Redeeming Roots decreases by more than this percentage.">
                       <HelpCircle size={14} color="#838383" />
                     </TooltipIcon>
                   </div>
