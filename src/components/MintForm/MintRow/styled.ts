@@ -25,9 +25,10 @@ export const Row = styled.div<{ $connected: boolean }>`
         display: flex;
         align-items: center;
         padding: 5px 10px;
+        background-color: rgba(255, 255, 255, 0.1);
 
         &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgba(255, 255, 255, 0.15);
         }
         > div {
           display: flex;
