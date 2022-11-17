@@ -244,9 +244,10 @@ export default function RedeemForm() {
     }
     if (redeemState.output !== "0") {
       if (!redeemFormState.redeemToWallet) {
-        if (!permit) {
-          return "Allow Root to use your Root";
-        }
+        return "Coming Soon!"
+        // if (!permit) {
+        //   return "Allow Root to use your Root";
+        // }
       }
     }
 
@@ -254,6 +255,9 @@ export default function RedeemForm() {
   };
 
   const onRedeem = async () => {
+    if (!account) {
+      return;
+    }
     if (redeemState.loading || redeemState.output === "0") {
       return;
     }
@@ -268,6 +272,8 @@ export default function RedeemForm() {
       } catch (e) {}
       return;
     }
+
+    return;
 
     if (!permit) {
       try {
@@ -621,7 +627,7 @@ export default function RedeemForm() {
       </AnimatePresence>
 
       <S.MintButton
-        disabled={redeemState.loading || redeemState.output === "0"}
+        disabled={redeemState.loading || redeemState.output === "0" || !redeemFormState.redeemToWallet}
         onClick={onRedeem}
       >
         {renderRedeemText()}

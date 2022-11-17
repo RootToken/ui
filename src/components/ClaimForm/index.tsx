@@ -165,6 +165,7 @@ export default function ClaimForm() {
     if (!account) {
       return "Connect Wallet";
     }
+    return "Coming Soon!";
     if (claimState.output !== "0") {
       if (claimFormState.claimToken.token.symbol === "BEAN") {
         return "CLAIM";
