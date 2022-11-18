@@ -96,7 +96,7 @@ export default function MintForm() {
 
   const getTokensSwapRate = (
     tokens: IMintFormToken[],
-    toMode: FarmToMode,
+    toMode: FarmToMode
   ): Promise<ISwapToken[]> => {
     return Promise.all(
       tokens.map(async (token): Promise<ISwapToken> => {
@@ -288,7 +288,10 @@ export default function MintForm() {
           return;
         }
 
-        const swaps = await getTokensSwapRate(state.mintTokens, state.mintToFarmBalance ? FarmToMode.INTERNAL : FarmToMode.EXTERNAL);
+        const swaps = await getTokensSwapRate(
+          state.mintTokens,
+          state.mintToFarmBalance ? FarmToMode.INTERNAL : FarmToMode.EXTERNAL
+        );
         const swap = swaps[0];
         const amount = swap.estimated;
 
@@ -442,8 +445,10 @@ export default function MintForm() {
           mintState.seasons,
           mintState.amounts,
           mintState.minRootsOut,
-          mintFormState.mintToFarmBalance,
-          permit,
+          mintFormState.mintToFarmBalance
+            ? FarmToMode.INTERNAL
+            : FarmToMode.EXTERNAL,
+          permit
         ).then(resetState);
         return;
       }
@@ -506,7 +511,7 @@ export default function MintForm() {
       return "Connect Wallet";
     }
     if (mintState.loading) {
-      return <Loading size={20} />
+      return <Loading size={20} />;
     }
     if (mintState.output !== "0") {
       const token = mintFormState.mintTokens[0];
@@ -871,7 +876,8 @@ export default function MintForm() {
         {renderMintText()}
       </S.MintButton>
 
-      {!permit && mintState.needAllowance &&
+      {!permit &&
+        mintState.needAllowance &&
         mintFormState.mintTokens[0].token.symbol === "BEAN DEPOSIT" && (
           <>
             <S.Divider>OR</S.Divider>
