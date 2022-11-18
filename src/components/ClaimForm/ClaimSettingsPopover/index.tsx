@@ -47,7 +47,7 @@ export default function ClaimSettingsPopver() {
                 <div className="content">
                   <div className="text" style={{display: "flex"}}>
                     Slippage Tolerance
-                    <div style={{marginTop: '7px', marginLeft: '3px'}}>
+                    <div>
                       <TooltipIcon text="Your transaction will fail if the Ether/ERC-20 token you receive upon Claiming cBean decreases by more than this percentage.">
                         <HelpCircle size={12} color="#838383" />
                       </TooltipIcon>
