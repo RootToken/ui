@@ -103,14 +103,14 @@ const getUserBalance = async (
   }
 
   try {
-    tokenBalances = await sdk.tokens.getBalances(undefined, [
-      sdk.tokens.WETH,
-      sdk.tokens.BEAN,
-      sdk.tokens.USDC,
-      sdk.tokens.USDT,
-      sdk.tokens.DAI,
-      sdk.tokens.ROOT,
-    ]);
+    // tokenBalances = await sdk.tokens.getBalances(undefined, [
+    //   sdk.tokens.WETH,
+    //   sdk.tokens.BEAN,
+    //   sdk.tokens.USDC,
+    //   sdk.tokens.USDT,
+    //   sdk.tokens.DAI,
+    //   sdk.tokens.ROOT,
+    // ]);
   } catch (err) {
     console.log(err);
   }

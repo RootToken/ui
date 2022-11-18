@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import MainLayout from "../layouts/MainLayout";
 import { mediaDown } from "../styled";
 import useAppStore from "../store";
 import { displayBN } from "../util/bigNumber";
-import { DataSource, TokenValue } from "@beanstalk/sdk";
+import { TokenValue } from "@beanstalk/sdk";
 import ENVIRONMENT from "../config";
 import useSWR from "swr";
 import { getAPY } from "../api/subgraph";
@@ -51,7 +51,6 @@ const Banner = styled.div`
       align-items: center;
       justify-content: center;
       display: flex;
-      margin-bottom: 25px;
 
       > div {
         color: #00f97c;
@@ -139,12 +138,6 @@ const FarmButton = styled.button<{ $disabled: boolean }>`
     opacity: 0.5;
   `}
 
-  ${mediaDown("tablet")`
-    margin: 0;
-    width: 48%;
-    flex-basis: 48%;
-  `}
-
   &:hover {
     background-color: #212623;
   }
@@ -155,56 +148,6 @@ const FarmButton = styled.button<{ $disabled: boolean }>`
   }
 `;
 
-const MintHeader = styled.div`
-  position: relative;
-  border-bottom: 1px solid #393939;
-  padding: 25px 53px 14px 53px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-
-  ${mediaDown("phone")`
-    padding: 25px 20px 14px 20px;
-  `}
-
-  > div {
-    width: 0px;
-    height: 1px;
-    position: absolute;
-    background-color: #00f97c;
-    bottom: -1px;
-    transition: transform 0.2s cubic-bezier(0.33, 1, 0.68, 1);
-  }
-`;
-const MintHeaderButton = styled.button<{ active: boolean }>`
-  font-weight: bold;
-  font-size: 14px;
-  line-height: 18px;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.5);
-  padding: 0;
-  margin: 0;
-  border: 0;
-  background-color: transparent;
-
-  &:hover {
-    color: rgba(255, 255, 255, 0.75);
-  }
-  ${(props) =>
-    props.active &&
-    `
-    color: #fff;
-    &:hover {
-      color: rgba(255,255,255,1);
-    }
-  `}
-`;
-const MintBody = styled.div`
-  padding: 35px 53px;
-  ${mediaDown("phone")`
-    padding: 35px 20px;
-  `}
-`;
 
 export default function DashboardPage() {
   const { data } = useSWR("apys", getAPY);
