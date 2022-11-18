@@ -506,7 +506,7 @@ export default function MintForm() {
       return "Connect Wallet";
     }
     if (mintState.loading) {
-      return <Loading/>
+      return <Loading size={20} />
     }
     if (mintState.output !== "0") {
       const token = mintFormState.mintTokens[0];

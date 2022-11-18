@@ -243,7 +243,7 @@ export default function RedeemForm() {
       return "Connect Wallet";
     }
     if (redeemState.loading) {
-      return <Loading />;
+      return <Loading size={20} />;
     }
     if (redeemState.output !== "0") {
       if (!redeemFormState.redeemToWallet) {
