@@ -216,6 +216,7 @@ export const MintButton = styled.button<{ disabled: boolean }>`
   line-height: 20px;
   margin: 0 auto;
   // margin-top: 30px;
+  margin-bottom: 15px;
 
   ${(props) =>
     props.disabled &&

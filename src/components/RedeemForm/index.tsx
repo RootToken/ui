@@ -275,34 +275,34 @@ export default function RedeemForm() {
 
     return;
 
-    if (!permit) {
-      try {
-        const permit = await beanstalkSdk.permit.sign(
-          account!.address,
-          beanstalkSdk.tokens.permitERC2612(
-            account!.address, // owner
-            beanstalkSdk.contracts.beanstalk.address, // spender
-            beanstalkSdk.tokens.ROOT, // root
-            TokenValue.fromHuman(
-              redeemFormState.redeemAmount,
-              18
-            ).toBlockchain() // amount of roots
-          )
-        );
-        setPermit(permit);
-        return;
-      } catch (e: any) {
-        toast.error(e.reason);
-        return;
-      }
-    }
+    // if (!permit) {
+    //   try {
+    //     const permit = await beanstalkSdk.permit.sign(
+    //       account!.address,
+    //       beanstalkSdk.tokens.permitERC2612(
+    //         account!.address, // owner
+    //         beanstalkSdk.contracts.beanstalk.address, // spender
+    //         beanstalkSdk.tokens.ROOT, // root
+    //         TokenValue.fromHuman(
+    //           redeemFormState.redeemAmount,
+    //           18
+    //         ).toBlockchain() // amount of roots
+    //       )
+    //     );
+    //     setPermit(permit);
+    //     return;
+    //   } catch (e: any) {
+    //     toast.error(e.reason);
+    //     return;
+    //   }
+    // }
 
-    await redeemBeanDepositAndWithdrawWithRoot(
-      permit,
-      TokenValue.fromHuman(redeemFormState.redeemAmount, 18),
-      redeemState.deposits,
-      redeemState.maxRootsIn
-    ).then(resetState);
+    // await redeemBeanDepositAndWithdrawWithRoot(
+    //   permit,
+    //   TokenValue.fromHuman(redeemFormState.redeemAmount, 18),
+    //   redeemState.deposits,
+    //   redeemState.maxRootsIn
+    // ).then(resetState);
     return;
   };
 

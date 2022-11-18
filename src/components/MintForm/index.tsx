@@ -26,6 +26,7 @@ import {
   TokenValue,
   Workflow,
   ERC20Token,
+  FarmWorkflow,
 } from "@beanstalk/sdk";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ITokenSymbol, TOKENS } from "../../interfaces/token";
@@ -50,12 +51,13 @@ export default function MintForm() {
     minRootsOut: TokenValue.fromHuman("0", 18),
     priceImpact: TokenValue.fromHuman("0", 18),
     swaps: [] as ISwapToken[],
-    workflow: undefined as undefined | Workflow | null,
+    workflow: undefined as undefined | FarmWorkflow | null,
     seasons: [] as BigNumber[],
     amounts: [] as BigNumber[],
     totalBeanIntoSilo: "",
     totalBdvFromDeposits: "",
     bdvImpacted: false,
+    needAllowance: false,
   });
   const [permit, setPermit] = useState<SignedPermit | undefined>(undefined);
 
@@ -219,19 +221,26 @@ export default function MintForm() {
           );
 
           const total = deposits.reduce((v, n) => {
-            return n.bdv.add(v);
+            return n.amount.add(v);
           }, TokenValue.fromHuman("0", 6));
 
-          console.log(
-            underlyingBdv
-              .add(total)
-              .mulDiv(
-                TokenValue.fromHuman("1", 18),
-                totalSupply.add(result.amount)
-              )
-              .mul(result.amount)
-              .toHuman()
-          );
+          const allowance =
+            await beanstalkSdk.contracts.beanstalk.depositAllowance(
+              account!.address,
+              beanstalkSdk.contracts.root.address,
+              beanstalkSdk.tokens.BEAN.address
+            );
+          const needAllowance = allowance.lt(total.toBigNumber());
+          // console.log(
+          //   underlyingBdv
+          //     .add(total)
+          //     .mulDiv(
+          //       TokenValue.fromHuman("1", 18),
+          //       totalSupply.add(result.amount)
+          //     )
+          //     .mul(result.amount)
+          //     .toHuman()
+          // );
 
           let priceImpact = TokenValue.fromHuman("0", 18);
           let bdvImpacted = false;
@@ -270,9 +279,9 @@ export default function MintForm() {
             amounts: deposits.map((v) => v.amount.toBigNumber()),
             totalBdvFromDeposits: displayBN(totalBeanFromDeposit, 2),
             totalBeanIntoSilo: displayBN(totalBeanFromDeposit, 2),
-
             priceImpact,
             bdvImpacted,
+            needAllowance,
           });
 
           return;
@@ -340,12 +349,13 @@ export default function MintForm() {
           minRootsOut: swap.estimatedWithSlippage,
           priceImpact,
           swaps,
-          workflow: swap.workflow,
+          workflow: swap.workflow as FarmWorkflow,
           amounts: [],
           seasons: [],
           totalBdvFromDeposits: displayBN(swap.estimatedTokenOut, 2),
           totalBeanIntoSilo: displayBN(swap.estimatedTokenOut, 2),
           bdvImpacted,
+          needAllowance: swap.needAllowance,
         });
       } catch (e) {
         console.log(e);
@@ -362,11 +372,33 @@ export default function MintForm() {
           totalBdvFromDeposits: "",
           totalBeanIntoSilo: "",
           bdvImpacted: false,
+          needAllowance: false,
         });
       }
     }, 500),
     [beanstalkSdk, account]
   );
+
+  const onApproveBeanDeposit = async () => {
+    const txToast = new TransactionToast({
+      loading: `Approving Bean Deposit...`,
+      success: "Approve successful.",
+    });
+    try {
+      const approval = await beanstalkSdk.contracts.beanstalk.approveDeposit(
+        beanstalkSdk.contracts.root.address,
+        beanstalkSdk.tokens.BEAN.address,
+        ethers.constants.MaxUint256
+      );
+      txToast.confirming(approval);
+      const receipt = await approval.wait();
+      txToast.success(receipt);
+      calculate(mintFormState);
+      return;
+    } catch (e) {
+      txToast.error(e);
+    }
+  };
 
   const onMint = async () => {
     if (mintState.output === "0") {
@@ -382,7 +414,7 @@ export default function MintForm() {
 
     try {
       if (token.token.symbol === "BEAN DEPOSIT") {
-        if (!permit) {
+        if (!permit && mintState.needAllowance) {
           try {
             const permit = await beanstalkSdk.permit.sign(
               account!.address,
@@ -406,10 +438,10 @@ export default function MintForm() {
         }
 
         mintRootsWithBeanDeposit(
-          permit,
           mintState.seasons,
           mintState.amounts,
-          mintState.minRootsOut
+          mintState.minRootsOut,
+          permit
         ).then(resetState);
         return;
       }
@@ -443,9 +475,19 @@ export default function MintForm() {
         loading: `Minting ${displayBN(swap.estimated, 2)} ROOT...`,
         success: "Minting successful.",
       });
-      const txn = await mintState.workflow!.execute(tokenAmount, {
+      const estimate = await mintState.workflow!.estimateGas(tokenAmount, {
         slippage: parseFloat(token.slippage),
       });
+      
+      const txn = await mintState.workflow!.execute(
+        tokenAmount,
+        {
+          slippage: parseFloat(token.slippage),
+        },
+        {
+          gasLimit: estimate.add(200000),
+        }
+      );
       txToast.confirming(txn);
       const receipt = await txn.wait();
       txToast.success(receipt);
@@ -469,7 +511,11 @@ export default function MintForm() {
       }
 
       // Check for permit
-      if (token.token.symbol === "BEAN DEPOSIT" && !permit) {
+      if (
+        token.token.symbol === "BEAN DEPOSIT" &&
+        !permit &&
+        mintState.needAllowance
+      ) {
         return `Allow Root to use your ${token.token.symbol}`;
       }
     }
@@ -818,6 +864,17 @@ export default function MintForm() {
       >
         {renderMintText()}
       </S.MintButton>
+
+      {mintState.needAllowance &&
+        mintFormState.mintTokens[0].token.symbol === "BEAN DEPOSIT" && (
+          <S.MintButton
+            disabled={mintState.loading || mintState.output === "0"}
+            onClick={onApproveBeanDeposit}
+          >
+            Approve Bean Deposit
+          </S.MintButton>
+        )}
+
       <TokenPickerModal
         open={openPicker}
         onClose={() => {
