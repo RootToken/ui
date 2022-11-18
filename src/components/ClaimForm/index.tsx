@@ -315,6 +315,9 @@ export default function ClaimForm() {
               <div className="rootContainer">
                 <img width={14} height={14} src="/bean.svg" />
                 <div>cBean</div>
+                <TooltipIcon text="cBean represents the Beans that underly the Deposits that are Redeemed for Roots and then Withdrawn from the Beanstalk Silo. Withdrawals from the Beanstalk Silo are Claimable at the top of the next hour.">
+                  <HelpCircle size={14} color="#838383" />
+                </TooltipIcon>
               </div>
             </div>
           </div>

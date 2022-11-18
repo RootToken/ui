@@ -67,11 +67,12 @@ export const Form = styled.form`
           align-items: center;
           padding: 5px 20px 5px 5px;
           > img {
-            margin-right: 10px;
+            margin-top: 2px;
           }
           > div {
             font-weight: bold;
             color: #fff;
+            margin-left: 6px;
           }
         }
       }
