@@ -130,7 +130,23 @@ export default function MintSettingsPopover() {
                 <div className="content">
                   <div className="text">
                     Mint to Farm Balance
-                    <TooltipIcon text="Transfer minted Roots to Beanstalk Farm Balance.">
+                    <TooltipIcon
+                      element={
+                        <p>
+                          Farm Balances are assets stored in Beanstalk. Farm
+                          assets can be used in transactions on the Farm.
+                          Circulating balances are Root assets in your wallet.
+                          Toggle to transfer minted Mint Roots to your Farm
+                          Balance.
+                          <br />
+                          For more information{" "}
+                          <a target="_blank" href="https://docs.bean.money/guides/balances/understand-my-balances#farm-balance-circulating-balance">
+                            click here
+                          </a>
+                          .
+                        </p>
+                      }
+                    >
                       <div className="helper">
                         <HelpCircle size={14} color="#838383" />
                       </div>
