@@ -134,7 +134,9 @@ const FarmButton = styled.button<{ $disabled: boolean }>`
   margin-top: 20px;
   margin-bottom: 10px;
 
-  ${props => props.$disabled && `
+  ${(props) =>
+    props.$disabled &&
+    `
     opacity: 0.5;
   `}
 
@@ -147,7 +149,6 @@ const FarmButton = styled.button<{ $disabled: boolean }>`
     margin-top: 2px;
   }
 `;
-
 
 export default function DashboardPage() {
   const { data } = useSWR("apys", getAPY);
@@ -169,40 +170,42 @@ export default function DashboardPage() {
   );
 
   const getData = async () => {
+    if (!beanstalkSdk || !beanstalkContract || !erc20Contracts) {
+      return;
+    }
     setState((s) => ({
       ...s,
       isLoading: true,
     }));
 
     try {
-      const totalSupply = TokenValue.fromBlockchain(
-        await erc20Contracts[ENVIRONMENT.rootContractAddress].totalSupply(),
-        18
-      );
-      const underlyingBdv = TokenValue.fromBlockchain(
-        await erc20Contracts[ENVIRONMENT.rootContractAddress].underlyingBdv(),
-        6
-      );
-      const seeds = TokenValue.fromBlockchain(
-        await beanstalkContract.balanceOfSeeds(ENVIRONMENT.rootContractAddress),
-        6
-      );
-      const stalk = TokenValue.fromBlockchain(
-        await beanstalkContract.balanceOfStalk(ENVIRONMENT.rootContractAddress),
-        10
-      );
-      const grownStalk = TokenValue.fromBlockchain(
-        await beanstalkContract.balanceOfGrownStalk(
-          ENVIRONMENT.rootContractAddress
-        ),
-        10
-      );
-      const earnedBeans = TokenValue.fromBlockchain(
-        await beanstalkContract.balanceOfEarnedBeans(
-          ENVIRONMENT.rootContractAddress
-        ),
-        6
-      );
+      const [
+        totalSupply,
+        underlyingBdv,
+        seeds,
+        stalk,
+        grownStalk,
+        earnedBeans,
+      ] = await Promise.all([
+        erc20Contracts[ENVIRONMENT.rootContractAddress]
+          .totalSupply()
+          .then((v: any) => TokenValue.fromBlockchain(v, 18)),
+        erc20Contracts[ENVIRONMENT.rootContractAddress]
+          .underlyingBdv()
+          .then((v: any) => TokenValue.fromBlockchain(v, 6)),
+        beanstalkContract
+          .balanceOfSeeds(ENVIRONMENT.rootContractAddress)
+          .then((v: any) => TokenValue.fromBlockchain(v, 6)),
+        beanstalkContract
+          .balanceOfStalk(ENVIRONMENT.rootContractAddress)
+          .then((v: any) => TokenValue.fromBlockchain(v, 10)),
+        beanstalkContract
+          .balanceOfGrownStalk(ENVIRONMENT.rootContractAddress)
+          .then((v: any) => TokenValue.fromBlockchain(v, 10)),
+        beanstalkContract
+          .balanceOfEarnedBeans(ENVIRONMENT.rootContractAddress)
+          .then((v: any) => TokenValue.fromBlockchain(v, 6)),
+      ]);
       setState({
         totalSupply,
         underlyingBdv,
@@ -217,7 +220,6 @@ export default function DashboardPage() {
         ...s,
         isLoading: false,
       }));
-      // toast.error(e.message);
     }
   };
 
