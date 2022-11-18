@@ -4,15 +4,17 @@ import MainLayout from "../layouts/MainLayout";
 import { mediaDown } from "../styled";
 import useAppStore from "../store";
 import { displayBN } from "../util/bigNumber";
-import { TokenValue } from "@beanstalk/sdk";
+import { DataSource, TokenValue } from "@beanstalk/sdk";
 import ENVIRONMENT from "../config";
 import useSWR from "swr";
 import { getAPY } from "../api/subgraph";
 import TooltipIcon from "../components/TooltipIcon";
+import { HelpCircle } from "react-feather";
+import TransactionToast from "../components/Common/TransactionToast";
 
 const Container = styled.div`
   max-width: 750px;
-  margin: 60px auto;
+  margin: 20px auto;
   width: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -32,25 +34,46 @@ const Banner = styled.div`
   align-items: center;
   position: relative;
   margin-bottom: 25px;
+  flex-direction: column;
+
+  ${mediaDown("phone")`
+      padding: 0; 
+      margin-bottom: 15px;
+  `}
 
   > div {
     background: #18181b;
     border-radius: 6px;
     padding: 20px 20px;
-    align-items: center;
-    justify-content: center;
     width: 100%;
-    display: flex;
 
-    > div {
-      color: #00f97c;
-      border-radius: 20px;
-      background: #212623;
-      font-weight: bold;
-      font-size: 14px;
-      padding: 5px 10px;
-      margin-left: 10px;
-      margin-top: 6px;
+    > .header {
+      align-items: center;
+      justify-content: center;
+      display: flex;
+      margin-bottom: 25px;
+
+      > div {
+        color: #00f97c;
+        border-radius: 20px;
+        background: #212623;
+        font-weight: bold;
+        font-size: 14px;
+        padding: 5px 10px;
+        margin-left: 10px;
+        margin-top: 6px;
+      }
+    }
+    > .actions {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+
+      ${mediaDown("tablet")`
+        justify-content: space-between;
+      `}
     }
   }
 `;
@@ -60,6 +83,10 @@ const MintContainer = styled.div`
   margin-bottom: 25px;
   width: 50%;
   flex-basis: 50%;
+  ${mediaDown("phone")`
+      padding: 0;
+      margin-bottom: 15px;
+  `}
 
   ${mediaDown("tablet")`
     flex-basis: 100%;
@@ -73,6 +100,7 @@ const MintContainer = styled.div`
     display: flex;
     flex-direction: column;
     height: 100%;
+
     > h2 {
       margin: 0 0 7px 0;
     }
@@ -90,6 +118,43 @@ const MintContainer = styled.div`
     }
   }
 `;
+
+const FarmButton = styled.button<{ $disabled: boolean }>`
+  background: transparent;
+  border-radius: 2.24601px;
+  color: #72f589;
+  border: 1px solid #72f589;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 20px;
+  font-weight: bold;
+  font-size: 14px;
+  border-radius: 6px;
+  line-height: 20px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+
+  ${props => props.$disabled && `
+    opacity: 0.5;
+  `}
+
+  ${mediaDown("tablet")`
+    margin: 0;
+    width: 48%;
+    flex-basis: 48%;
+  `}
+
+  &:hover {
+    background-color: #212623;
+  }
+
+  > div {
+    margin-left: 8px;
+    margin-top: 2px;
+  }
+`;
+
 const MintHeader = styled.div`
   position: relative;
   border-bottom: 1px solid #393939;
@@ -148,6 +213,8 @@ export default function DashboardPage() {
     underlyingBdv: TokenValue.fromHuman("0", 6),
     seeds: TokenValue.fromHuman("0", 6),
     stalk: TokenValue.fromHuman("0", 10),
+    grownStalk: TokenValue.fromHuman("0", 10),
+    earnedBeans: TokenValue.fromHuman("0", 10),
     isLoading: false,
   });
   const { beanstalkSdk, beanstalkContract, erc20Contracts } = useAppStore(
@@ -181,12 +248,26 @@ export default function DashboardPage() {
         await beanstalkContract.balanceOfStalk(ENVIRONMENT.rootContractAddress),
         10
       );
+      const grownStalk = TokenValue.fromBlockchain(
+        await beanstalkContract.balanceOfGrownStalk(
+          ENVIRONMENT.rootContractAddress
+        ),
+        10
+      );
+      const earnedBeans = TokenValue.fromBlockchain(
+        await beanstalkContract.balanceOfEarnedBeans(
+          ENVIRONMENT.rootContractAddress
+        ),
+        6
+      );
       setState({
         totalSupply,
         underlyingBdv,
         seeds,
         stalk,
         isLoading: false,
+        grownStalk,
+        earnedBeans,
       });
     } catch (e: any) {
       setState((s) => ({
@@ -196,35 +277,82 @@ export default function DashboardPage() {
       // toast.error(e.message);
     }
   };
+
+  const onEarn = async () => {
+    if (state.earnedBeans.eq(0)) {
+      return;
+    }
+    const txToast = new TransactionToast({
+      loading: `Claiming rewards...`,
+      success: "Claim successful.",
+    });
+
+    try {
+      const txn = await beanstalkSdk.contracts.root.earn();
+      txToast.confirming(txn);
+      const receipt = await txn.wait();
+      txToast.success(receipt);
+      getData();
+    } catch (e) {
+      txToast.error(e);
+    }
+  };
+
+  const onMow = async () => {
+    if (state.grownStalk.eq(0)) {
+      return;
+    }
+    const txToast = new TransactionToast({
+      loading: `Claiming rewards...`,
+      success: "Claim successful.",
+    });
+
+    try {
+      const txn = await beanstalkSdk.contracts.beanstalk.update(
+        ENVIRONMENT.rootContractAddress
+      );
+      txToast.confirming(txn);
+      const receipt = await txn.wait();
+      txToast.success(receipt);
+      getData();
+    } catch (e) {
+      txToast.error(e);
+    }
+  };
+
   useEffect(() => {
     getData();
   }, [erc20Contracts, beanstalkContract]);
+
   return (
     <MainLayout>
       <>
         <Container>
           <Banner>
             <div>
-              <img src="/root-logo.svg" />
-              {data && (
-                <TooltipIcon
-                  element={
-                    <p>
-                      The Variable Bean APY uses a moving average of Beans
-                      earned by Stalkholders during recent Seasons to estimate a
-                      future rate of return, accounting for Stalk growth. <br />
-                      <a
-                        href="https://docs.bean.money/guides/silo/understand-vapy"
-                        target="_blank"
-                      >
-                        Learn more
-                      </a>
-                    </p>
-                  }
-                >
-                  <div className="apy">{data?.seeds}% vAPY</div>
-                </TooltipIcon>
-              )}
+              <div className="header">
+                <img src="/root-logo.svg" />
+                {data && (
+                  <TooltipIcon
+                    element={
+                      <p>
+                        The Variable Bean APY uses a moving average of Beans
+                        earned by Stalkholders during recent Seasons to estimate
+                        a future rate of return, accounting for Stalk growth.{" "}
+                        <br />
+                        <a
+                          href="https://docs.bean.money/guides/silo/understand-vapy"
+                          target="_blank"
+                        >
+                          Learn more
+                        </a>
+                      </p>
+                    }
+                  >
+                    <div className="apy">{data?.seeds}% vAPY</div>
+                  </TooltipIcon>
+                )}
+              </div>
             </div>
           </Banner>
 
@@ -258,6 +386,34 @@ export default function DashboardPage() {
               <h2>Total Seeds</h2>
               <p>The total Seeds of Root. Does not include Earned Seeds.</p>
               {!state.isLoading && <div>{displayBN(state.seeds, 2)}</div>}
+            </div>
+          </MintContainer>
+
+          <MintContainer>
+            <div>
+              <h2>Earned Beans</h2>
+              <p>The total earned Beans of Root.</p>
+              {!state.isLoading && <div>{displayBN(state.earnedBeans, 2)}</div>}
+              <FarmButton $disabled={state.earnedBeans.eq(0)} onClick={onEarn}>
+                Earn{" "}
+                <TooltipIcon text="Mow all of Root’s Grown Stalk, Plant the Seeds associated with Root’s Earned Beans, and Deposit Root’s Earned Beans in the current Season">
+                  <HelpCircle size={16} color="rgba(255,255,255,0.5)" />
+                </TooltipIcon>
+              </FarmButton>
+            </div>
+          </MintContainer>
+
+          <MintContainer>
+            <div>
+              <h2>Grown Stalk</h2>
+              <p>The total grown Stalk of Root.</p>
+              {!state.isLoading && <div>{displayBN(state.grownStalk, 2)}</div>}
+              <FarmButton $disabled={state.grownStalk.eq(0)} onClick={onMow}>
+                Mow{" "}
+                <TooltipIcon text="Mow all of Root’s Grown Stalk">
+                  <HelpCircle size={16} color="rgba(255,255,255,0.5)" />
+                </TooltipIcon>
+              </FarmButton>
             </div>
           </MintContainer>
         </Container>
