@@ -218,7 +218,7 @@ export default function DashboardPage() {
     } catch (e: any) {
       setState((s) => ({
         ...s,
-        isLoading: false,
+        isLoading: true,
       }));
     }
   };
