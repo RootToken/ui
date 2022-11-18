@@ -478,7 +478,7 @@ export default function MintForm() {
       const estimate = await mintState.workflow!.estimateGas(tokenAmount, {
         slippage: parseFloat(token.slippage),
       });
-      
+
       const txn = await mintState.workflow!.execute(
         tokenAmount,
         {
@@ -867,12 +867,15 @@ export default function MintForm() {
 
       {mintState.needAllowance &&
         mintFormState.mintTokens[0].token.symbol === "BEAN DEPOSIT" && (
-          <S.MintButton
-            disabled={mintState.loading || mintState.output === "0"}
-            onClick={onApproveBeanDeposit}
-          >
-            Approve Bean Deposit
-          </S.MintButton>
+          <>
+            <S.Divider>OR</S.Divider>
+            <S.MintButton
+              disabled={mintState.loading || mintState.output === "0"}
+              onClick={onApproveBeanDeposit}
+            >
+              Approve Bean Deposit
+            </S.MintButton>
+          </>
         )}
 
       <TokenPickerModal

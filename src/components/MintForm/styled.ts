@@ -215,8 +215,6 @@ export const MintButton = styled.button<{ disabled: boolean }>`
   border-radius: 6px;
   line-height: 20px;
   margin: 0 auto;
-  // margin-top: 30px;
-  margin-bottom: 15px;
 
   ${(props) =>
     props.disabled &&
@@ -411,4 +409,12 @@ export const PriceExchangeTooltip = styled.div`
     color: #b0b0b0;
     font-size: 14px;
   }
+`;
+
+export const Divider = styled.div`
+  display: flex;
+  justify-content: center;
+  font-weight: bold;
+  color: #757880;
+  margin: 12px;
 `;
