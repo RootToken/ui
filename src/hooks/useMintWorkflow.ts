@@ -6,6 +6,7 @@ import {
   Token,
   ERC20Token,
   Workflow,
+  FarmWorkflow,
 } from "@beanstalk/sdk";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import { ethers, BigNumberish } from "ethers";
@@ -35,7 +36,7 @@ export default function useMintWorkflow() {
 
     // Use Depot since DepotFacet isn't ready.
     const spender = sdk.contracts.depot.address;
-    const depotFarm = sdk.farm.create<{ permit: any }>("DepotMint", "depot");
+    const depotFarm = sdk.farm.create<{ permit: any }>("DepotMint", "depot") as FarmWorkflow;
 
     // Give DEPOT permission to use `inputToken`.
     // depotFarm.add(new sdk.farm.actions.PermitERC20(), {
@@ -275,10 +276,10 @@ export default function useMintWorkflow() {
   };
 
   const mintRootsWithBeanDeposit = async (
-    permit: SignedPermit,
     seasons: BigNumberish[],
     amounts: BigNumberish[],
-    minRootsOut: TokenValue
+    minRootsOut: TokenValue,
+    permit?: SignedPermit,
   ) => {
     const txToast = new TransactionToast({
       loading: `Minting Root...`,
