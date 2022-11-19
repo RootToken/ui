@@ -161,13 +161,13 @@ export default function DashboardPage() {
     earnedBeans: TokenValue.fromHuman("0", 10),
     isLoading: false,
   });
-  const { beanstalkSdk, beanstalkContract, erc20Contracts } = useAppStore(
-    (v) => ({
+  const { beanstalkSdk, beanstalkContract, erc20Contracts, account } =
+    useAppStore((v) => ({
       beanstalkSdk: v.beanstalkSdk,
       beanstalkContract: v.beanstalkContract,
       erc20Contracts: v.erc20Contracts,
-    })
-  );
+      account: v.account,
+    }));
 
   const getData = async () => {
     if (!beanstalkSdk || !beanstalkContract || !erc20Contracts) {
@@ -339,7 +339,10 @@ export default function DashboardPage() {
               <h2>Earned Beans</h2>
               <p>The total earned Beans of Root.</p>
               {!state.isLoading && <div>{displayBN(state.earnedBeans, 2)}</div>}
-              <FarmButton $disabled={state.earnedBeans.eq(0)} onClick={onEarn}>
+              <FarmButton
+                $disabled={state.earnedBeans.eq(0) || !account}
+                onClick={onEarn}
+              >
                 Earn{" "}
                 <TooltipIcon text="Mow all of Root’s Grown Stalk, Plant the Seeds associated with Root’s Earned Beans, and Deposit Root’s Earned Beans in the current Season">
                   <HelpCircle size={16} color="rgba(255,255,255,0.5)" />
@@ -353,7 +356,10 @@ export default function DashboardPage() {
               <h2>Grown Stalk</h2>
               <p>The total grown Stalk of Root.</p>
               {!state.isLoading && <div>{displayBN(state.grownStalk, 2)}</div>}
-              <FarmButton $disabled={state.grownStalk.eq(0)} onClick={onMow}>
+              <FarmButton
+                $disabled={state.grownStalk.eq(0) || !account}
+                onClick={onMow}
+              >
                 Mow{" "}
                 <TooltipIcon text="Mow all of Root’s Grown Stalk">
                   <HelpCircle size={16} color="rgba(255,255,255,0.5)" />
