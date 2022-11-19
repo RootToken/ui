@@ -32,6 +32,11 @@ export const PopoverContainer = styled(motion.div)`
         color: #b0b0b0;
         font-size: 14px;
         font-weight: bold;
+        display: flex;
+        align-items: center;
+        > img {
+          margin-right: 5px;
+        }
       }
       > .actions {
         display: flex;

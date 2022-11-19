@@ -10,11 +10,16 @@ import ConnectModal from "../ConnectModal";
 import TooltipIcon from "../TooltipIcon";
 import ENVIRONMENT from "../../config";
 import CopyToClipboard from "react-copy-to-clipboard";
+import { displayBN } from "../../util/bigNumber";
+import { TokenValue } from "@beanstalk/sdk";
 
 export default function AccountPopover() {
   const [isOpen, setOpen] = useState(false);
   const [copy, setCopy] = useState(false);
-  const sdk = useAppStore((v) => v.beanstalkSdk);
+  const { sdk, account } = useAppStore((v) => ({
+    sdk: v.beanstalkSdk,
+    account: v.account,
+  }));
   const [openConnectModal, setOpenConnectModal] = useState(false);
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
@@ -47,7 +52,7 @@ export default function AccountPopover() {
         {...triggerProps}
         onClick={() => {
           if (isOpen) {
-            setOpen(false)
+            setOpen(false);
           } else {
             if (isConnected) {
               setOpen(true);
@@ -68,42 +73,60 @@ export default function AccountPopover() {
               <div className="section">
                 <div className="header">Connected Wallet</div>
                 {isConnected && address && (
-                  <div className="address">
-                    <div className="text">
-                      {trimAddress(address).toUpperCase()}
-                    </div>
-                    <div className="actions">
-                      <TooltipIcon text="Explore" placement="bottom-center">
-                        <a
-                          target="_blank"
-                          href={`${ENVIRONMENT.chainExplorer}/address/${address}`}
-                        >
-                          <button>
-                            <ExternalLink size={14} />
-                          </button>
-                        </a>
-                      </TooltipIcon>
+                  <>
+                    <div className="address">
+                      <div className="text">
+                        {trimAddress(address).toUpperCase()}
+                      </div>
+                      <div className="actions">
+                        <TooltipIcon text="Explore" placement="bottom-center">
+                          <a
+                            target="_blank"
+                            href={`${ENVIRONMENT.chainExplorer}/address/${address}`}
+                          >
+                            <button>
+                              <ExternalLink size={14} />
+                            </button>
+                          </a>
+                        </TooltipIcon>
 
-                      <TooltipIcon
-                        text={copy ? "Copied!" : "Copy"}
-                        placement="bottom-center"
-                      >
-                        <CopyToClipboard
-                          text={address}
-                          onCopy={() => {
-                            setCopy(true);
-                            setTimeout(() => {
-                              setCopy(false);
-                            }, 500);
-                          }}
+                        <TooltipIcon
+                          text={copy ? "Copied!" : "Copy"}
+                          placement="bottom-center"
                         >
-                          <button>
-                            <Copy size={14} />
-                          </button>
-                        </CopyToClipboard>
-                      </TooltipIcon>
+                          <CopyToClipboard
+                            text={address}
+                            onCopy={() => {
+                              setCopy(true);
+                              setTimeout(() => {
+                                setCopy(false);
+                              }, 500);
+                            }}
+                          >
+                            <button>
+                              <Copy size={14} />
+                            </button>
+                          </CopyToClipboard>
+                        </TooltipIcon>
+                      </div>
                     </div>
-                  </div>
+
+                    <div className="address">
+                      <div className="text">
+                        <img src="/root.svg" width="18" height="18" />
+                        Root Balance
+                      </div>
+                      <div className="actions">
+                        <b>
+                          {displayBN(
+                            account?.tokenBalances.get(sdk.tokens.ROOT)
+                              ?.total || TokenValue.fromHuman("0", 18),
+                            2
+                          )}
+                        </b>
+                      </div>
+                    </div>
+                  </>
                 )}
                 <S.DisconnectButton
                   onClick={() => {
