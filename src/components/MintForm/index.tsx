@@ -422,7 +422,7 @@ export default function MintForm() {
       if (token.token.symbol === "BEAN DEPOSIT") {
         if (!permit && mintState.needAllowance) {
           txToast = new TransactionToast({
-            loading: `Approving ${token.token.symbol}...`,
+            loading: `Approving ${token.token.name}...`,
             success: "Approve successful.",
           });
           try {
@@ -463,7 +463,7 @@ export default function MintForm() {
       if (swap?.needAllowance) {
         if (swap.tokenIn instanceof ERC20Token) {
           txToast = new TransactionToast({
-            loading: `Approving ${token.token.symbol}...`,
+            loading: `Approving ${token.token.name}...`,
             success: "Approve successful.",
           });
 
@@ -520,7 +520,7 @@ export default function MintForm() {
       const swap = mintState.swaps[0];
 
       if (swap?.needAllowance) {
-        return `Approve ${swap.token.token.symbol}`;
+        return `Approve ${swap.token.token.name}`;
       }
 
       // Check for permit
@@ -529,7 +529,7 @@ export default function MintForm() {
         !permit &&
         mintState.needAllowance
       ) {
-        return `Approve ${token.token.symbol}`;
+        return `Approve ${token.token.name}`;
       }
     }
 

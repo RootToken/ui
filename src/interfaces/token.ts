@@ -62,7 +62,7 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     permit: true,
   },
   USDC: {
-    name: "USDC",
+    name: "USD Coin",
     symbol: "USDC",
     icon: "/usdc.svg",
     address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -72,7 +72,7 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     permit: true,
   },
   USDT: {
-    name: "USDT",
+    name: "Tether",
     symbol: "USDT",
     icon: "/tether.svg",
     address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
@@ -82,7 +82,7 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     permit: false,
   },
   DAI: {
-    name: "DAI",
+    name: "Dai",
     symbol: "DAI",
     icon: "/dai.svg",
     address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
