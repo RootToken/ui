@@ -11,6 +11,7 @@ export interface IMintFormToken {
 export interface IMintFormState {
   mintTokens: IMintFormToken[];
   slippage: string;
+  mintToFarmBalance: boolean;
 }
 
 export const getDefaultMintFormState = (): IMintFormState => ({
@@ -22,6 +23,7 @@ export const getDefaultMintFormState = (): IMintFormState => ({
     },
   ],
   slippage: "0.5",
+  mintToFarmBalance: false,
 });
 
 export interface IRedeemFormState {

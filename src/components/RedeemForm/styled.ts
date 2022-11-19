@@ -362,7 +362,7 @@ export const TxHeader = styled.div<{ active: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 13px;
+  padding: 10px 15px;
   cursor: pointer;
   user-select: none;
   ${(props) =>
@@ -382,9 +382,11 @@ export const TxHeader = styled.div<{ active: boolean }>`
       font-size: 14px;
       line-height: 20px;
       color: #999999;
+      font-weight: bold;
     }
   }
 `;
+
 
 export const PriceExchangeTooltip = styled.div`
   > .header {

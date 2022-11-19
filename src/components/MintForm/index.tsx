@@ -95,7 +95,8 @@ export default function MintForm() {
   );
 
   const getTokensSwapRate = (
-    tokens: IMintFormToken[]
+    tokens: IMintFormToken[],
+    toMode: FarmToMode
   ): Promise<ISwapToken[]> => {
     return Promise.all(
       tokens.map(async (token): Promise<ISwapToken> => {
@@ -118,7 +119,7 @@ export default function MintForm() {
           const strategy = getMintStrategy(
             tokenIn,
             FarmFromMode.EXTERNAL,
-            FarmToMode.EXTERNAL
+            toMode
           );
 
           if (!strategy) throw new Error("Failed to build workflow");
@@ -287,7 +288,10 @@ export default function MintForm() {
           return;
         }
 
-        const swaps = await getTokensSwapRate(state.mintTokens);
+        const swaps = await getTokensSwapRate(
+          state.mintTokens,
+          state.mintToFarmBalance ? FarmToMode.INTERNAL : FarmToMode.EXTERNAL
+        );
         const swap = swaps[0];
         const amount = swap.estimated;
 
@@ -441,6 +445,9 @@ export default function MintForm() {
           mintState.seasons,
           mintState.amounts,
           mintState.minRootsOut,
+          mintFormState.mintToFarmBalance
+            ? FarmToMode.INTERNAL
+            : FarmToMode.EXTERNAL,
           permit
         ).then(resetState);
         return;
@@ -491,6 +498,7 @@ export default function MintForm() {
       txToast.confirming(txn);
       const receipt = await txn.wait();
       txToast.success(receipt);
+      resetState();
       return;
     } catch (e) {
       txToast?.error(e);
@@ -501,6 +509,9 @@ export default function MintForm() {
   const renderMintText = () => {
     if (!account) {
       return "Connect Wallet";
+    }
+    if (mintState.loading) {
+      return <Loading size={20} />;
     }
     if (mintState.output !== "0") {
       const token = mintFormState.mintTokens[0];
@@ -865,7 +876,8 @@ export default function MintForm() {
         {renderMintText()}
       </S.MintButton>
 
-      {mintState.needAllowance &&
+      {!permit &&
+        mintState.needAllowance &&
         mintFormState.mintTokens[0].token.symbol === "BEAN DEPOSIT" && (
           <>
             <S.Divider>OR</S.Divider>

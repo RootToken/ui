@@ -25,7 +25,7 @@ export const PopoverContainer = styled(motion.div)`
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
 
       &:last-child {
         margin-bottom: 0;
@@ -35,6 +35,10 @@ export const PopoverContainer = styled(motion.div)`
         font-size: 14px;
         display: flex;
         align-items: center;
+
+       .helper {
+          margin-left: 8px;
+        }
 
         > .from {
           display: flex;
@@ -91,4 +95,28 @@ export const SlippageInput = styled(NumericFormat)`
   margin: 0;
   text-align: end;
   flex: 1;
+`;
+
+export const ToggleButton = styled.button<{ $active: boolean }>`
+  width: 50px;
+  height: 30px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  padding: 2px 5px;
+
+  > div {
+    width: 21px;
+    height: 21px;
+    background-color: #999999;
+    border-radius: 6px;
+    transition: transform 0.2s cubic-bezier(0.33,1,0.68,1);
+
+    ${(props) =>
+      props.$active &&
+      `
+    background-color: #72f589;
+    transform: translateX(19px);
+    
+    `}
+  }
 `;

@@ -242,9 +242,12 @@ export default function RedeemForm() {
     if (!account) {
       return "Connect Wallet";
     }
+    if (redeemState.loading) {
+      return <Loading size={20} />;
+    }
     if (redeemState.output !== "0") {
       if (!redeemFormState.redeemToWallet) {
-        return "Coming Soon!"
+        return "Coming Soon!";
         // if (!permit) {
         //   return "Allow Root to use your Root";
         // }
@@ -627,7 +630,11 @@ export default function RedeemForm() {
       </AnimatePresence>
 
       <S.MintButton
-        disabled={redeemState.loading || redeemState.output === "0" || !redeemFormState.redeemToWallet}
+        disabled={
+          redeemState.loading ||
+          redeemState.output === "0" ||
+          !redeemFormState.redeemToWallet
+        }
         onClick={onRedeem}
       >
         {renderRedeemText()}

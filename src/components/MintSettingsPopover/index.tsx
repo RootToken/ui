@@ -1,7 +1,7 @@
 import { useLayer } from "react-laag";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { HelpCircle, ArrowRight, ChevronsRight, Settings } from "react-feather";
+import { HelpCircle, ChevronsRight, Settings } from "react-feather";
 import TooltipIcon from "../TooltipIcon";
 import * as S from "./styled";
 import useAppStore from "../../store";
@@ -43,12 +43,12 @@ export default function MintSettingsPopover() {
           {isOpen && (
             <S.PopoverContainer {...layerProps}>
               <div className="section">
-                <div className="header" style={{display: "flex"}}>
+                <div className="header" style={{ display: "flex" }}>
                   Slippage Tolerance
-                  <div style={{marginTop: '7px', marginLeft: '3px'}}>
-                  <TooltipIcon text="Your transaction will fail if the Roots you receive upon Minting decreases by more than this percentage.">
-                    <HelpCircle size={12} color="#838383" />
-                  </TooltipIcon>
+                  <div style={{ marginTop: "7px", marginLeft: "3px" }}>
+                    <TooltipIcon text="Your transaction will fail if the Roots you receive upon Minting decreases by more than this percentage.">
+                      <HelpCircle size={12} color="#838383" />
+                    </TooltipIcon>
                   </div>
                 </div>
 
@@ -127,33 +127,45 @@ export default function MintSettingsPopover() {
                   </>
                 )}
 
-                {/* <div className="content">
+                <div className="content">
                   <div className="text">
-                    <img src="/bean.svg" width={16} />
-                    BEAN
-                    <ChevronsRight color="#b0b0b0" size={16} />
-                    <img src="/root.svg" width={16} />
-                    ROOT
+                    Mint to Farm Balance
+                    <TooltipIcon
+                      element={
+                        <p>
+                          Farm Balances are assets stored in Beanstalk. Farm
+                          assets can be used in transactions on the Farm.
+                          Circulating balances are Root assets in your wallet.
+                          Toggle to transfer minted Mint Roots to your Farm
+                          Balance.
+                          <br />
+                          For more information{" "}
+                          <a target="_blank" href="https://docs.bean.money/guides/balances/understand-my-balances#farm-balance-circulating-balance">
+                            click here
+                          </a>
+                          .
+                        </p>
+                      }
+                    >
+                      <div className="helper">
+                        <HelpCircle size={14} color="#838383" />
+                      </div>
+                    </TooltipIcon>
                   </div>
 
-                  <div className="slippage">
-                    <S.SlippageInput
-                      id="slippage"
-                      maxLength={5}
-                      allowNegative={false}
-                      allowLeadingZeros={false}
-                      decimalScale={2}
-                      placeholder="1"
-                      value={mintFormState.slippage}
-                      valueIsNumericString
-                      onValueChange={(v) => {
-                        const value = v.value;
-                        onChangeMintFormStateField("slippage", value);
-                      }}
-                    />
-                    <label htmlFor="slippage">%</label>
-                  </div>
-                </div> */}
+                  <S.ToggleButton
+                    $active={mintFormState.mintToFarmBalance}
+                    className="toggle"
+                    onClick={() =>
+                      onChangeMintFormStateField(
+                        "mintToFarmBalance",
+                        !mintFormState.mintToFarmBalance
+                      )
+                    }
+                  >
+                    <div />
+                  </S.ToggleButton>
+                </div>
               </div>
             </S.PopoverContainer>
           )}

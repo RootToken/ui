@@ -279,6 +279,7 @@ export default function useMintWorkflow() {
     seasons: BigNumberish[],
     amounts: BigNumberish[],
     minRootsOut: TokenValue,
+    toMode: FarmToMode = FarmToMode.EXTERNAL,
     permit?: SignedPermit,
   ) => {
     const txToast = new TransactionToast({
@@ -292,7 +293,7 @@ export default function useMintWorkflow() {
           seasons,
           amounts,
         }],
-        FarmToMode.EXTERNAL,
+        toMode,
         minRootsOut.toBigNumber(),
         permit
       );
