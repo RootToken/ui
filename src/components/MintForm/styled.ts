@@ -418,3 +418,15 @@ export const Divider = styled.div`
   color: #757880;
   margin: 12px;
 `;
+
+export const Info = styled.div`
+  margin-top: 20px;
+  border-radius: 8px;
+  padding: 11px 15px;
+  background-color: rgba(203, 208, 169, 0.16);
+  color: #cacba9;
+  font-size: 14px;
+  > a {
+    color: #00f97c;
+  }
+`;

@@ -672,6 +672,21 @@ export default function MintForm() {
           </S.ContentContainer>
         </div>
       </S.Phase>
+      {mintFormState.mintToFarmBalance && (
+        <S.Phase>
+          <S.Info>
+            You are minting Roots to your Beanstalk Farm Balance - for more
+            information{" "}
+            <a
+              href="https://docs.bean.money/guides/balances/understand-my-balances#farm-balance-circulating-balance"
+              target="_blank"
+            >
+              click here
+            </a>
+            .
+          </S.Info>
+        </S.Phase>
+      )}
       <AnimatePresence initial={false}>
         {mintState.output !== "0" && (
           <motion.div
@@ -858,6 +873,13 @@ export default function MintForm() {
                           <p>
                             Use {mintState.totalBdvFromDeposits} Bean Deposit to
                             mint {mintState.output} Root
+                          </p>
+
+                          <p>
+                            Transfer {mintState.output} Root to{" "}
+                            {mintFormState.mintToFarmBalance
+                              ? "Beanstalk Farm Balance"
+                              : "your wallet"}
                           </p>
                         </div>
                       </div>
