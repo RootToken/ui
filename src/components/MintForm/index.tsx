@@ -383,28 +383,30 @@ export default function MintForm() {
     [beanstalkSdk, account]
   );
 
-  const onApproveBeanDeposit = async () => {
-    const txToast = new TransactionToast({
-      loading: `Approving Bean Deposit...`,
-      success: "Approve successful.",
-    });
+  const onSignPermit = async () => {
     try {
-      const approval = await beanstalkSdk.contracts.beanstalk.approveDeposit(
-        beanstalkSdk.contracts.root.address,
-        beanstalkSdk.tokens.BEAN.address,
-        ethers.constants.MaxUint256
+      const permit = await beanstalkSdk.permit.sign(
+        account!.address,
+        beanstalkSdk.silo.permitDepositToken(
+          account!.address,
+          beanstalkSdk.tokens.ROOT.address,
+          beanstalkSdk.tokens.BEAN.address,
+          mintState.amounts
+            .reduce((p, d) => {
+              return p.add(d);
+            }, BigNumber.from(0))
+            .toString()
+        )
       );
-      txToast.confirming(approval);
-      const receipt = await approval.wait();
-      txToast.success(receipt);
-      calculate(mintFormState);
+      onMint(permit);
       return;
-    } catch (e) {
-      txToast.error(e);
+    } catch (e: any) {
+      toast.error(e.reason);
+      return;
     }
   };
 
-  const onMint = async () => {
+  const onMint = async (permit?: SignedPermit) => {
     if (mintState.output === "0") {
       return;
     }
@@ -419,24 +421,24 @@ export default function MintForm() {
     try {
       if (token.token.symbol === "BEAN DEPOSIT") {
         if (!permit && mintState.needAllowance) {
+          txToast = new TransactionToast({
+            loading: `Approving ${token.token.symbol}...`,
+            success: "Approve successful.",
+          });
           try {
-            const permit = await beanstalkSdk.permit.sign(
-              account!.address,
-              beanstalkSdk.silo.permitDepositToken(
-                account!.address,
-                beanstalkSdk.tokens.ROOT.address,
+            const approval =
+              await beanstalkSdk.contracts.beanstalk.approveDeposit(
+                beanstalkSdk.contracts.root.address,
                 beanstalkSdk.tokens.BEAN.address,
-                mintState.amounts
-                  .reduce((p, d) => {
-                    return p.add(d);
-                  }, BigNumber.from(0))
-                  .toString()
-              )
-            );
-            setPermit(permit);
+                ethers.constants.MaxUint256
+              );
+            txToast.confirming(approval);
+            const receipt = await approval.wait();
+            txToast.success(receipt);
+            calculate(mintFormState);
             return;
           } catch (e: any) {
-            toast.error(e.reason);
+            txToast.error(e.reason);
             return;
           }
         }
@@ -527,7 +529,7 @@ export default function MintForm() {
         !permit &&
         mintState.needAllowance
       ) {
-        return `Allow Root to use your ${token.token.symbol}`;
+        return `Approve ${token.token.symbol}`;
       }
     }
 
@@ -862,13 +864,15 @@ export default function MintForm() {
                               </p>
                             );
                           })}
-                          {mintState.totalBeanIntoSilo !== "0" && (
-                            <p>
-                              Deposit {mintState.totalBeanIntoSilo} Bean into
-                              the Silo for {mintState.totalBeanIntoSilo} Bean
-                              Deposit
-                            </p>
-                          )}
+                          {mintFormState.mintTokens[0].token.symbol !==
+                            "BEAN DEPOSIT" &&
+                            mintState.totalBeanIntoSilo !== "0" && (
+                              <p>
+                                Deposit {mintState.totalBeanIntoSilo} Bean into
+                                the Silo for {mintState.totalBeanIntoSilo} Bean
+                                Deposit
+                              </p>
+                            )}
 
                           <p>
                             Use {mintState.totalBdvFromDeposits} Bean Deposit to
@@ -893,7 +897,7 @@ export default function MintForm() {
       </AnimatePresence>
       <S.MintButton
         disabled={mintState.loading || mintState.output === "0"}
-        onClick={onMint}
+        onClick={() => onMint()}
       >
         {renderMintText()}
       </S.MintButton>
@@ -905,9 +909,31 @@ export default function MintForm() {
             <S.Divider>OR</S.Divider>
             <S.MintButton
               disabled={mintState.loading || mintState.output === "0"}
-              onClick={onApproveBeanDeposit}
+              onClick={onSignPermit}
             >
-              Approve Bean Deposit
+              Permit and Mint{" "}
+              <TooltipIcon
+                element={
+                  <p>
+                    To continue you need to allow Root smart contracts to use
+                    your USDC.
+                    <br />
+                    <br />
+                    To do this, we use signed approvals, which allows you to
+                    give permission and make a swap in one transaction.
+                    <br />
+                    <br />
+                    <a
+                      href="https://eips.ethereum.org/EIPS/eip-2612"
+                      target="_blank"
+                    >
+                      Read more about EIP-2612: permit
+                    </a>
+                  </p>
+                }
+              >
+                <HelpCircle size={16} color="#3D3D3D" />
+              </TooltipIcon>
             </S.MintButton>
           </>
         )}

@@ -212,9 +212,14 @@ export const MintButton = styled.button<{ disabled: boolean }>`
   font-weight: bold;
   color: #123123;
   font-size: 14px;
-  border-radius: 6px;
+  border-radius: 10px;
   line-height: 20px;
   margin: 0 auto;
+  width: 100%;
+
+  > div {
+    margin-left: 5px;
+  }
 
   ${(props) =>
     props.disabled &&
