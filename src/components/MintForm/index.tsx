@@ -438,7 +438,7 @@ export default function MintForm() {
             calculate(mintFormState);
             return;
           } catch (e: any) {
-            txToast.error(e.reason);
+            txToast.error(e);
             return;
           }
         }
