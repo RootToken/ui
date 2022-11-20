@@ -109,7 +109,7 @@ export default function RedeemForm() {
         balances
           .get(beanstalkSdk.tokens.BEAN)
           ?.deposited.crates.forEach((crate) => {
-            console.log(crate.season.toString(), crate.amount.toHuman());
+            // console.log(crate.season.toString(), crate.amount.toHuman());
             deposits.push({
               season: crate.season,
               amount: crate.amount,
@@ -205,6 +205,11 @@ export default function RedeemForm() {
         if (!result) {
           throw new Error("No bean deposit output");
         }
+
+        // console.log(result.seedsRatio.toHuman())
+        // console.log(result.stalkRatio.toHuman())
+        // console.log(result.bdvRatio.toHuman())
+        // console.log(result.amount.toHuman())
 
         const totalSlipage = TokenValue.fromHuman(redeemFormState.slippage, 18);
 

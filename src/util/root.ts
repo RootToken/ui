@@ -79,8 +79,8 @@ export const calculateRoot = (
       );
 
       // Root burning uses the maximum of the decrease in bdv/stalk/seeds.
-      const max = TokenValue.max(bdvRatio, stalkRatio, seedsRatio);
-      const amount = rootTotalSupply.mulDiv(max, PRECISION).sub(rootTotalSupply);
+      const max = TokenValue.min(bdvRatio, stalkRatio, seedsRatio);
+      const amount = rootTotalSupply.sub(rootTotalSupply.mulDiv(max, PRECISION));
 
       return {
         amount, // 18 (ROOT)
