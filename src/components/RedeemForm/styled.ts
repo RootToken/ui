@@ -190,6 +190,15 @@ export const OptionHeader = styled.div<{ active: boolean }>`
   }
 `;
 
+export const Divider = styled.div`
+  display: flex;
+  justify-content: center;
+  font-weight: bold;
+  color: #757880;
+  margin: 12px;
+`;
+
+
 export const MintButton = styled.button<{ disabled: boolean }>`
   background: #72f589;
   border-radius: 2.24601px;
@@ -201,16 +210,22 @@ export const MintButton = styled.button<{ disabled: boolean }>`
   font-weight: bold;
   color: #123123;
   font-size: 14px;
-  border-radius: 6px;
+  border-radius: 10px;
   line-height: 20px;
   margin: 0 auto;
+  width: 100%;
+
+  > div {
+    margin-left: 5px;
+  }
+
   ${(props) =>
     props.disabled &&
     `
-    background-color: rgba(255,255,255,0.03);
-    color: #757880;
-    opacity: 0.5;
-  `}
+  background-color: rgba(255,255,255,0.03);
+  color: #757880;
+  opacity: 0.5;
+`}
 `;
 
 export const Graph = styled.div`
@@ -386,7 +401,6 @@ export const TxHeader = styled.div<{ active: boolean }>`
     }
   }
 `;
-
 
 export const PriceExchangeTooltip = styled.div`
   > .header {

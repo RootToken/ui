@@ -151,11 +151,7 @@ export default function RedeemForm() {
             rootSeedsBefore,
             false
           );
-
-          if (!result) {
-            continue;
-          }
-
+         
           // Partial
           if (result.amount.gt(redeemAmountRemaining)) {
             redeemDeposits.push({
@@ -184,8 +180,10 @@ export default function RedeemForm() {
         let totalStalkFromDeposits = TokenValue.fromHuman("0", 10);
         let totalSeedsFromDeposits = TokenValue.fromHuman("0", 6);
         let totalBdvFromDeposits = TokenValue.fromHuman("0", 6);
+        let totalAmount = TokenValue.fromHuman("0", 6);
 
         redeemDeposits.forEach((deposit) => {
+          totalAmount = totalAmount.add(deposit.amount);
           totalBdvFromDeposits = totalBdvFromDeposits.add(deposit.bdv);
           totalStalkFromDeposits = totalStalkFromDeposits.add(deposit.stalk);
           totalSeedsFromDeposits = totalSeedsFromDeposits.add(deposit.seeds);
@@ -202,22 +200,13 @@ export default function RedeemForm() {
           false
         );
 
-        if (!result) {
-          throw new Error("No bean deposit output");
-        }
-
-        // console.log(result.seedsRatio.toHuman())
-        // console.log(result.stalkRatio.toHuman())
-        // console.log(result.bdvRatio.toHuman())
-        // console.log(result.amount.toHuman())
-
         const totalSlipage = TokenValue.fromHuman(redeemFormState.slippage, 18);
 
         setRedeemState((state) => ({
           ...state,
           loading: false,
           output: displayBN(
-            result.amount,
+            totalAmount,
             TOKENS["BEAN DEPOSIT"].formatDecimals
           ),
           deposits: redeemDeposits,

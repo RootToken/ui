@@ -16,12 +16,11 @@ export const calculateRoot = (
   bdvRatio: TokenValue;
   stalkRatio: TokenValue;
   seedsRatio: TokenValue;
-  min?: TokenValue;
-  max?: TokenValue;
+  min: TokenValue;
 } => {
   try {
-    const rootStalkAfter = rootStalkBefore.add(totalStalkFromDeposits);
-    const rootSeedsAfter = rootSeedsBefore.add(totalSeedsFromDeposits);
+    const rootStalkAfter = isDeposit ? rootStalkBefore.add(totalStalkFromDeposits) : rootStalkBefore.sub(totalStalkFromDeposits);
+    const rootSeedsAfter = isDeposit ? rootSeedsBefore.add(totalSeedsFromDeposits): rootSeedsBefore.sub(totalSeedsFromDeposits);
     const rootUnderlyingBdvAfter = isDeposit
       ? rootUnderlyingBdvBefore.add(totalBdvFromDeposits)
       : rootUnderlyingBdvBefore.sub(totalBdvFromDeposits);
@@ -78,15 +77,15 @@ export const calculateRoot = (
     const seedsRatio = PRECISION.mulDiv(rootSeedsAfter, rootSeedsBefore, "up");
 
     // Root burning uses the maximum of the decrease in bdv/stalk/seeds.
-    const max = TokenValue.min(bdvRatio, stalkRatio, seedsRatio);
-    const amount = rootTotalSupply.sub(rootTotalSupply.mulDiv(max, PRECISION));
+    const min = TokenValue.min(bdvRatio, stalkRatio, seedsRatio);
+    const amount = rootTotalSupply.sub(rootTotalSupply.mulDiv(min, PRECISION, "up"));
 
     return {
       amount, // 18 (ROOT)
       bdvRatio, // 18 (PRECISION)
       stalkRatio, // 18 (PRECISION)
       seedsRatio, // 18 (PRECISION)
-      max, // 18 (PRECISION)
+      min, // 18 (PRECISION)
     };
   } catch (err) {
     console.log(err);
