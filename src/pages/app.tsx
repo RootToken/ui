@@ -152,7 +152,7 @@ export default function AppPage() {
     <MainLayout>
       <>
         <Container>
-          <a href="https://app.betparadox.com/soccer/root-5" target="_blank">
+          <a href="https://app.betparadox.com/soccer" target="_blank">
             <Banner>
               <img
                 className="ribbon"
