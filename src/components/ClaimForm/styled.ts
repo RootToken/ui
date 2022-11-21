@@ -3,6 +3,13 @@ import styled from "styled-components";
 import { NumericFormat } from "react-number-format";
 
 export const Form = styled.form`
+
+> p {
+  margin-bottom: 15px;
+}
+> a {
+  color: #00f97c;
+}
   .group {
     > .header {
       justify-content: space-between;

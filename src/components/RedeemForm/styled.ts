@@ -124,6 +124,10 @@ export const Info = styled.div`
   background-color: rgba(203, 208, 169, 0.16);
   color: #cacba9;
   font-size: 14px;
+
+  > a {
+    color: #00f97c;
+  }
 `;
 
 export const Option = styled.div<{ active: boolean }>`

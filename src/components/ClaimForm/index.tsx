@@ -274,6 +274,18 @@ export default function ClaimForm() {
     TokenValue.fromHuman("0", TOKENS["BEAN DEPOSIT"].decimals);
 
   return (
+    <S.Form>
+      <p>Please use Beanstalk UI to claim your withdrawal bean deposits.</p>
+      <a
+        href="https://app.bean.money/#/silo/0xbea0000029ad1c77d3d5d23ba2d8893db9d1efab?action=claim"
+        target="_blank"
+      >
+        Click here to go to Beanstalk UI
+      </a>.
+    </S.Form>
+  );
+
+  return (
     <S.Form
       onSubmit={(e) => {
         e.preventDefault();

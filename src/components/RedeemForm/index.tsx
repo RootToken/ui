@@ -151,7 +151,7 @@ export default function RedeemForm() {
             rootSeedsBefore,
             false
           );
-         
+
           // Partial
           if (result.amount.gt(redeemAmountRemaining)) {
             redeemDeposits.push({
@@ -205,10 +205,7 @@ export default function RedeemForm() {
         setRedeemState((state) => ({
           ...state,
           loading: false,
-          output: displayBN(
-            totalAmount,
-            TOKENS["BEAN DEPOSIT"].formatDecimals
-          ),
+          output: displayBN(totalAmount, TOKENS["BEAN DEPOSIT"].formatDecimals),
           deposits: redeemDeposits,
           maxRootsIn: result.amount.add(
             result.amount.mul(totalSlipage.mul(10)).div(1000)
@@ -446,6 +443,17 @@ export default function RedeemForm() {
                 </div>
               </S.ContentContainer>
             </div>
+          </S.Phase>
+          <S.Phase>
+            <S.Info>
+              You can claim your Bean Deposits using the{" "}
+              <a
+                href="https://app.bean.money/#/silo/0xbea0000029ad1c77d3d5d23ba2d8893db9d1efab?action=withdraw"
+                target="_blank"
+              >
+                Beanstalk UI
+              </a>.
+            </S.Info>
           </S.Phase>
         </>
       ) : (
