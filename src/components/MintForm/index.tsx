@@ -293,28 +293,28 @@ export default function MintForm() {
               }
               return 0;
             });
-            bdvImpacts.forEach((v) => {
-              console.log(
-                v.bdvImpacted,
-                v.deposit.season.toString(),
-                v.deposit.amount.toHuman(),
-                v.deposit.bdv.toHuman(),
-                v.deposit.stalk.toHuman(),
-                v.out.toHuman()
-              );
-            });
+            // bdvImpacts.forEach((v) => {
+            //   console.log(
+            //     v.bdvImpacted,
+            //     v.deposit.season.toString(),
+            //     v.deposit.amount.toHuman(),
+            //     v.deposit.bdv.toHuman(),
+            //     v.deposit.stalk.toHuman(),
+            //     v.out.toHuman()
+            //   );
+            // });
 
-            console.log("---------");
-            stalkImpacts.forEach((v) => {
-              console.log(
-                v.bdvImpacted,
-                v.deposit.season.toString(),
-                v.deposit.amount.toHuman(),
-                v.deposit.bdv.toHuman(),
-                v.deposit.stalk.toHuman(),
-                v.out.toHuman()
-              );
-            });
+            // console.log("---------");
+            // stalkImpacts.forEach((v) => {
+            //   console.log(
+            //     v.bdvImpacted,
+            //     v.deposit.season.toString(),
+            //     v.deposit.amount.toHuman(),
+            //     v.deposit.bdv.toHuman(),
+            //     v.deposit.stalk.toHuman(),
+            //     v.out.toHuman()
+            //   );
+            // });
             // 10 percent of total remaining
             let minWeight = amountRemaining1.mulDiv(10, 100);
             let depositStalk = TokenValue.fromHuman("0", 10);
@@ -337,31 +337,31 @@ export default function MintForm() {
               );
               const bdvImpacted = !result.bdvRatio.lte(result.stalkRatio);
 
-              console.log("----------");
-              console.log(
-                // deposit.season.toString(),
-                bdvImpacted,
-                depositBdv.toHuman(),
-                depositStalk.toHuman(),
-                result.amount.toHuman(),
-                bdvImpacts.length,
-                stalkImpacts.length
-                // result.bdvRatio.gte(result.stalkRatio),
-              );
+              // console.log("----------");
+              // console.log(
+              //   // deposit.season.toString(),
+              //   bdvImpacted,
+              //   depositBdv.toHuman(),
+              //   depositStalk.toHuman(),
+              //   result.amount.toHuman(),
+              //   bdvImpacts.length,
+              //   stalkImpacts.length
+              //   // result.bdvRatio.gte(result.stalkRatio),
+              // );
 
-              console.log({
-                amountRemaining: amountRemaining1.toHuman(),
-                // depositStalk: depositStalk.toHuman(),
-                // depositSeeds: depositSeeds.toHuman(),
-                // depositBdv: depositBdv.toHuman(),
-                // rootAmt: result.amount.toHuman(),
-                // bdvImpacted,
-                // bdvImpacts,
-                // stalkImpacts,
-                // min: result.min?.toHuman(),
-                // bdvRatio: result.bdvRatio.toHuman(),
-                // stalkRatio: result.stalkRatio.toHuman(),
-              });
+              // console.log({
+              //   amountRemaining: amountRemaining1.toHuman(),
+              //   // depositStalk: depositStalk.toHuman(),
+              //   // depositSeeds: depositSeeds.toHuman(),
+              //   // depositBdv: depositBdv.toHuman(),
+              //   // rootAmt: result.amount.toHuman(),
+              //   // bdvImpacted,
+              //   // bdvImpacts,
+              //   // stalkImpacts,
+              //   // min: result.min?.toHuman(),
+              //   // bdvRatio: result.bdvRatio.toHuman(),
+              //   // stalkRatio: result.stalkRatio.toHuman(),
+              // });
               // console.log(depositBdv.add(amountRemaining1).toHuman());
 
               const bdvImpact = bdvImpacts[0];
@@ -376,10 +376,10 @@ export default function MintForm() {
                 const min = bdvImpact.value.lt(stalkImpact.value)
                   ? bdvImpact
                   : stalkImpact;
-                console.log(
-                  "using lowest between stalk x bdv",
-                  min.deposit.season.toString()
-                );
+                // console.log(
+                //   "using lowest between stalk x bdv",
+                //   min.deposit.season.toString()
+                // );
 
                 if (min.deposit.amount.gt(minWeight)) {
                   amountRemaining1 = amountRemaining1.sub(minWeight);
@@ -435,10 +435,10 @@ export default function MintForm() {
               } else if (bdvImpacted && stalkImpact) {
                 // If bdv impacted then use more stalk to offset it
                 const min = stalkImpact;
-                console.log(
-                  "using more older deposit to offset",
-                  min.deposit.season.toString()
-                );
+                // console.log(
+                //   "using more older deposit to offset",
+                //   min.deposit.season.toString()
+                // );
                 if (min.deposit.amount.gt(minWeight)) {
                   amountRemaining1 = amountRemaining1.sub(minWeight);
                   const bdvFromDeposit = min.deposit.bdv.mulDiv(
@@ -488,10 +488,10 @@ export default function MintForm() {
               } else if (!bdvImpacted && bdvImpact) {
                 // If stalk impacted then use more bdv to offset it
                 const min = bdvImpact;
-                console.log(
-                  "using more newer deposit to offset",
-                  min.deposit.season.toString()
-                );
+                // console.log(
+                //   "using more newer deposit to offset",
+                //   min.deposit.season.toString()
+                // );
                 if (min.deposit.amount.gt(minWeight)) {
                   amountRemaining1 = amountRemaining1.sub(minWeight);
                   const bdvFromDeposit = min.deposit.bdv.mulDiv(
@@ -541,13 +541,13 @@ export default function MintForm() {
               } else {
                 
                 const min = bdvImpact || stalkImpact;
-                console.log(
-                  "using first bdv/stalkx",
-                  bdvImpacted,
-                  // stalkImpact,
-                  // bdvImpact,
-                  min.deposit.season.toString(),
-                );
+                // console.log(
+                //   "using first bdv/stalkx",
+                //   bdvImpacted,
+                //   // stalkImpact,
+                //   // bdvImpact,
+                //   min.deposit.season.toString(),
+                // );
                 if (min.deposit.amount.gt(minWeight)) {
                   amountRemaining1 = amountRemaining1.sub(minWeight);
                   const bdvFromDeposit = min.deposit.bdv.mulDiv(
@@ -635,11 +635,11 @@ export default function MintForm() {
             });
             const tempDeposits: DepositCrate<TokenValue>[] = [];
             Object.keys(depositsMap).forEach((v) => {
-              console.log(
-                v,
-                depositsMap[v].bdv.toHuman(),
-                depositsMap[v].stalk.toHuman()
-              );
+              // console.log(
+              //   v,
+              //   depositsMap[v].bdv.toHuman(),
+              //   depositsMap[v].stalk.toHuman()
+              // );
               tempDeposits.push(depositsMap[v]);
             });
 
@@ -705,9 +705,9 @@ export default function MintForm() {
           //   }
           // }
 
-          deposits.forEach((v) => {
-            console.log(v.season.toString(), v.amount.toHuman())
-          });
+          // deposits.forEach((v) => {
+          //   console.log(v.season.toString(), v.amount.toHuman())
+          // });
           const result = await beanstalkSdk.root.estimateRoots(
             beanstalkSdk.tokens.BEAN,
             deposits,
