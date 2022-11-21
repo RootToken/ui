@@ -153,6 +153,7 @@ const FarmButton = styled.button<{ $disabled: boolean }>`
 export default function DashboardPage() {
   const { data } = useSWR("apys", getAPY);
   const [state, setState] = useState({
+    bdvPerRoot: TokenValue.fromHuman("0", 6),
     totalSupply: TokenValue.fromHuman("0", 18),
     underlyingBdv: TokenValue.fromHuman("0", 6),
     seeds: TokenValue.fromHuman("0", 6),
@@ -180,6 +181,7 @@ export default function DashboardPage() {
 
     try {
       const [
+        bdvPerRoot,
         totalSupply,
         underlyingBdv,
         seeds,
@@ -187,6 +189,9 @@ export default function DashboardPage() {
         grownStalk,
         earnedBeans,
       ] = await Promise.all([
+        erc20Contracts[ENVIRONMENT.rootContractAddress]
+          .bdvPerRoot()
+          .then((v: any) => TokenValue.fromBlockchain(v, 6)),
         erc20Contracts[ENVIRONMENT.rootContractAddress]
           .totalSupply()
           .then((v: any) => TokenValue.fromBlockchain(v, 18)),
@@ -214,6 +219,7 @@ export default function DashboardPage() {
         isLoading: false,
         grownStalk,
         earnedBeans,
+        bdvPerRoot,
       });
     } catch (e: any) {
       setState((s) => ({
@@ -295,6 +301,13 @@ export default function DashboardPage() {
                     }
                   >
                     <div className="apy">{data?.seeds}% vAPY</div>
+                  </TooltipIcon>
+                )}
+                {!state.isLoading && (
+                  <TooltipIcon element={<p>BDV per Root</p>}>
+                    <div className="apy">
+                      {displayBN(state.bdvPerRoot, 3)} BDV
+                    </div>
                   </TooltipIcon>
                 )}
               </div>
