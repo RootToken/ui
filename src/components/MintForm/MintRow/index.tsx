@@ -2,6 +2,7 @@ import { TokenValue } from "@beanstalk/sdk";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { ChevronDown } from "react-feather";
+import TooltipIcon from "../../../components/TooltipIcon";
 import { IMintFormToken } from "../../../interfaces/mintForm";
 import useAppStore from "../../../store";
 import { displayBN } from "../../../util/bigNumber";
@@ -10,13 +11,20 @@ import * as S from "./styled";
 
 export default function MintRow({ index }: { index: number }) {
   const [openTokenPicker, setOpenTokenPicker] = useState(false);
-  const { account, mintFormState, onChangeMintFormStateField } = useAppStore(
-    ({ account, mintFormState, onChangeMintFormStateField }) => ({
-      account,
-      mintFormState,
-      onChangeMintFormStateField,
-    })
-  );
+  const { account, mintFormState, onChangeMintFormStateField, beanstalkSdk } =
+    useAppStore(
+      ({
+        account,
+        mintFormState,
+        onChangeMintFormStateField,
+        beanstalkSdk,
+      }) => ({
+        account,
+        mintFormState,
+        onChangeMintFormStateField,
+        beanstalkSdk,
+      })
+    );
 
   const mintItem = mintFormState.mintTokens[index];
 
@@ -32,13 +40,36 @@ export default function MintRow({ index }: { index: number }) {
     onChangeMintFormStateField("mintTokens", clonedArr);
   };
 
-  const tokenBalance =
-    mintItem.token.symbol === "BEAN DEPOSIT"
-      ? account?.siloDeposits.reduce((v, cur) => {
-          return v.add(cur.amount);
-        }, TokenValue.fromHuman("0", 6)) || TokenValue.fromHuman("0", 6)
-      : account?.balances.get(mintItem.token.address) ||
-        TokenValue.fromHuman("0", mintItem.token.decimals);
+  let balance = TokenValue.fromHuman("0", mintItem.token.decimals);
+  let external = TokenValue.fromHuman("0", mintItem.token.decimals);
+  let internal = TokenValue.fromHuman("0", mintItem.token.decimals);
+  if (account && mintItem.token.symbol === "BEAN DEPOSIT") {
+    balance = account.siloDeposits.reduce((v, cur) => {
+      return v.add(cur.amount);
+    }, TokenValue.fromHuman("0", 6));
+    external = balance;
+
+  } else if (account && mintItem.token.symbol === "ETH") {
+    balance = account.ethBalance;
+    external = balance;
+  } else if (account) {
+    const map = beanstalkSdk.tokens.getMap();
+    const token = map.get(mintItem.token.address.toLowerCase());
+    if (token) {
+      const total = account.tokenBalances.get(token)?.total;
+      const externalTemp = account.tokenBalances.get(token)?.external;
+      const internalTemp = account.tokenBalances.get(token)?.internal;
+      if (total) {
+        balance = total;
+      }
+      if (externalTemp) {
+        external = externalTemp;
+      }
+      if (internalTemp) {
+        internal = internalTemp;
+      }
+    }
+  }
 
   return (
     <>
@@ -58,7 +89,7 @@ export default function MintRow({ index }: { index: number }) {
                 return !TokenValue.fromHuman(
                   v.floatValue,
                   mintItem.token.decimals
-                ).gt(tokenBalance);
+                ).gt(balance);
               }
               return true;
             }}
@@ -100,16 +131,50 @@ export default function MintRow({ index }: { index: number }) {
           >
             <S.Balance>
               <div className="balance">
-                <span>
-                  Balance:{" "}
-                  {displayBN(tokenBalance, mintItem.token.formatDecimals)}
-                </span>{" "}
+                <TooltipIcon
+                  width={300}
+                  placement="bottom-center"
+                  element={
+                    <S.BalanceHover>
+                      <div>
+                        <b>Circulating Balance</b>:{" "}
+                        {displayBN(external, mintItem.token.formatDecimals)}{" "}
+                        {mintItem.token.name}{" "}
+                      </div>
+
+                      <div>
+                        <b>Farm Balance</b>:{" "}
+                        {displayBN(internal, mintItem.token.formatDecimals)}{" "}
+                        {mintItem.token.name}{" "}
+                      </div>
+                      <hr />
+                      <p>
+                        The Root UI first spends the balance that is most
+                        gas-efficient based on the specified amount.
+                      </p>
+                      <p>
+                        For more information{" "}
+                        <a
+                          href="https://docs.bean.money/guides/balances/understand-my-balances#farm-balance-circulating-balance"
+                          target="_blank"
+                        >
+                          click here
+                        </a>
+                        .
+                      </p>
+                    </S.BalanceHover>
+                  }
+                >
+                  <span>
+                    Balance: {displayBN(balance, mintItem.token.formatDecimals)}
+                  </span>
+                </TooltipIcon>
                 <button
                   onClick={() =>
                     onChangeWithField(
                       "amount",
                       displayBN(
-                        tokenBalance,
+                        balance,
                         mintItem.token.formatDecimals
                       ).replaceAll(",", "")
                     )

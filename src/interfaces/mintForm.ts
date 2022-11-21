@@ -69,5 +69,6 @@ export interface ISwapToken {
   swap: SwapOperation;
   workflow?: Workflow;
   needAllowance: boolean;
+  needInternalAllowance: boolean;
   tokenIn: Token;
 }
