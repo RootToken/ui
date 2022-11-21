@@ -275,12 +275,14 @@ export default function ClaimForm() {
 
   return (
     <S.Form>
-      <p>Please use Beanstalk UI to claim your withdrawal bean deposits.</p>
+      <p>Please use the Beanstalk UI to claim your withdrawn Bean deposits.
+
+</p>
       <a
         href="https://app.bean.money/#/silo/0xbea0000029ad1c77d3d5d23ba2d8893db9d1efab?action=claim"
         target="_blank"
       >
-        Click here to go to Beanstalk UI
+        Click here to go to the Beanstalk UI
       </a>.
     </S.Form>
   );
