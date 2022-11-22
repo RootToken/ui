@@ -539,7 +539,6 @@ export default function MintForm() {
                   deposits.push(min.deposit);
                 }
               } else {
-                
                 const min = bdvImpact || stalkImpact;
                 // console.log(
                 //   "using first bdv/stalkx",
@@ -904,7 +903,7 @@ export default function MintForm() {
       if (token.token.symbol === "BEAN DEPOSIT") {
         if (!permit && mintState.needAllowance) {
           txToast = new TransactionToast({
-            loading: `Approving ${token.token.name}...`,
+            loading: `Approving ${token.token.symbol}...`,
             success: "Approve successful.",
           });
           try {
@@ -945,7 +944,7 @@ export default function MintForm() {
       if (swap?.needAllowance) {
         if (swap.tokenIn instanceof ERC20Token) {
           txToast = new TransactionToast({
-            loading: `Approving ${token.token.name}...`,
+            loading: `Approving ${token.token.symbol}...`,
             success: "Approve successful.",
           });
 
@@ -1002,7 +1001,7 @@ export default function MintForm() {
       const swap = mintState.swaps[0];
 
       if (swap?.needAllowance) {
-        return `Approve ${swap.token.token.name}`;
+        return `Approve ${swap.token.token.symbol}`;
       }
 
       // Check for permit
@@ -1011,7 +1010,7 @@ export default function MintForm() {
         !permit &&
         mintState.needAllowance
       ) {
-        return `Approve ${token.token.name}`;
+        return `Approve ${token.token.symbol}`;
       }
     }
 
@@ -1156,6 +1155,21 @@ export default function MintForm() {
           </S.ContentContainer>
         </div>
       </S.Phase>
+      {/* {mintState.output !== "0" && mintFormState.mintTokens[0].token.symbol !== "BEAN DEPOSIT" && (
+        <S.Phase>
+          <S.Info>
+            Slippage is {displayBN(mintState.priceImpact, 2)}% to mint Roots directly from {mintFormState.mintTokens[0].token.symbol}, you can likely swap
+            {" "}{mintFormState.mintTokens[0].token.symbol} for Roots on 1inch with less slippage{" "}
+            <a
+              href={`https://app.1inch.io/#/1/unified/swap/${mintFormState.mintTokens[0].token.symbol}/ROOT_1`}
+              target="_blank"
+            >
+              here
+            </a>
+            .
+          </S.Info>
+        </S.Phase>
+      )} */}
       {mintFormState.mintToFarmBalance && (
         <S.Phase>
           <S.Info>
@@ -1337,7 +1351,7 @@ export default function MintForm() {
                                   ),
                                   swap.token.token.formatDecimals
                                 )}{" "}
-                                {swap.token.token.name} for{" "}
+                                {swap.token.token.symbol} for{" "}
                                 {displayBN(
                                   swap.estimatedTokenOut,
                                   TOKENS.BEAN.formatDecimals
