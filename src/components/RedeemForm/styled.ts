@@ -59,11 +59,13 @@ export const Form = styled.form`
         text-align: right;
         display: flex;
         align-items: center;
-        > span {
-          font-weight: 300;
-          font-size: 14px;
-          line-height: 26px;
-          color: #757880;
+        > div {
+          > span {
+            font-weight: 300;
+            font-size: 14px;
+            line-height: 26px;
+            color: #757880;
+          }
         }
         > button {
           color: #00f97c;
@@ -462,6 +464,27 @@ export const ContentContainer = styled.div<{ $isLoading?: boolean }>`
           margin-left: 8px;
         }
       }
+    }
+  }
+`;
+
+export const BalanceHover = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  > hr {
+    width: 100%;
+    border: 1px solid #323232;
+    margin: 12px 0;
+  }
+
+  > p, div {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+
+    > a {
+      color: #00f97c;
+      font-weight: bold;
     }
   }
 `;

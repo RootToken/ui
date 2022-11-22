@@ -1054,7 +1054,7 @@ export default function MintForm() {
       }
 
       if (swap?.needInternalAllowance) {
-        return `Approve Farm Balance ${swap.token.token.name}`;
+        return `Approve ${swap.token.token.name} Farm Balance`;
       }
 
       // Check for permit
