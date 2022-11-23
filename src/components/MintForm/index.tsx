@@ -1208,7 +1208,7 @@ export default function MintForm() {
           </S.ContentContainer>
         </div>
       </S.Phase>
-      {mintState.output !== "0" && mintFormState.mintTokens[0].token.symbol !== "BEAN DEPOSIT" && (
+      {/* {mintState.output !== "0" && mintFormState.mintTokens[0].token.symbol !== "BEAN DEPOSIT" && (
         <S.Phase>
           <S.Info>
             Slippage is {displayBN(mintState.priceImpact, 2)}% to mint Roots directly from {mintFormState.mintTokens[0].token.symbol}, you can likely swap
@@ -1222,7 +1222,7 @@ export default function MintForm() {
             .
           </S.Info>
         </S.Phase>
-      )}
+      )} */}
       {mintFormState.mintToFarmBalance && (
         <S.Phase>
           <S.Info>
