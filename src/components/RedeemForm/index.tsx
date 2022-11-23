@@ -64,7 +64,7 @@ export default function RedeemForm() {
     deposits: [] as ISiloDeposit[],
     needAllowance: false,
     needInternalAllowance: false,
-    internalBalance: undefined as TokenValue | undefined,
+    internalBalance: TokenValue.fromHuman("0", 18),
   });
   const [permit, setPermit] = useState<SignedPermit | undefined>(undefined);
 
@@ -271,7 +271,7 @@ export default function RedeemForm() {
           needAllowance: false,
           priceImpact: TokenValue.fromHuman("0", 18),
           rootAmount: TokenValue.fromHuman("0", 18),
-          internalBalance: undefined,
+          internalBalance: TokenValue.fromHuman("0", 18),
           needInternalAllowance: false,
           loading: false,
           output: "0",
@@ -369,7 +369,7 @@ export default function RedeemForm() {
 
     if (redeemFormState.redeemToWallet) {
       try {
-        if (redeemState.internalBalance) {
+        if (redeemState.internalBalance.gt(0)) {
           await redeemBeanDepositWithInternalRoot(
             redeemState.rootAmount,
             redeemState.deposits,

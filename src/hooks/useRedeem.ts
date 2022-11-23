@@ -60,9 +60,6 @@ export default function useRedeem() {
     maxRootsIn: TokenValue,
     internalRoot?: TokenValue,
   ) => {
-    console.log(amount.toHuman())
-    console.log(internalRoot?.toHuman())
-
     const txToast = new TransactionToast({
       loading: `Redeeming Root...`,
       success: "Redeem successful.",
