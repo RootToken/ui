@@ -1214,7 +1214,7 @@ export default function MintForm() {
             Slippage is {displayBN(mintState.priceImpact, 2)}% to mint Roots directly from {mintFormState.mintTokens[0].token.symbol}, you can likely swap
             {" "}{mintFormState.mintTokens[0].token.symbol} for Roots on 1inch with less slippage{" "}
             <a
-              href={`https://app.1inch.io/#/1/unified/swap/${mintFormState.mintTokens[0].token.symbol}/ROOT_1`}
+              href={`https://app.1inch.io/#/1/unified/swap/${mintFormState.mintTokens[0].token.symbol}/0x77700005BEA4DE0A78b956517f099260C2CA9a26`}
               target="_blank"
             >
               here
