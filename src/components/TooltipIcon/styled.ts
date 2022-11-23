@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import styled from "styled-components";
 
-export const PopoverContainer = styled(motion.div)`
+export const PopoverContainer = styled(motion.div)<{ $width?: number }>`
   background: #18181b;
   border: 1px solid #323232;
   border-radius: 12px;
   padding: 12px 15px;
   width: fit-content;
-  max-width: 250px;
+  max-width: ${props => props.$width || 250}px;
 
   > p {
     margin: 0;

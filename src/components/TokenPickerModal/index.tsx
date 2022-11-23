@@ -6,7 +6,7 @@ import * as S from "./styled";
 import { IToken, ITokenSymbol, TOKENS } from "../../interfaces/token";
 import { ISiloDeposit } from "../../interfaces/siloDeposit";
 import { displayBN } from "../../util/bigNumber";
-import { TokenValue } from "@beanstalk/sdk";
+import { TokenValue, Token } from "@beanstalk/sdk";
 import { IAccount } from "../../interfaces/account";
 
 interface ModalProps {
@@ -25,12 +25,14 @@ export default function TokenPickerModal({
   claim = false,
 }: ModalProps) {
   const [search, setSearch] = useState("");
-  const { account, mintFormState, claimFormState } = useAppStore((state) => ({
-    beanstalkSdk: state.beanstalkSdk,
-    account: state.account,
-    mintFormState: state.mintFormState,
-    claimFormState: state.claimFormState,
-  }));
+  const { account, mintFormState, claimFormState, beanstalkSdk } = useAppStore(
+    (state) => ({
+      beanstalkSdk: state.beanstalkSdk,
+      account: state.account,
+      mintFormState: state.mintFormState,
+      claimFormState: state.claimFormState,
+    })
+  );
 
   const disabledTokens: { [key: string]: boolean } = {};
 
@@ -46,6 +48,8 @@ export default function TokenPickerModal({
   account?.siloDeposits.forEach((deposit) => {
     beanDepositAmount = beanDepositAmount.add(deposit.amount);
   });
+
+  const tokenMap = beanstalkSdk.tokens.getMap();
 
   useEffect(() => {
     if (!open) {
@@ -96,6 +100,7 @@ export default function TokenPickerModal({
               const token = TOKENS[key as ITokenSymbol];
               return (
                 <CoinItem
+                  tokenKey={tokenMap.get(token.address.toLowerCase())}
                   key={key}
                   token={token}
                   isDisabled={disabledTokens[token.symbol]}
@@ -118,19 +123,25 @@ const CoinItem = ({
   isDisabled,
   account,
   onSelect,
+  tokenKey,
 }: {
   token: IToken;
   isDisabled: boolean;
   account?: IAccount;
   onSelect: (token: IToken) => void;
+  tokenKey?: Token;
 }) => {
-  const balance = account?.balances.get(token.address);
-  let beanDepositAmount = TokenValue.fromHuman("0", 6);
-
-  if (token.symbol === "BEAN DEPOSIT") {
-    account?.siloDeposits.forEach((deposit) => {
-      beanDepositAmount = beanDepositAmount.add(deposit.amount);
+  let balance = TokenValue.fromHuman("0", token.decimals);
+  if (token.symbol === "BEAN DEPOSIT" && account) {
+    account.siloDeposits.forEach((deposit) => {
+      balance = balance.add(deposit.amount);
     });
+  } else if (token.symbol === "ETH" && account?.ethBalance) {
+    balance = account?.ethBalance;
+  } else if (tokenKey && account) {
+    if (account.tokenBalances.get(tokenKey)?.total) {
+      balance = account.tokenBalances.get(tokenKey)!.total;
+    }
   }
 
   return (
@@ -149,18 +160,10 @@ const CoinItem = ({
             <div>{token.name}</div>
           </div>
         </div>
-        {token.symbol === "BEAN DEPOSIT" ? account && (
-          <>
-            <div className="balance">
-              {displayBN(beanDepositAmount, token.formatDecimals)}
-            </div>
-          </>
-        ) : (
-          balance && (
-            <div className="balance">
-              {displayBN(balance, token.formatDecimals)}
-            </div>
-          )
+        {account && (
+          <div className="balance">
+            {displayBN(balance, token.formatDecimals)}
+          </div>
         )}
       </S.CoinItem>
     </li>

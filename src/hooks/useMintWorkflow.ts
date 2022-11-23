@@ -10,6 +10,7 @@ import {
 } from "@beanstalk/sdk";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import { ethers, BigNumberish } from "ethers";
+import { TransferToken } from "../util/farm";
 import TransactionToast from "../components/Common/TransactionToast";
 import useAppStore from "../store";
 
@@ -29,13 +30,14 @@ export default function useMintWorkflow() {
   const mintRootsWithSwappedBean = (
     inputToken: Token,
     fromMode: FarmFromMode = FarmFromMode.EXTERNAL,
-    toMode: FarmToMode = FarmToMode.EXTERNAL
+    toMode: FarmToMode = FarmToMode.EXTERNAL,
+    internalBalance?: TokenValue,
   ) => {
     if (!account) return null;
     const depositToken = sdk.tokens.BEAN; // always deposit BEAN
 
     // Use Depot since DepotFacet isn't ready.
-    const spender = sdk.contracts.depot.address;
+    // const spender = sdk.contracts.depot.address;
     const depotFarm = sdk.farm.create<{ permit: any }>("DepotMint", "depot") as FarmWorkflow;
 
     // Give DEPOT permission to use `inputToken`.
@@ -43,6 +45,27 @@ export default function useMintWorkflow() {
     //   onlyExecute: true,
     //   skip: (amountInStep) => inputToken.hasEnoughAllowance(account.address, spender, amountInStep)
     // });
+    // 
+    // If the user is using internal balance then transfer it to depot
+    if (internalBalance) {
+      depotFarm.add(
+        () => ({
+          target: sdk.contracts.beanstalk.address,
+          callData: sdk.contracts.beanstalk.interface.encodeFunctionData(
+            "transferToken",
+            [
+              inputToken.address, //
+              account.address, //
+              internalBalance.toBlockchain(),
+              FarmFromMode.INTERNAL, //
+              FarmToMode.EXTERNAL, //
+            ]
+          ),
+        }),
+        { onlyExecute: true }
+      );
+    }
+   
 
     // DEPOT sends assets to PIPELINE on behalf of the signer.
     depotFarm.add(

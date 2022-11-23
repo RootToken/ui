@@ -78,6 +78,7 @@ const getUserBalance = async (
   const accountAddress = await sdk.getAccount();
   let siloBalances: Map<Token, TokenSiloBalance> = new Map();
   let tokenBalances: Map<Token, TokenBalance> = new Map();
+  let ethBalance = TokenValue.fromHuman("0", 18);
 
   try {
     siloBalances = await sdk.silo.getBalances(undefined, {
@@ -113,6 +114,16 @@ const getUserBalance = async (
     ]);
   } catch (err) {
     console.log(err);
+  }
+
+  try {
+    const balance = await sdk.signer!.getBalance("latest");
+    if (!balance) {
+      throw new Error("failed to get balance");
+    }
+    ethBalance = TokenValue.fromBlockchain(balance, 18);
+  } catch(e) {
+    throw e;
   }
 
   const balances: Map<string, TokenValue> = new Map();
@@ -180,6 +191,7 @@ const getUserBalance = async (
   }
 
   return {
+    ethBalance,
     address: accountAddress,
     balances,
     siloDeposits: tempDeposits,

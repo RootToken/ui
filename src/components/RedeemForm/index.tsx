@@ -23,6 +23,8 @@ import debounce from "lodash.debounce";
 import useRedeem from "../../hooks/useRedeem";
 import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import { toast } from "react-hot-toast";
+import TransactionToast from "../Common/TransactionToast";
+import { ethers } from "ethers";
 
 export default function RedeemForm() {
   const [openTx, setOpenTx] = useState(false);
@@ -60,10 +62,13 @@ export default function RedeemForm() {
     maxRootsIn: TokenValue.fromHuman("0", TOKENS["BEAN DEPOSIT"].decimals),
     priceImpact: TokenValue.fromHuman("0", TOKENS["BEAN DEPOSIT"].decimals),
     deposits: [] as ISiloDeposit[],
+    needAllowance: false,
+    needInternalAllowance: false,
+    internalBalance: TokenValue.fromHuman("0", 18),
   });
   const [permit, setPermit] = useState<SignedPermit | undefined>(undefined);
 
-  const { redeemBeanDepositWithRoot, redeemBeanDepositAndWithdrawWithRoot } =
+  const { redeemBeanDepositWithRoot, redeemBeanDepositWithInternalRoot } =
     useRedeem();
 
   const calculateEstimate = useCallback(
@@ -202,18 +207,72 @@ export default function RedeemForm() {
 
         const totalSlipage = TokenValue.fromHuman(redeemFormState.slippage, 18);
 
+        // Check if user is using internal balance
+        const rootAmount = TokenValue.fromHuman(
+          redeemFormState.redeemAmount,
+          18
+        );
+        const rootBalance = account!.tokenBalances.get(
+          beanstalkSdk.tokens.ROOT
+        );
+
+        let needAllowance = false;
+        let needInternalAllowance = false;
+        let internalAmount = TokenValue.fromHuman(
+          "0",
+          beanstalkSdk.tokens.ROOT.decimals
+        );
+
+        // Using both external and internal to redeem
+        // Need to check allowance for both external/internal for depot
+        if (rootBalance && rootAmount.gt(rootBalance.external)) {
+          let internalAllowance = TokenValue.fromHuman(
+            "0",
+            beanstalkSdk.tokens.ROOT.decimals
+          );
+         
+
+          if (rootAmount.gt(rootBalance.external)) {
+            internalAllowance = TokenValue.fromBlockchain(
+              await beanstalkSdk.contracts.beanstalk.tokenAllowance(
+                account!.address,
+                beanstalkSdk.contracts.depot.address,
+                beanstalkSdk.tokens.ROOT.address
+              ),
+              beanstalkSdk.tokens.ROOT.decimals
+            );
+            internalAmount = rootAmount.sub(rootBalance.external);
+          }
+
+          const allowance = await beanstalkSdk.tokens.ROOT.getAllowance(
+            account!.address,
+            beanstalkSdk.contracts.depot.address
+          );
+
+          needAllowance = allowance.lt(rootAmount);
+          needInternalAllowance = internalAllowance.lt(internalAmount);
+        }
+
         setRedeemState((state) => ({
-          ...state,
+          priceImpact: TokenValue.fromHuman("0", 18),
+          rootAmount: TokenValue.fromHuman(redeemFormState.redeemAmount, 18),
           loading: false,
           output: displayBN(totalAmount, TOKENS["BEAN DEPOSIT"].formatDecimals),
           deposits: redeemDeposits,
           maxRootsIn: result.amount.add(
             result.amount.mul(totalSlipage.mul(10)).div(1000)
           ),
+          needInternalAllowance,
+          internalBalance: internalAmount,
+          needAllowance,
         }));
       } catch (e) {
         setRedeemState((state) => ({
-          ...state,
+          needAllowance: false,
+          priceImpact: TokenValue.fromHuman("0", 18),
+          rootAmount: TokenValue.fromHuman("0", 18),
+          internalBalance: TokenValue.fromHuman("0", 18),
+          needInternalAllowance: false,
           loading: false,
           output: "0",
           maxRootsIn: TokenValue.fromHuman("0", 18),
@@ -245,6 +304,13 @@ export default function RedeemForm() {
       }
     }
 
+    if (redeemState.needInternalAllowance) {
+      return "Approve Root Farm Balance";
+    }
+    if (redeemState.needAllowance) {
+      return "Approve Root";
+    }
+
     return "REDEEM";
   };
 
@@ -256,8 +322,63 @@ export default function RedeemForm() {
       return;
     }
 
+    if (redeemState.needInternalAllowance) {
+      const txToast = new TransactionToast({
+        loading: `Approving Root Farm Balance...`,
+        success: "Approve successful.",
+      });
+
+      try {
+        const approval = await beanstalkSdk.contracts.beanstalk.approveToken(
+          beanstalkSdk.contracts.depot.address, // DEPOT is the spender
+          beanstalkSdk.tokens.ROOT.address,
+          ethers.constants.MaxUint256
+        );
+        txToast.confirming(approval);
+        const receipt = await approval.wait();
+        txToast.success(receipt);
+        calculateEstimate(redeemFormState);
+      } catch (e) {
+        txToast.error(e);
+      }
+
+      return;
+    }
+
+    if (redeemState.needAllowance) {
+      const txToast = new TransactionToast({
+        loading: `Approving Root...`,
+        success: "Approve successful.",
+      });
+
+      try {
+        const approval = await beanstalkSdk.contracts.root.approve(
+          beanstalkSdk.contracts.depot.address, // DEPOT is the spender
+          ethers.constants.MaxUint256
+        );
+        txToast.confirming(approval);
+        const receipt = await approval.wait();
+        txToast.success(receipt);
+        calculateEstimate(redeemFormState);
+      } catch (e) {
+        txToast.error(e);
+      }
+
+      return;
+    }
+
     if (redeemFormState.redeemToWallet) {
       try {
+        if (redeemState.internalBalance.gt(0)) {
+          await redeemBeanDepositWithInternalRoot(
+            redeemState.rootAmount,
+            redeemState.deposits,
+            redeemState.maxRootsIn,
+            redeemState.internalBalance
+          );
+          resetState();
+          return;
+        }
         await redeemBeanDepositWithRoot(
           redeemState.deposits,
           redeemState.maxRootsIn
@@ -316,13 +437,19 @@ export default function RedeemForm() {
     calculateEstimate(redeemFormState);
   }, [redeemFormState]);
 
+  const internalBalance =
+    account?.tokenBalances.get(beanstalkSdk.tokens.ROOT)?.internal ||
+    TokenValue.fromHuman("0", beanstalkSdk.tokens.ROOT.decimals);
+  const externalBalance =
+    account?.tokenBalances.get(beanstalkSdk.tokens.ROOT)?.external ||
+    TokenValue.fromHuman("0", beanstalkSdk.tokens.ROOT.decimals);
   const tokenBalance =
-    account?.balances.get(ENVIRONMENT.rootContractAddress) ||
-    TokenValue.fromHuman("0", 18);
+    account?.tokenBalances.get(beanstalkSdk.tokens.ROOT)?.total ||
+    TokenValue.fromHuman("0", beanstalkSdk.tokens.ROOT.decimals);
 
   const redeemAmount = TokenValue.fromHuman(
     redeemFormState.redeemAmount || "0",
-    18
+    beanstalkSdk.tokens.ROOT.decimals
   );
 
   return (
@@ -388,7 +515,40 @@ export default function RedeemForm() {
               >
                 <div />
                 <div className="balance">
-                  <span>Balance: {displayBN(tokenBalance, 2)}</span>{" "}
+                  <TooltipIcon
+                    width={300}
+                    placement="bottom-center"
+                    element={
+                      <S.BalanceHover>
+                        <div>
+                          <b>Circulating Balance</b>:{" "}
+                          {displayBN(externalBalance, 2)} Root
+                        </div>
+
+                        <div>
+                          <b>Farm Balance</b>: {displayBN(internalBalance, 2)}{" "}
+                          Root{" "}
+                        </div>
+                        <hr />
+                        <p>
+                          The Root UI first spends the balance that is most
+                          gas-efficient based on the specified amount.
+                        </p>
+                        <p>
+                          For more information{" "}
+                          <a
+                            href="https://docs.bean.money/guides/balances/understand-my-balances#farm-balance-circulating-balance"
+                            target="_blank"
+                          >
+                            click here
+                          </a>
+                          .
+                        </p>
+                      </S.BalanceHover>
+                    }
+                  >
+                    <span>Balance: {displayBN(tokenBalance, 2)}</span>
+                  </TooltipIcon>
                   <button
                     onClick={() =>
                       onChangeRedeemFormStateField(
@@ -452,7 +612,8 @@ export default function RedeemForm() {
                 target="_blank"
               >
                 Beanstalk UI
-              </a>.
+              </a>
+              .
             </S.Info>
           </S.Phase>
         </>

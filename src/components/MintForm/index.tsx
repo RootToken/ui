@@ -59,6 +59,7 @@ export default function MintForm() {
     totalBdvFromDeposits: "",
     bdvImpacted: false,
     needAllowance: false,
+    needInternalAllowance: false,
   });
   const [permit, setPermit] = useState<SignedPermit | undefined>(undefined);
 
@@ -110,6 +111,7 @@ export default function MintForm() {
             | "DAI"
             | "ETH"
             | "WETH";
+
           const tokenIn = beanstalkSdk.tokens[symbol];
           const amount = tokenIn.fromHuman(token.amount);
           const allowance = await tokenIn.getAllowance(
@@ -117,10 +119,30 @@ export default function MintForm() {
             spender
           );
 
+          // Check if user is using internal balance
+          let internalAllowance: TokenValue | undefined;
+          let internalAmount: TokenValue | undefined;
+          if (account!.tokenBalances.get(tokenIn)) {
+            if (amount.gt(account!.tokenBalances.get(tokenIn)!.external)) {
+              internalAllowance = TokenValue.fromBlockchain(
+                await beanstalkSdk.contracts.beanstalk.tokenAllowance(
+                  account!.address,
+                  spender,
+                  tokenIn.address
+                ),
+                tokenIn.decimals
+              );
+              internalAmount = amount.sub(
+                account!.tokenBalances.get(tokenIn)!.external
+              );
+            }
+          }
+
           const strategy = getMintStrategy(
             tokenIn,
             FarmFromMode.EXTERNAL,
-            toMode
+            toMode,
+            internalAmount
           );
 
           if (!strategy) throw new Error("Failed to build workflow");
@@ -131,6 +153,10 @@ export default function MintForm() {
           const needAllowance = allowance
             ? allowance.lt(amount.toBigNumber())
             : false;
+          const needInternalAllowance =
+            internalAllowance && internalAmount
+              ? internalAllowance.lt(internalAmount)
+              : false;
 
           const estimatedTokenOut = await swap.estimate(amount);
 
@@ -145,9 +171,10 @@ export default function MintForm() {
             swap,
             workflow,
             needAllowance,
+            needInternalAllowance,
           };
         } catch (e: any) {
-          // console.log(e);
+          console.log(e);
           throw e;
         }
       })
@@ -766,6 +793,7 @@ export default function MintForm() {
             priceImpact,
             bdvImpacted,
             needAllowance,
+            needInternalAllowance: false,
           });
 
           return;
@@ -841,6 +869,7 @@ export default function MintForm() {
           totalBeanIntoSilo: displayBN(swap.estimatedTokenOut, 2),
           bdvImpacted,
           needAllowance: swap.needAllowance,
+          needInternalAllowance: swap.needInternalAllowance,
         });
       } catch (e) {
         // console.log(e);
@@ -858,6 +887,7 @@ export default function MintForm() {
           totalBeanIntoSilo: "",
           bdvImpacted: false,
           needAllowance: false,
+          needInternalAllowance: false,
         });
       }
     }, 500),
@@ -959,6 +989,25 @@ export default function MintForm() {
           return;
         }
       }
+      if (swap?.needInternalAllowance) {
+        if (swap.tokenIn instanceof ERC20Token) {
+          txToast = new TransactionToast({
+            loading: `Approving ${token.token.name}...`,
+            success: "Approve successful.",
+          });
+
+          const approval = await beanstalkSdk.contracts.beanstalk.approveToken(
+            beanstalkSdk.contracts.depot.address, // DEPOT is the spender
+            swap.tokenIn.address,
+            ethers.constants.MaxUint256
+          );
+          txToast.confirming(approval);
+          const receipt = await approval.wait();
+          txToast.success(receipt);
+          calculate(mintFormState);
+          return;
+        }
+      }
 
       // Execute
       txToast = new TransactionToast({
@@ -1002,6 +1051,10 @@ export default function MintForm() {
 
       if (swap?.needAllowance) {
         return `Approve ${swap.token.token.symbol}`;
+      }
+
+      if (swap?.needInternalAllowance) {
+        return `Approve ${swap.token.token.name} Farm Balance`;
       }
 
       // Check for permit

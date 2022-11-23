@@ -10,4 +10,5 @@ export interface IAccount {
   signer: ethers.Signer;
   tokenBalances: Map<Token, TokenBalance>;
   siloBalances: Map<Token, TokenSiloBalance>;
+  ethBalance: TokenValue;
 }

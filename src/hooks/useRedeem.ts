@@ -54,11 +54,11 @@ export default function useRedeem() {
     }
   };
 
-  const redeemBeanDepositAndWithdrawWithRoot = async (
-    permit: SignedPermit,
+  const redeemBeanDepositWithInternalRoot = async (
     amount: TokenValue,
     deposits: ISiloDeposit[],
-    maxRootsIn: TokenValue
+    maxRootsIn: TokenValue,
+    internalRoot?: TokenValue,
   ) => {
     const txToast = new TransactionToast({
       loading: `Redeeming Root...`,
@@ -75,10 +75,27 @@ export default function useRedeem() {
 
       const token = beanstalkSdk.tokens.ROOT;
 
-      const farm = beanstalkSdk.farm.create("Redeem", "beanstalk");
+      const farm = beanstalkSdk.farm.create("Redeem", "depot");
       const pipe = beanstalkSdk.farm.createAdvancedPipe();
 
-      farm.add(new beanstalkSdk.farm.actions.PermitERC20(permit));
+      if (internalRoot) {
+        farm.add(
+          () => ({
+            target: beanstalkSdk.contracts.beanstalk.address,
+            callData: beanstalkSdk.contracts.beanstalk.interface.encodeFunctionData(
+              "transferToken",
+              [
+                token.address, //
+                account!.address, //
+                internalRoot.toBlockchain(),
+                FarmFromMode.INTERNAL, //
+                FarmToMode.EXTERNAL, //
+              ]
+            ),
+          }),
+          { onlyExecute: true }
+        );
+      }
       farm.add(
         beanstalkSdk.farm.presets.loadPipeline(
           token,
@@ -123,13 +140,13 @@ export default function useRedeem() {
       );
 
       // @TODO add a farm step here to withdraw
-      farm.add(
-        new beanstalkSdk.farm.actions.WithdrawDeposits(
-          beanstalkSdk.tokens.BEAN.address,
-          seasons,
-          amounts
-        )
-      );
+      // farm.add(
+      //   new beanstalkSdk.farm.actions.WithdrawDeposits(
+      //     beanstalkSdk.tokens.BEAN.address,
+      //     seasons,
+      //     amounts
+      //   )
+      // );
 
       const txn = await farm.execute(amount, {
         slippage: 0.5,
@@ -145,6 +162,6 @@ export default function useRedeem() {
 
   return {
     redeemBeanDepositWithRoot,
-    redeemBeanDepositAndWithdrawWithRoot,
+    redeemBeanDepositWithInternalRoot,
   };
 }
