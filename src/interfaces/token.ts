@@ -48,7 +48,7 @@ export const TOKENS: { [key in ITokenSymbol]: IToken } = {
     address: "0xBEA0000029AD1c77D3d5D23Ba2D8893dB9d1Efab",
     decimals: 6,
     formatDecimals: 2,
-    slippage: 0,
+    slippage: 0.5,
     permit: true,
   },
   "BEAN DEPOSIT": {

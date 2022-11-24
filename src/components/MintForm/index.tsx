@@ -49,6 +49,7 @@ export default function MintForm() {
   const [mintState, setMintState] = useState({
     loading: false,
     output: "0",
+    route: "mint" as "mint" | "swap",
     minRootsOut: TokenValue.fromHuman("0", 18),
     priceImpact: TokenValue.fromHuman("0", 18),
     swaps: [] as ISwapToken[],
@@ -66,6 +67,7 @@ export default function MintForm() {
   const {
     mintRootsWithSwappedBean: getMintStrategy,
     mintRootsWithBeanDeposit,
+    mintRootsWithSwappedBeanUniswap,
   } = useMintWorkflow();
 
   const {
@@ -172,6 +174,7 @@ export default function MintForm() {
             workflow,
             needAllowance,
             needInternalAllowance,
+            internalAmount,
           };
         } catch (e: any) {
           console.log(e);
@@ -779,6 +782,7 @@ export default function MintForm() {
 
           // Estimate
           setMintState({
+            route: "mint",
             output: displayBN(result.amount, 2),
             loading: false,
             minRootsOut: result.amount.sub(
@@ -805,6 +809,66 @@ export default function MintForm() {
         );
         const swap = swaps[0];
         const amount = swap.estimated;
+
+        // Check if using uniswap is better
+        try {
+          const uniswapStrategy = mintRootsWithSwappedBeanUniswap(
+            swap.tokenIn,
+            FarmFromMode.EXTERNAL,
+            state.mintToFarmBalance ? FarmToMode.INTERNAL : FarmToMode.EXTERNAL,
+            swap.internalAmount
+          );
+
+          if (!uniswapStrategy) {
+            throw new Error("Missing uniswap strategy");
+          }
+
+          const { rootOutput, priceImpact } =
+            await uniswapStrategy?.estimateBeanToRoot(swap.estimatedTokenOut);
+          console.log("estimated root from uniswap:", rootOutput?.toHuman());
+
+          if (rootOutput?.gte(swap.estimated)) {
+            console.log("using uniswap route");
+
+            console.log(swap.token.slippage, parseFloat(swap.token.slippage));
+            console.log(
+              Workflow.slip(
+                rootOutput.toBigNumber(),
+                parseFloat(swap.token.slippage)
+              ).toString()
+            );
+            console.log(
+              rootOutput
+                .mul(parseFloat(swap.token.slippage) * 10)
+                .div(1000)
+                .toHuman()
+            );
+
+            setMintState({
+              route: "swap",
+              output: displayBN(rootOutput, 2),
+              loading: false,
+              minRootsOut: TokenValue.fromBlockchain(
+                Workflow.slip(
+                  rootOutput.toBigNumber(),
+                  parseFloat(swap.token.slippage)
+                ),
+                18
+              ),
+              priceImpact: TokenValue.fromHuman(priceImpact, 18),
+              swaps,
+              workflow: uniswapStrategy.workflow as FarmWorkflow,
+              amounts: [],
+              seasons: [],
+              totalBdvFromDeposits: displayBN(swap.estimatedTokenOut, 2),
+              totalBeanIntoSilo: displayBN(swap.estimatedTokenOut, 2),
+              bdvImpacted: false,
+              needAllowance: swap.needAllowance,
+              needInternalAllowance: swap.needInternalAllowance,
+            });
+            return;
+          }
+        } catch (e) {}
 
         let priceImpact = TokenValue.fromHuman("0", 18);
         let bdvImpacted = false;
@@ -857,6 +921,7 @@ export default function MintForm() {
         }
 
         setMintState({
+          route: "mint",
           output: displayBN(amount, 2),
           loading: false,
           minRootsOut: swap.estimatedWithSlippage,
@@ -875,6 +940,7 @@ export default function MintForm() {
         // console.log(e);
         setOpenTx(false);
         setMintState({
+          route: "mint",
           output: "0",
           loading: false,
           minRootsOut: TokenValue.fromHuman("0", 18),
@@ -1011,9 +1077,10 @@ export default function MintForm() {
 
       // Execute
       txToast = new TransactionToast({
-        loading: `Minting ${displayBN(swap.estimated, 2)} ROOT...`,
+        loading: `Minting ${mintState.output} ROOT...`,
         success: "Minting successful.",
       });
+
       const estimate = await mintState.workflow!.estimateGas(tokenAmount, {
         slippage: parseFloat(token.slippage),
       });
@@ -1325,116 +1392,220 @@ export default function MintForm() {
                           </div>
                           <div>{displayBN(mintState.priceImpact, 2)}%</div>
                         </div>
-                        <div className="routes">
-                          <div className="line" />
-                          {mintFormState.mintTokens.filter(
-                            (v) => v.token.slippage !== 0
-                          ).length > 0 ? (
-                            <>
-                              <div className="list">
-                                {mintFormState.mintTokens.map((v, idx) => {
-                                  if (v.token.slippage === 0) {
-                                    return null;
-                                  }
-                                  return (
-                                    <div className="token" key={idx}>
+                        {mintState.route === "mint" ? (
+                          <>
+                            <div className="routes">
+                              <div className="line" />
+                              {mintFormState.mintTokens.filter(
+                                (v) => v.token.slippage !== 0
+                              ).length > 0 ? (
+                                <>
+                                  <div className="list">
+                                    {mintFormState.mintTokens.map((v, idx) => {
+                                      if (v.token.slippage === 0) {
+                                        return null;
+                                      }
+                                      return (
+                                        <div className="token" key={idx}>
+                                          <img
+                                            width={25}
+                                            height={25}
+                                            src={v.token.icon}
+                                          />
+                                        </div>
+                                      );
+                                    })}
+                                    <div className="to">
+                                      <ChevronsRight
+                                        color="#b0b0b0"
+                                        size={16}
+                                      />
                                       <img
                                         width={25}
                                         height={25}
-                                        src={v.token.icon}
+                                        src="/bean.svg"
                                       />
                                     </div>
-                                  );
-                                })}
-                                <div className="to">
-                                  <ChevronsRight color="#b0b0b0" size={16} />
-                                  <img width={25} height={25} src="/bean.svg" />
-                                </div>
 
-                                <div className="to">
-                                  <ChevronsRight color="#b0b0b0" size={16} />
-                                  <img width={25} height={25} src="/silo.svg" />
-                                  <img width={25} height={25} src="/bean.svg" />
-                                </div>
-                              </div>
+                                    <div className="to">
+                                      <ChevronsRight
+                                        color="#b0b0b0"
+                                        size={16}
+                                      />
+                                      <img
+                                        width={25}
+                                        height={25}
+                                        src="/silo.svg"
+                                      />
+                                      <img
+                                        width={25}
+                                        height={25}
+                                        src="/bean.svg"
+                                      />
+                                    </div>
+                                  </div>
 
-                              <div className="token">
-                                <img width={25} height={25} src="/root.svg" />
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="list">
-                                {mintState.totalBeanIntoSilo !== "0" && (
                                   <div className="token">
                                     <img
                                       width={25}
                                       height={25}
-                                      src="/bean.svg"
+                                      src="/root.svg"
                                     />
                                   </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="list">
+                                    <div className="to">
+                                      <img
+                                        width={25}
+                                        height={25}
+                                        src="/silo.svg"
+                                      />
+                                      <img
+                                        width={25}
+                                        height={25}
+                                        src="/bean.svg"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="token">
+                                    <img
+                                      width={25}
+                                      height={25}
+                                      src="/root.svg"
+                                    />
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                            <div className="routesText">
+                              {mintState.swaps.map((swap) => {
+                                if (swap.tokenIn.symbol === "BEAN") {
+                                  return;
+                                }
+                                return (
+                                  <p key={swap.token.token.symbol}>
+                                    Swap{" "}
+                                    {displayBN(
+                                      TokenValue.fromHuman(
+                                        swap.token.amount || "0",
+                                        swap.token.token.formatDecimals
+                                      ),
+                                      swap.token.token.formatDecimals
+                                    )}{" "}
+                                    {swap.token.token.symbol} for{" "}
+                                    {displayBN(
+                                      swap.estimatedTokenOut,
+                                      TOKENS.BEAN.formatDecimals
+                                    )}{" "}
+                                    Bean
+                                  </p>
+                                );
+                              })}
+                              {mintFormState.mintTokens[0].token.symbol !==
+                                "BEAN DEPOSIT" &&
+                                mintState.totalBeanIntoSilo !== "0" && (
+                                  <p>
+                                    Deposit {mintState.totalBeanIntoSilo} Bean
+                                    into the Silo for{" "}
+                                    {mintState.totalBeanIntoSilo} Bean Deposit
+                                  </p>
                                 )}
-                                <div className="to">
-                                  {mintState.totalBeanIntoSilo !== "0" && (
-                                    <ChevronsRight color="#b0b0b0" size={16} />
-                                  )}
-                                  <img width={25} height={25} src="/silo.svg" />
-                                  <img width={25} height={25} src="/bean.svg" />
-                                </div>
-                              </div>
 
-                              <div className="token">
-                                <img width={25} height={25} src="/root.svg" />
-                              </div>
-                            </>
-                          )}
-                        </div>
-                        <div className="routesText">
-                          {mintState.swaps.map((swap) => {
-                            if (swap.tokenIn.symbol === "BEAN") {
-                              return;
-                            }
-                            return (
-                              <p key={swap.token.token.symbol}>
-                                Swap{" "}
-                                {displayBN(
-                                  TokenValue.fromHuman(
-                                    swap.token.amount || "0",
-                                    swap.token.token.formatDecimals
-                                  ),
-                                  swap.token.token.formatDecimals
-                                )}{" "}
-                                {swap.token.token.symbol} for{" "}
-                                {displayBN(
-                                  swap.estimatedTokenOut,
-                                  TOKENS.BEAN.formatDecimals
-                                )}{" "}
-                                Bean
-                              </p>
-                            );
-                          })}
-                          {mintFormState.mintTokens[0].token.symbol !==
-                            "BEAN DEPOSIT" &&
-                            mintState.totalBeanIntoSilo !== "0" && (
                               <p>
-                                Deposit {mintState.totalBeanIntoSilo} Bean into
-                                the Silo for {mintState.totalBeanIntoSilo} Bean
-                                Deposit
+                                Use {mintState.totalBdvFromDeposits} Bean
+                                Deposit to mint {mintState.output} Root
                               </p>
-                            )}
 
-                          <p>
-                            Use {mintState.totalBdvFromDeposits} Bean Deposit to
-                            mint {mintState.output} Root
-                          </p>
+                              <p>
+                                Transfer {mintState.output} Root to{" "}
+                                {mintFormState.mintToFarmBalance
+                                  ? "Beanstalk Farm Balance"
+                                  : "your wallet"}
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="routes">
+                              <div className="line" />
+                              <>
+                                <div className="list">
+                                  {mintFormState.mintTokens.map((v, idx) => {
+                                    if (v.token.slippage === 0) {
+                                      return null;
+                                    }
+                                    return (
+                                      <div className="token" key={idx}>
+                                        <img
+                                          width={25}
+                                          height={25}
+                                          src={v.token.icon}
+                                        />
+                                      </div>
+                                    );
+                                  })}
+                                  {mintFormState.mintTokens[0].token.symbol !==
+                                    "BEAN" && (
+                                    <div className="to">
+                                      <ChevronsRight
+                                        color="#b0b0b0"
+                                        size={16}
+                                      />
+                                      <img
+                                        width={25}
+                                        height={25}
+                                        src="/bean.svg"
+                                      />
+                                    </div>
+                                  )}
+                                </div>
 
-                          <p>
-                            Transfer {mintState.output} Root to{" "}
-                            {mintFormState.mintToFarmBalance
-                              ? "Beanstalk Farm Balance"
-                              : "your wallet"}
-                          </p>
-                        </div>
+                                <div className="token">
+                                  <img width={25} height={25} src="/root.svg" />
+                                </div>
+                              </>
+                            </div>
+                            <div className="routesText">
+                              {mintState.swaps.map((swap) => {
+                                if (swap.tokenIn.symbol === "BEAN") {
+                                  return;
+                                }
+                                return (
+                                  <p key={swap.token.token.symbol}>
+                                    Swap{" "}
+                                    {displayBN(
+                                      TokenValue.fromHuman(
+                                        swap.token.amount || "0",
+                                        swap.token.token.formatDecimals
+                                      ),
+                                      swap.token.token.formatDecimals
+                                    )}{" "}
+                                    {swap.token.token.symbol} for{" "}
+                                    {displayBN(
+                                      swap.estimatedTokenOut,
+                                      TOKENS.BEAN.formatDecimals
+                                    )}{" "}
+                                    Bean
+                                  </p>
+                                );
+                              })}
+                              <p>
+                                Swap {mintState.totalBdvFromDeposits} Bean for{" "}
+                                {mintState.output} Root
+                              </p>
+
+                              <p>
+                                Transfer {mintState.output} Root to{" "}
+                                {mintFormState.mintToFarmBalance
+                                  ? "Beanstalk Farm Balance"
+                                  : "your wallet"}
+                              </p>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </motion.div>
                   )}

@@ -71,4 +71,5 @@ export interface ISwapToken {
   needAllowance: boolean;
   needInternalAllowance: boolean;
   tokenIn: Token;
+  internalAmount: TokenValue | undefined;
 }
