@@ -23,7 +23,8 @@ import {
 import beanstalkAbi from "./abi/Beanstalk.json";
 import { Signer } from "@wagmi/core";
 import { ISiloClaimable, ISiloDeposit } from "./interfaces/siloDeposit";
-const provider = new ethers.providers.JsonRpcProvider(ENVIRONMENT.rpcUrl);
+export const provider = new ethers.providers.JsonRpcProvider(ENVIRONMENT.rpcUrl);
+
 interface AppState {
   onUserConnect: (signer: Signer) => void;
   onUserDisconnect: () => void;
@@ -122,7 +123,7 @@ const getUserBalance = async (
       throw new Error("failed to get balance");
     }
     ethBalance = TokenValue.fromBlockchain(balance, 18);
-  } catch(e) {
+  } catch (e) {
     throw e;
   }
 
