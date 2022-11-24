@@ -457,7 +457,7 @@ export default function useMintWorkflow() {
             fee,
             recipient: sdk.contracts.pipeline.address,
             deadline: Math.floor(Date.now() / 1000) + 60 * 5,
-            amountIn: TokenValue.fromHuman("10", 6).toBlockchain(),
+            amountIn: "0",
             amountOutMinimum: min,
             sqrtPriceLimitX96: 0,
           },
