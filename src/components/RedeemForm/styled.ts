@@ -1,4 +1,5 @@
 import { darken } from "polished";
+import { mediaDown } from "../../styled";
 import styled from "styled-components";
 
 export const Form = styled.form`
@@ -119,6 +120,27 @@ export const Form = styled.form`
 export const Phase = styled.section`
   margin-bottom: 25px;
 `;
+export const StalkSeeds = styled.div`
+  display: flex;
+  justify-content: space-between;
+  ${mediaDown("phone")`
+      flex-direction: column;
+    `}
+  > div {
+    flex-basis: 48%;
+    width: 48%;
+
+    ${mediaDown("phone")`
+      flex-basis: 100%;
+      width: 100%;
+      margin-bottom: 15px;
+    `}
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+`;
 export const Info = styled.div`
   margin-top: 20px;
   border-radius: 8px;
@@ -203,7 +225,6 @@ export const Divider = styled.div`
   color: #757880;
   margin: 12px;
 `;
-
 
 export const MintButton = styled.button<{ disabled: boolean }>`
   background: #72f589;
@@ -451,17 +472,15 @@ export const ContentContainer = styled.div<{ $isLoading?: boolean }>`
       display: flex;
       align-items: center;
       padding: 5px 20px 5px 5px;
-      > img {
-        margin-right: 7px;
-      }
       > div {
         font-weight: bold;
         color: #fff;
         display: flex;
         align-items: center;
+        margin-left: 6px;
 
         > div {
-          margin-left: 8px;
+          margin-left: 7px;
         }
       }
     }
@@ -478,7 +497,8 @@ export const BalanceHover = styled.div`
     margin: 12px 0;
   }
 
-  > p, div {
+  > p,
+  div {
     margin: 0 0 5px 0;
     font-size: 14px;
 

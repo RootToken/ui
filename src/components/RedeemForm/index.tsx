@@ -230,7 +230,6 @@ export default function RedeemForm() {
             "0",
             beanstalkSdk.tokens.ROOT.decimals
           );
-         
 
           if (rootAmount.gt(rootBalance.external)) {
             internalAllowance = TokenValue.fromBlockchain(
@@ -603,6 +602,67 @@ export default function RedeemForm() {
                 </div>
               </S.ContentContainer>
             </div>
+          </S.Phase>
+          <S.Phase style={{ marginTop: -10 }}>
+            <S.StalkSeeds>
+              <S.ContentContainer $isLoading={redeemState.loading}>
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={redeemState.deposits
+                      .reduce((curr, prev) => {
+                        return curr.add(prev.stalk);
+                      }, TokenValue.fromHuman("0", 10))
+                      .toHuman()}
+                  />
+                  <div className="rootContainer">
+                    <img
+                      width={14}
+                      height={14}
+                      src="/stalk.svg"
+                      style={{  marginTop: 1 }}
+                    />
+                    <img />
+                    <div>Stalk</div>
+                  </div>
+                </div>
+              </S.ContentContainer>
+              <S.ContentContainer $isLoading={redeemState.loading}>
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={redeemState.deposits
+                      .reduce((curr, prev) => {
+                        return curr.add(prev.seeds);
+                      }, TokenValue.fromHuman("0", 6))
+                      .toHuman()}
+                  />
+                  <div className="rootContainer">
+                    <img
+                      width={14}
+                      height={14}
+                      src="/seeds.svg"
+                      style={{  marginTop: 3 }}
+
+                    />
+
+                    <div>Seed</div>
+                  </div>
+                </div>
+              </S.ContentContainer>
+            </S.StalkSeeds>
           </S.Phase>
           <S.Phase>
             <S.Info>
