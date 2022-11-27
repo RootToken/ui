@@ -570,7 +570,7 @@ export default function RedeemForm() {
           <S.Phase>
             <div className="group">
               <div className="header">
-                <div>REDEEM AMOUNT</div>
+                <div>REDEEM TO</div>
               </div>
               <S.ContentContainer $isLoading={redeemState.loading}>
                 <div className="inputContainer">
