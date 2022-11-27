@@ -622,14 +622,18 @@ export default function RedeemForm() {
                       .toHuman()}
                   />
                   <div className="rootContainer">
-                    <img
-                      width={14}
-                      height={14}
-                      src="/stalk.svg"
-                      style={{  marginTop: 1 }}
-                    />
-                    <img />
-                    <div>Stalk</div>
+                    <TooltipIcon text="Stalk is the governance token of the Beanstalk DAO. Stalk entitles holders to passive interest in the form of a share of future Bean mints, and the right to propose and vote on BIPs. Your Stalk is forfeited when you Withdraw your Deposited assets from the Silo.">
+                      <>
+                        <img
+                          width={14}
+                          height={14}
+                          src="/stalk.svg"
+                          style={{ marginTop: 1 }}
+                        />
+                        <img />
+                        <div>Stalk</div>
+                      </>
+                    </TooltipIcon>
                   </div>
                 </div>
               </S.ContentContainer>
@@ -650,15 +654,17 @@ export default function RedeemForm() {
                       .toHuman()}
                   />
                   <div className="rootContainer">
-                    <img
-                      width={14}
-                      height={14}
-                      src="/seeds.svg"
-                      style={{  marginTop: 3 }}
-
-                    />
-
-                    <div>Seed</div>
+                    <TooltipIcon text="Seeds are illiquid tokens that yield 1/10,000 Stalk each Season. Your Seeds is forfeited when you Withdraw your Deposited assets from the Silo.">
+                      <>
+                        <img
+                          width={14}
+                          height={14}
+                          src="/seeds.svg"
+                          style={{ marginTop: 3 }}
+                        />
+                        <div>Seed</div>
+                      </>
+                    </TooltipIcon>
                   </div>
                 </div>
               </S.ContentContainer>
