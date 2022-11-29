@@ -1,11 +1,14 @@
 import styled from "styled-components";
 import { NumericFormat } from "react-number-format";
 import { darken } from "polished";
-import { mediaDown } from "../../../styled";
 
-export const Row = styled.div<{ $connected: boolean }>`
+export const Row = styled.div<{ $connected: boolean; $loading: boolean }>`
   border-radius: 6px;
   background-color: rgba(255, 255, 255, 0.03);
+
+  ${props => props.$loading && `
+    opacity: 0.5;
+  `}
   > .inputContainer {
     position: relative;
     display: flex;

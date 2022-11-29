@@ -185,8 +185,10 @@ export default function RedeemForm() {
           console.log("redeem for non silo deposit");
 
           // Estimate root to bean
-          const { beanOutput, priceImpact } = await estimateRootToBean(rootAmount);
-          console.log("Bean Estimated:", beanOutput.toHuman(), priceImpact)
+          const { beanOutput, priceImpact } = await estimateRootToBean(
+            rootAmount
+          );
+          console.log("Bean Estimated:", beanOutput.toHuman(), priceImpact);
 
           // Bean to output token
           const swap = beanstalkSdk.swap.buildSwap(
@@ -198,7 +200,7 @@ export default function RedeemForm() {
           );
 
           const erc20Estimate = await swap.estimate(beanOutput);
-          console.log('erc20:', erc20Estimate.toHuman())
+          console.log("erc20:", erc20Estimate.toHuman());
           setRedeemState(() => ({
             amountOutMinimum: TokenValue.fromBlockchain(
               Workflow.slip(
@@ -669,7 +671,10 @@ export default function RedeemForm() {
           <div className="header">
             <div>REDEEM TO</div>
           </div>
-          <RedeemRow output={redeemState.output} />
+          <RedeemRow
+            loading={redeemState.loading}
+            output={redeemState.output}
+          />
           {/* <S.ContentContainer $isLoading={redeemState.loading}>
                 <div className="inputContainer">
                   <NumericFormat
@@ -683,8 +688,116 @@ export default function RedeemForm() {
                     value={redeemState.output}
                   />
                 </div>
-                <div className="pickerContainer">
-                  <button>
+              </S.ContentContainer>
+            </div>
+          </S.Phase>
+          <S.Phase style={{ marginTop: -10 }}>
+            <S.StalkSeeds>
+              <S.ContentContainer $isLoading={redeemState.loading}>
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={redeemState.deposits
+                      .reduce((curr, prev) => {
+                        return curr.add(prev.stalk);
+                      }, TokenValue.fromHuman("0", 10))
+                      .toHuman()}
+                  />
+                  <div className="rootContainer">
+                    <TooltipIcon text="Stalk is the governance token of the Beanstalk DAO. Stalk entitles holders to passive interest in the form of a share of future Bean mints, and the right to propose and vote on BIPs. Your Stalk is forfeited when you Withdraw your Deposited assets from the Silo.">
+                      <>
+                        <img
+                          width={14}
+                          height={14}
+                          src="/stalk.svg"
+                          style={{ marginTop: 1 }}
+                        />
+                        <img />
+                        <div>Stalk</div>
+                      </>
+                    </TooltipIcon>
+                  </div>
+                </div>
+              </S.ContentContainer>
+              <S.ContentContainer $isLoading={redeemState.loading}>
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={redeemState.deposits
+                      .reduce((curr, prev) => {
+                        return curr.add(prev.seeds);
+                      }, TokenValue.fromHuman("0", 6))
+                      .toHuman()}
+                  />
+                  <div className="rootContainer">
+                    <TooltipIcon text="Seeds are illiquid tokens that yield 1/10,000 Stalk each Season. Your Seeds is forfeited when you Withdraw your Deposited assets from the Silo.">
+                      <>
+                        <img
+                          width={14}
+                          height={14}
+                          src="/seeds.svg"
+                          style={{ marginTop: 3 }}
+                        />
+                        <div>Seed</div>
+                      </>
+                    </TooltipIcon>
+                  </div>
+                </div>
+              </S.ContentContainer>
+            </S.StalkSeeds>
+          </S.Phase>
+          
+          <S.Phase>
+            <S.Info>
+              You can claim your Bean Deposits using the{" "}
+              <a
+                href="https://app.bean.money/#/silo/0xbea0000029ad1c77d3d5d23ba2d8893db9d1efab?action=withdraw"
+                target="_blank"
+              >
+                Beanstalk UI
+              </a>
+              .
+            </S.Info>
+          </S.Phase>
+        </>
+      ) : (
+        <>
+          <S.Phase>
+            <div className="group">
+              <div className="header">
+                <div>CLAIMABLE AMOUNT</div>
+              </div>
+              <S.ContentContainer $isLoading={redeemState.loading}>
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={redeemState.output}
+                  />
+                  <div className="rootContainer">
+                    <img
+                      width={14}
+                      height={14}
+                      src="/bean.svg"
+                      style={{ marginTop: 3 }}
+                    />
                     <div>
                       <img width={14} height={14} src={"/bean.svg"} />
                       <div>BEAN</div>
@@ -695,19 +808,89 @@ export default function RedeemForm() {
               </S.ContentContainer> */}
         </div>
       </S.Phase>
+
       {redeemFormState.redeemToken.symbol === "BEAN DEPOSIT" && (
-        <S.Phase>
-          <S.Info>
-            You can claim your Bean Deposits using the{" "}
-            <a
-              href="https://app.bean.money/#/silo/0xbea0000029ad1c77d3d5d23ba2d8893db9d1efab?action=withdraw"
-              target="_blank"
-            >
-              Beanstalk UI
-            </a>
-            .
-          </S.Info>
-        </S.Phase>
+        <>
+          <S.Phase style={{ marginTop: -10 }}>
+            <S.StalkSeeds>
+              <S.ContentContainer $isLoading={redeemState.loading}>
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={redeemState.deposits
+                      .reduce((curr, prev) => {
+                        return curr.add(prev.stalk);
+                      }, TokenValue.fromHuman("0", 10))
+                      .toHuman()}
+                  />
+                  <div className="seedContainer">
+                    <TooltipIcon text="Stalk is the governance token of the Beanstalk DAO. Stalk entitles holders to passive interest in the form of a share of future Bean mints, and the right to propose and vote on BIPs. Your Stalk is forfeited when you Withdraw your Deposited assets from the Silo.">
+                      <>
+                        <img
+                          width={14}
+                          height={14}
+                          src="/stalk.svg"
+                          style={{ marginTop: 1 }}
+                        />
+                        <img />
+                        <div>Stalk</div>
+                      </>
+                    </TooltipIcon>
+                  </div>
+                </div>
+              </S.ContentContainer>
+              <S.ContentContainer $isLoading={redeemState.loading}>
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={redeemState.deposits
+                      .reduce((curr, prev) => {
+                        return curr.add(prev.seeds);
+                      }, TokenValue.fromHuman("0", 6))
+                      .toHuman()}
+                  />
+                  <div className="seedContainer">
+                    <TooltipIcon text="Seeds are illiquid tokens that yield 1/10,000 Stalk each Season. Your Seeds is forfeited when you Withdraw your Deposited assets from the Silo.">
+                      <>
+                        <img
+                          width={14}
+                          height={14}
+                          src="/seeds.svg"
+                          style={{ marginTop: 3 }}
+                        />
+                        <div>Seed</div>
+                      </>
+                    </TooltipIcon>
+                  </div>
+                </div>
+              </S.ContentContainer>
+            </S.StalkSeeds>
+          </S.Phase>
+          <S.Phase>
+            <S.Info>
+              You can claim your Bean Deposits using the{" "}
+              <a
+                href="https://app.bean.money/#/silo/0xbea0000029ad1c77d3d5d23ba2d8893db9d1efab?action=withdraw"
+                target="_blank"
+              >
+                Beanstalk UI
+              </a>
+              .
+            </S.Info>
+          </S.Phase>
+        </>
       )}
 
       <AnimatePresence initial={false}>
@@ -801,7 +984,10 @@ export default function RedeemForm() {
                             </div>
                             <div>
                               {/* <img width={16} height={16} src="/root.svg" /> */}
-                              {displayBN(redeemState.amountOutMinimum, redeemFormState.redeemToken.formatDecimals)}
+                              {displayBN(
+                                redeemState.amountOutMinimum,
+                                redeemFormState.redeemToken.formatDecimals
+                              )}
                             </div>
                           </div>
                         )}

@@ -5,7 +5,7 @@ import useAppStore from "../../../store";
 import TokenPickerModal from "../../TokenPickerModal";
 import * as S from "./styled";
 
-export default function RedeemRow({ output }: { output: string }) {
+export default function RedeemRow({ output, loading }: { output: string; loading: boolean }) {
   const [openTokenPicker, setOpenTokenPicker] = useState(false);
   const {
     account,
@@ -32,7 +32,7 @@ export default function RedeemRow({ output }: { output: string }) {
 
   return (
     <>
-      <S.Row $connected={!!account}>
+      <S.Row $connected={!!account} $loading={loading}>
         <div className="inputContainer">
           <S.Input
             $connected={!!account}
