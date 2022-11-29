@@ -670,6 +670,7 @@ export default function RedeemForm() {
               </S.ContentContainer>
             </S.StalkSeeds>
           </S.Phase>
+          
           <S.Phase>
             <S.Info>
               You can claim your Bean Deposits using the{" "}
