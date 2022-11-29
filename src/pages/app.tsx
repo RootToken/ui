@@ -92,7 +92,7 @@ const MintHeader = styled.div`
   padding: 20px 53px 16px 53px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
 
   ${mediaDown("phone")`
     padding: 25px 20px 14px 20px;
@@ -195,7 +195,7 @@ export default function AppPage() {
               >
                 Redeem
               </MintHeaderButton>
-              <MintHeaderButton
+              {/* <MintHeaderButton
                 id="claim"
                 active={pathname === "/claim"}
                 onClick={(e: any) => {
@@ -203,7 +203,7 @@ export default function AppPage() {
                 }}
               >
                 Claim
-              </MintHeaderButton>
+              </MintHeaderButton> */}
             </MintHeader>
             <MintBody>
               <Suspense fallback={<div>Loading...</div>}>
