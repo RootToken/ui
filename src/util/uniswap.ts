@@ -140,3 +140,57 @@ export const estimateBeanToRoot = async (amountIn: TokenValue) => {
     throw e;
   }
 };
+
+export const estimateRootToBean = async (amountIn: TokenValue) => {
+  try {
+    const [immutables, state] = await Promise.all([
+      getPoolImmutables(),
+      getPoolState(),
+    ]);
+
+    // create instances of the Token object to represent the two tokens in the given pool
+    const root = new Token(1, immutables.token0, 18, "ROOT", "Root");
+    const bean = new Token(1, immutables.token1, 6, "BEAN", "Bean");
+
+    const poolExample = new Pool(
+      root,
+      bean,
+      immutables.fee,
+      state.sqrtPriceX96.toString(), //note the description discrepancy - sqrtPriceX96 and sqrtRatioX96 are interchangable values
+      state.liquidity.toString(),
+      state.tick
+    );
+
+    // create an instance of the route object in order to construct a trade object
+    const swapRoute = new Route([poolExample], root, bean);
+
+    // call the quoter contract to determine the amount out of a swap, given an amount in
+    const quotedAmountOut =
+      await quoterContract.callStatic.quoteExactInputSingle(
+        immutables.token0, // Root
+        immutables.token1, // Bean
+        immutables.fee,
+        amountIn.toBlockchain(),
+        0
+      );
+
+    // create an unchecked trade instance
+    const trade = Trade.createUncheckedTrade({
+      route: swapRoute,
+      inputAmount: CurrencyAmount.fromRawAmount(root, amountIn.toBlockchain()),
+      outputAmount: CurrencyAmount.fromRawAmount(
+        bean,
+        quotedAmountOut.toString()
+      ),
+      tradeType: TradeType.EXACT_INPUT,
+    });
+
+    return {
+      beanOutput: TokenValue.fromBlockchain(quotedAmountOut, 6),
+      priceImpact: trade.priceImpact.toFixed(2),
+      fee: immutables.fee,
+    };
+  } catch (e) {
+    throw e;
+  }
+};

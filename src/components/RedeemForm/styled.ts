@@ -478,9 +478,58 @@ export const ContentContainer = styled.div<{ $isLoading?: boolean }>`
         display: flex;
         align-items: center;
         margin-left: 6px;
+      }
+    }
+
+    > .seedContainer {
+      display: flex;
+      align-items: center;
+      padding: 5px 13px 5px 5px;
+      > div {
+        font-weight: bold;
+        color: #fff;
+        display: flex;
+        align-items: center;
 
         > div {
-          margin-left: 7px;
+          margin-left: 2px;
+        }
+      }
+    }
+  }
+  > .pickerContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 5px 10px 5px 5px;
+    justify-content: center;
+
+    > button {
+      border: none;
+      margin: 0;
+      background-color: rgba(255, 255, 255, 0.03);
+      border-radius: 3.17392px;
+      display: flex;
+      align-items: center;
+      padding: 5px 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+      > div {
+        display: flex;
+        align-items: center;
+        margin-right: 5px;
+        > div {
+          margin-left: 8px;
+          color: #fff;
+          font-size: 14px;
+          line-height: 19px;
+          flex: 1;
+        }
+        > img {
+          margin: 0 0 -2px 0;
         }
       }
     }

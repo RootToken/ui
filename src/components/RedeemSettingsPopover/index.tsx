@@ -73,15 +73,32 @@ export default function RedeemSettingsPopver() {
 
                 <div className="content">
                   <div className="text">
-                    Redeem for Bean Deposit{" "}
-                    <TooltipIcon text="Roots are instantly Redeemable for Bean Deposits. To Use Bean Deposits, go to bean.money.">
-
-                      <HelpCircle size={14} color="#838383" />
+                    Redeem to Farm Balance{" "}
+                    <TooltipIcon
+                      element={
+                        <p>
+                          Farm Balances are assets stored in Beanstalk. Farm
+                          assets can be used in transactions on the Farm.
+                          Circulating balances are Root assets in your wallet.
+                          Toggle to transfer redeemed tokens to your Farm
+                          Balance.
+                          <br />
+                          For more information{" "}
+                          <a target="_blank" href="https://docs.bean.money/guides/balances/understand-my-balances#farm-balance-circulating-balance">
+                            click here
+                          </a>
+                          .
+                        </p>
+                      }
+                    >
+                      <div className="helper">
+                        <HelpCircle size={14} color="#838383" />
+                      </div>
                     </TooltipIcon>
                   </div>
 
                   <S.ToggleButton
-                    $active={redeemFormState.redeemToWallet}
+                    $active={!redeemFormState.redeemToWallet}
                     className="toggle"
                     onClick={() =>
                       onChangeRedeemFormStateField(

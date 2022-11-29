@@ -1,4 +1,10 @@
-import { DataSource, TokenValue } from "@beanstalk/sdk";
+import {
+  DataSource,
+  FarmFromMode,
+  FarmToMode,
+  TokenValue,
+  Workflow,
+} from "@beanstalk/sdk";
 import { useCallback, useEffect, useState } from "react";
 import {
   ChevronDown,
@@ -25,6 +31,8 @@ import { SignedPermit } from "@beanstalk/sdk/dist/types/lib/permit";
 import { toast } from "react-hot-toast";
 import TransactionToast from "../Common/TransactionToast";
 import { ethers } from "ethers";
+import RedeemRow from "./RedeemRow";
+import { estimateRootToBean } from "../../util/uniswap";
 
 export default function RedeemForm() {
   const [openTx, setOpenTx] = useState(false);
@@ -64,12 +72,17 @@ export default function RedeemForm() {
     deposits: [] as ISiloDeposit[],
     needAllowance: false,
     needInternalAllowance: false,
-    internalBalance: TokenValue.fromHuman("0", 18),
+    internalAmount: TokenValue.fromHuman("0", 18),
+    amountOutMinimum: TokenValue.fromHuman("0", 18),
   });
   const [permit, setPermit] = useState<SignedPermit | undefined>(undefined);
 
-  const { redeemBeanDepositWithRoot, redeemBeanDepositWithInternalRoot } =
-    useRedeem();
+  const {
+    redeemBeanDepositWithRoot,
+    redeemBeanDepositWithInternalRoot,
+    redeemBeanWithRoot,
+    redeemERC20WithRoot,
+  } = useRedeem();
 
   const calculateEstimate = useCallback(
     debounce(async (redeemFormState: IRedeemFormState) => {
@@ -81,6 +94,141 @@ export default function RedeemForm() {
         // Validate
         if (redeemFormState.redeemAmount === "") {
           throw new Error("Invalid input");
+        }
+
+        const totalSlipage = TokenValue.fromHuman(redeemFormState.slippage, 18);
+
+        // Check if user is using internal balance
+        const rootAmount = TokenValue.fromHuman(
+          redeemFormState.redeemAmount,
+          18
+        );
+        const rootBalance = account!.tokenBalances.get(
+          beanstalkSdk.tokens.ROOT
+        );
+
+        let needAllowance = false;
+        let needInternalAllowance = false;
+        let internalAmount = TokenValue.fromHuman(
+          "0",
+          beanstalkSdk.tokens.ROOT.decimals
+        );
+
+        const allowance = await beanstalkSdk.tokens.ROOT.getAllowance(
+          account!.address,
+          beanstalkSdk.contracts.depot.address
+        );
+
+        needAllowance = allowance.lt(rootAmount);
+
+        // Using both external and internal to redeem
+        // Need to check allowance for both external/internal for depot
+        if (rootBalance && rootAmount.gt(rootBalance.external)) {
+          let internalAllowance = TokenValue.fromHuman(
+            "0",
+            beanstalkSdk.tokens.ROOT.decimals
+          );
+
+          if (rootAmount.gt(rootBalance.external)) {
+            internalAllowance = TokenValue.fromBlockchain(
+              await beanstalkSdk.contracts.beanstalk.tokenAllowance(
+                account!.address,
+                beanstalkSdk.contracts.depot.address,
+                beanstalkSdk.tokens.ROOT.address
+              ),
+              beanstalkSdk.tokens.ROOT.decimals
+            );
+            internalAmount = rootAmount.sub(rootBalance.external);
+          }
+
+          needInternalAllowance = internalAllowance.lt(internalAmount);
+        }
+
+        // If Redeem for BEAN
+        if (redeemFormState.redeemToken.symbol === "BEAN") {
+          console.log("redeeming for bean");
+          const { beanOutput, priceImpact } = await estimateRootToBean(
+            rootAmount
+          );
+          setRedeemState(() => ({
+            amountOutMinimum: TokenValue.fromBlockchain(
+              Workflow.slip(
+                beanOutput.toBigNumber(),
+                parseFloat(redeemFormState.slippage)
+              ),
+              redeemFormState.redeemToken.decimals
+            ),
+            priceImpact: TokenValue.fromHuman(priceImpact, 6),
+            rootAmount,
+            loading: false,
+            output: displayBN(
+              beanOutput,
+              redeemFormState.redeemToken.formatDecimals
+            ),
+            deposits: [],
+            maxRootsIn: TokenValue.fromBlockchain(
+              Workflow.slip(
+                rootAmount.toBigNumber(),
+                parseFloat(redeemFormState.slippage)
+              ),
+              redeemFormState.redeemToken.decimals
+            ),
+            needInternalAllowance,
+            internalAmount,
+            needAllowance,
+          }));
+          return;
+        }
+
+        // If Redeem for non silo deposit
+        if (redeemFormState.redeemToken.symbol !== "BEAN DEPOSIT") {
+          console.log("redeem for non silo deposit");
+
+          // Estimate root to bean
+          const { beanOutput, priceImpact } = await estimateRootToBean(
+            rootAmount
+          );
+          console.log("Bean Estimated:", beanOutput.toHuman(), priceImpact);
+
+          // Bean to output token
+          const swap = beanstalkSdk.swap.buildSwap(
+            beanstalkSdk.tokens.BEAN,
+            beanstalkSdk.tokens[redeemFormState.redeemToken.symbol],
+            account.address,
+            FarmFromMode.EXTERNAL,
+            FarmToMode.EXTERNAL
+          );
+
+          const erc20Estimate = await swap.estimate(beanOutput);
+          console.log("erc20:", erc20Estimate.toHuman());
+          setRedeemState(() => ({
+            amountOutMinimum: TokenValue.fromBlockchain(
+              Workflow.slip(
+                erc20Estimate.toBigNumber(),
+                parseFloat(redeemFormState.slippage)
+              ),
+              redeemFormState.redeemToken.decimals
+            ),
+            priceImpact: TokenValue.fromHuman(priceImpact, 6),
+            rootAmount,
+            loading: false,
+            output: displayBN(
+              erc20Estimate,
+              redeemFormState.redeemToken.formatDecimals
+            ),
+            deposits: [],
+            maxRootsIn: TokenValue.fromBlockchain(
+              Workflow.slip(
+                rootAmount.toBigNumber(),
+                parseFloat(redeemFormState.slippage)
+              ),
+              redeemFormState.redeemToken.decimals
+            ),
+            needInternalAllowance,
+            internalAmount,
+            needAllowance,
+          }));
+          return;
         }
 
         // Get root data
@@ -123,8 +271,6 @@ export default function RedeemForm() {
               seeds: crate.seeds,
             });
           });
-
-        console.log("ALL DEPOSITS");
 
         // Sort to get the best bdv to stalk ratio (lower the better)
         deposits.sort((a, b) => {
@@ -205,54 +351,8 @@ export default function RedeemForm() {
           false
         );
 
-        const totalSlipage = TokenValue.fromHuman(redeemFormState.slippage, 18);
-
-        // Check if user is using internal balance
-        const rootAmount = TokenValue.fromHuman(
-          redeemFormState.redeemAmount,
-          18
-        );
-        const rootBalance = account!.tokenBalances.get(
-          beanstalkSdk.tokens.ROOT
-        );
-
-        let needAllowance = false;
-        let needInternalAllowance = false;
-        let internalAmount = TokenValue.fromHuman(
-          "0",
-          beanstalkSdk.tokens.ROOT.decimals
-        );
-
-        // Using both external and internal to redeem
-        // Need to check allowance for both external/internal for depot
-        if (rootBalance && rootAmount.gt(rootBalance.external)) {
-          let internalAllowance = TokenValue.fromHuman(
-            "0",
-            beanstalkSdk.tokens.ROOT.decimals
-          );
-
-          if (rootAmount.gt(rootBalance.external)) {
-            internalAllowance = TokenValue.fromBlockchain(
-              await beanstalkSdk.contracts.beanstalk.tokenAllowance(
-                account!.address,
-                beanstalkSdk.contracts.depot.address,
-                beanstalkSdk.tokens.ROOT.address
-              ),
-              beanstalkSdk.tokens.ROOT.decimals
-            );
-            internalAmount = rootAmount.sub(rootBalance.external);
-          }
-
-          const allowance = await beanstalkSdk.tokens.ROOT.getAllowance(
-            account!.address,
-            beanstalkSdk.contracts.depot.address
-          );
-
-          needAllowance = allowance.lt(rootAmount);
-          needInternalAllowance = internalAllowance.lt(internalAmount);
-        }
-
-        setRedeemState((state) => ({
+        setRedeemState(() => ({
+          amountOutMinimum: TokenValue.fromHuman("0", 18),
           priceImpact: TokenValue.fromHuman("0", 18),
           rootAmount: TokenValue.fromHuman(redeemFormState.redeemAmount, 18),
           loading: false,
@@ -262,15 +362,16 @@ export default function RedeemForm() {
             result.amount.mul(totalSlipage.mul(10)).div(1000)
           ),
           needInternalAllowance,
-          internalBalance: internalAmount,
+          internalAmount,
           needAllowance,
         }));
       } catch (e) {
-        setRedeemState((state) => ({
+        setRedeemState(() => ({
           needAllowance: false,
+          amountOutMinimum: TokenValue.fromHuman("0", 18),
           priceImpact: TokenValue.fromHuman("0", 18),
           rootAmount: TokenValue.fromHuman("0", 18),
-          internalBalance: TokenValue.fromHuman("0", 18),
+          internalAmount: TokenValue.fromHuman("0", 18),
           needInternalAllowance: false,
           loading: false,
           output: "0",
@@ -295,12 +396,6 @@ export default function RedeemForm() {
       return <Loading size={20} />;
     }
     if (redeemState.output !== "0") {
-      if (!redeemFormState.redeemToWallet) {
-        return "Coming Soon!";
-        // if (!permit) {
-        //   return "Allow Root to use your Root";
-        // }
-      }
     }
 
     if (redeemState.needInternalAllowance) {
@@ -366,14 +461,27 @@ export default function RedeemForm() {
       return;
     }
 
-    if (redeemFormState.redeemToWallet) {
+    if (redeemFormState.redeemToken.symbol === "BEAN") {
       try {
-        if (redeemState.internalBalance.gt(0)) {
+        await redeemBeanWithRoot(
+          redeemState.rootAmount,
+          redeemState.internalAmount,
+          redeemState.amountOutMinimum,
+          redeemFormState.redeemToWallet
+            ? FarmToMode.EXTERNAL
+            : FarmToMode.INTERNAL
+        );
+        resetState();
+        return;
+      } catch (e) {}
+    } else if (redeemFormState.redeemToken.symbol === "BEAN DEPOSIT") {
+      try {
+        if (redeemState.internalAmount.gt(0)) {
           await redeemBeanDepositWithInternalRoot(
             redeemState.rootAmount,
             redeemState.deposits,
             redeemState.maxRootsIn,
-            redeemState.internalBalance
+            redeemState.internalAmount
           );
           resetState();
           return;
@@ -383,40 +491,33 @@ export default function RedeemForm() {
           redeemState.maxRootsIn
         );
         resetState();
+        return;
       } catch (e) {}
+    } else if (redeemFormState.redeemToken.symbol === "ETH") {
+      toast.error("ETH not supported");
       return;
     }
 
-    return;
+    const symbol = redeemFormState.redeemToken.symbol as
+      | "BEAN"
+      | "USDC"
+      | "USDT"
+      | "DAI"
+      | "WETH";
 
-    // if (!permit) {
-    //   try {
-    //     const permit = await beanstalkSdk.permit.sign(
-    //       account!.address,
-    //       beanstalkSdk.tokens.permitERC2612(
-    //         account!.address, // owner
-    //         beanstalkSdk.contracts.beanstalk.address, // spender
-    //         beanstalkSdk.tokens.ROOT, // root
-    //         TokenValue.fromHuman(
-    //           redeemFormState.redeemAmount,
-    //           18
-    //         ).toBlockchain() // amount of roots
-    //       )
-    //     );
-    //     setPermit(permit);
-    //     return;
-    //   } catch (e: any) {
-    //     toast.error(e.reason);
-    //     return;
-    //   }
-    // }
-
-    // await redeemBeanDepositAndWithdrawWithRoot(
-    //   permit,
-    //   TokenValue.fromHuman(redeemFormState.redeemAmount, 18),
-    //   redeemState.deposits,
-    //   redeemState.maxRootsIn
-    // ).then(resetState);
+    // Redeem to ERC20 with root
+    try {
+      await redeemERC20WithRoot(
+        redeemState.rootAmount,
+        redeemState.internalAmount,
+        beanstalkSdk.tokens[symbol],
+        redeemState.amountOutMinimum,
+        redeemFormState.redeemToWallet
+          ? FarmToMode.EXTERNAL
+          : FarmToMode.INTERNAL
+      );
+      resetState();
+    } catch (e) {}
     return;
   };
 
@@ -565,14 +666,16 @@ export default function RedeemForm() {
         </div>
       </S.Phase>
 
-      {redeemFormState.redeemToWallet ? (
-        <>
-          <S.Phase>
-            <div className="group">
-              <div className="header">
-                <div>REDEEM TO</div>
-              </div>
-              <S.ContentContainer $isLoading={redeemState.loading}>
+      <S.Phase>
+        <div className="group">
+          <div className="header">
+            <div>REDEEM TO</div>
+          </div>
+          <RedeemRow
+            loading={redeemState.loading}
+            output={redeemState.output}
+          />
+          {/* <S.ContentContainer $isLoading={redeemState.loading}>
                 <div className="inputContainer">
                   <NumericFormat
                     decimalScale={2}
@@ -584,21 +687,6 @@ export default function RedeemForm() {
                     readOnly
                     value={redeemState.output}
                   />
-                  <div className="rootContainer">
-                    <img
-                      width={14}
-                      height={14}
-                      src="/silo.svg"
-                      style={{ marginRight: 2, marginTop: 3 }}
-                    />
-                    <img
-                      width={14}
-                      height={14}
-                      src="/bean.svg"
-                      style={{ marginTop: 3 }}
-                    />
-                    <div>Bean Deposit</div>
-                  </div>
                 </div>
               </S.ContentContainer>
             </div>
@@ -711,20 +799,95 @@ export default function RedeemForm() {
                       style={{ marginTop: 3 }}
                     />
                     <div>
-                      cBean{" "}
-                      <TooltipIcon text="cBean represents the Beans that underly the Deposits that are Redeemed for Roots and then Withdrawn from the Beanstalk Silo. Withdrawals from the Beanstalk Silo are Claimable at the top of the next hour.">
-                        <HelpCircle size={14} color="#838383" />
-                      </TooltipIcon>
+                      <img width={14} height={14} src={"/bean.svg"} />
+                      <div>BEAN</div>
                     </div>
+                    <ChevronDown size={14} color="#999999" />
+                  </button>
+                </div>
+              </S.ContentContainer> */}
+        </div>
+      </S.Phase>
+
+      {redeemFormState.redeemToken.symbol === "BEAN DEPOSIT" && (
+        <>
+          <S.Phase style={{ marginTop: -10 }}>
+            <S.StalkSeeds>
+              <S.ContentContainer $isLoading={redeemState.loading}>
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={redeemState.deposits
+                      .reduce((curr, prev) => {
+                        return curr.add(prev.stalk);
+                      }, TokenValue.fromHuman("0", 10))
+                      .toHuman()}
+                  />
+                  <div className="seedContainer">
+                    <TooltipIcon text="Stalk is the governance token of the Beanstalk DAO. Stalk entitles holders to passive interest in the form of a share of future Bean mints, and the right to propose and vote on BIPs. Your Stalk is forfeited when you Withdraw your Deposited assets from the Silo.">
+                      <>
+                        <img
+                          width={14}
+                          height={14}
+                          src="/stalk.svg"
+                          style={{ marginTop: 1 }}
+                        />
+                        <img />
+                        <div>Stalk</div>
+                      </>
+                    </TooltipIcon>
                   </div>
                 </div>
               </S.ContentContainer>
-            </div>
+              <S.ContentContainer $isLoading={redeemState.loading}>
+                <div className="inputContainer">
+                  <NumericFormat
+                    decimalScale={2}
+                    placeholder="0"
+                    id="rootAmount"
+                    thousandSeparator
+                    valueIsNumericString
+                    allowNegative={false}
+                    readOnly
+                    value={redeemState.deposits
+                      .reduce((curr, prev) => {
+                        return curr.add(prev.seeds);
+                      }, TokenValue.fromHuman("0", 6))
+                      .toHuman()}
+                  />
+                  <div className="seedContainer">
+                    <TooltipIcon text="Seeds are illiquid tokens that yield 1/10,000 Stalk each Season. Your Seeds is forfeited when you Withdraw your Deposited assets from the Silo.">
+                      <>
+                        <img
+                          width={14}
+                          height={14}
+                          src="/seeds.svg"
+                          style={{ marginTop: 3 }}
+                        />
+                        <div>Seed</div>
+                      </>
+                    </TooltipIcon>
+                  </div>
+                </div>
+              </S.ContentContainer>
+            </S.StalkSeeds>
           </S.Phase>
-
           <S.Phase>
             <S.Info>
-              You can Claim your claimable Bean at the start of the next hour.
+              You can claim your Bean Deposits using the{" "}
+              <a
+                href="https://app.bean.money/#/silo/0xbea0000029ad1c77d3d5d23ba2d8893db9d1efab?action=withdraw"
+                target="_blank"
+              >
+                Beanstalk UI
+              </a>
+              .
             </S.Info>
           </S.Phase>
         </>
@@ -796,19 +959,39 @@ export default function RedeemForm() {
                             <Loading />
                           </div>
                         )}
-                        <div className="row">
-                          <div>
-                            Maximum Root{" "}
-                            <TooltipIcon text="The maximum amount you are willing to redeem. If the price slips any further, your transaction will revert.">
-                              <HelpCircle size={16} color="#3D3D3D" />
-                            </TooltipIcon>
+                        {redeemFormState.redeemToken.symbol ===
+                        "BEAN DEPOSIT" ? (
+                          <div className="row">
+                            <div>
+                              Maximum Root{" "}
+                              <TooltipIcon text="The maximum amount you are willing to redeem. If the price slips any further, your transaction will revert.">
+                                <HelpCircle size={16} color="#3D3D3D" />
+                              </TooltipIcon>
+                            </div>
+                            <div>
+                              {redeemState.maxRootsIn.gte(tokenBalance)
+                                ? displayBN(redeemAmount, 2)
+                                : displayBN(redeemState.maxRootsIn, 2)}
+                            </div>
                           </div>
-                          <div>
-                            {redeemState.maxRootsIn.gte(tokenBalance)
-                              ? displayBN(redeemAmount, 2)
-                              : displayBN(redeemState.maxRootsIn, 2)}
+                        ) : (
+                          <div className="row">
+                            <div>
+                              Minimum Output{" "}
+                              <TooltipIcon text="The minimum amount you are guaranteed to receive. If the price slips any further, your transaction will revert.">
+                                <HelpCircle size={16} color="#3D3D3D" />
+                              </TooltipIcon>
+                            </div>
+                            <div>
+                              {/* <img width={16} height={16} src="/root.svg" /> */}
+                              {displayBN(
+                                redeemState.amountOutMinimum,
+                                redeemFormState.redeemToken.formatDecimals
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        )}
+
                         {/* <div className="row">
                           <div>
                             Price Impact{" "}
@@ -830,24 +1013,40 @@ export default function RedeemForm() {
                           </div>
 
                           <div className="token">
-                            {redeemFormState.redeemToWallet && (
+                            {redeemFormState.redeemToken.symbol ===
+                              "BEAN DEPOSIT" && (
                               <img width={25} height={25} src="/silo.svg" />
                             )}
-                            <img width={25} height={25} src="/bean.svg" />
+                            <img
+                              width={25}
+                              height={25}
+                              src={redeemFormState.redeemToken.icon}
+                            />
                           </div>
                         </div>
                         <div className="routesText">
-                          {redeemFormState.redeemToWallet ? (
+                          {redeemFormState.redeemToken.symbol ===
+                          "BEAN DEPOSIT" ? (
                             <p>
                               Use {displayBN(redeemAmount, 2)} Root to redeem
                               for {redeemState.output} Bean Deposit
                             </p>
                           ) : (
                             <p>
-                              Use {displayBN(redeemAmount, 2)} Root to redeem
-                              for {redeemState.output} cBean
+                              Swap {displayBN(redeemAmount, 2)} Root
+                              for {redeemState.output}{" "}
+                              {redeemFormState.redeemToken.symbol}
                             </p>
                           )}
+                          <p>
+                            Transfer {redeemState.output}{" "}
+                            {redeemFormState.redeemToken.name} to{" "}
+                            {redeemFormState.redeemToWallet ||
+                            redeemFormState.redeemToken.symbol ===
+                              "BEAN DEPOSIT"
+                              ? "your wallet"
+                              : "Beanstalk Farm Balance"}
+                          </p>
                         </div>
                       </div>
                     </motion.div>
@@ -860,11 +1059,7 @@ export default function RedeemForm() {
       </AnimatePresence>
 
       <S.MintButton
-        disabled={
-          redeemState.loading ||
-          redeemState.output === "0" ||
-          !redeemFormState.redeemToWallet
-        }
+        disabled={redeemState.loading || redeemState.output === "0"}
         onClick={onRedeem}
       >
         {renderRedeemText()}

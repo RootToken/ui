@@ -30,12 +30,14 @@ export interface IRedeemFormState {
   redeemAmount: string;
   slippage: string;
   redeemToWallet: boolean;
+  redeemToken: IToken;
 }
 
 export const getDefaultRedeemFormState = (): IRedeemFormState => ({
   redeemAmount: "",
   redeemToWallet: true,
   slippage: "0.5",
+  redeemToken: TOKENS["BEAN DEPOSIT"],
 });
 
 export interface IClaimFormState {
