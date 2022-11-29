@@ -446,7 +446,7 @@ export default function useRedeem() {
         FarmToMode.EXTERNAL
       );
 
-      swap.getFarm().generators.map(async (step) => {
+      swap.getFarm().generators.map(async (step: any) => {
         if (step.name === "exchangeUnderlying") {
           pipe.add(async function exchangeUnderlying(amountInStep, context) {
             return pipe.wrap(

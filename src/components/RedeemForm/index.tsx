@@ -1033,11 +1033,20 @@ export default function RedeemForm() {
                             </p>
                           ) : (
                             <p>
-                              Use {displayBN(redeemAmount, 2)} Root to redeem
+                              Swap {displayBN(redeemAmount, 2)} Root
                               for {redeemState.output}{" "}
                               {redeemFormState.redeemToken.symbol}
                             </p>
                           )}
+                          <p>
+                            Transfer {redeemState.output}{" "}
+                            {redeemFormState.redeemToken.name} to{" "}
+                            {redeemFormState.redeemToWallet ||
+                            redeemFormState.redeemToken.symbol ===
+                              "BEAN DEPOSIT"
+                              ? "your wallet"
+                              : "Beanstalk Farm Balance"}
+                          </p>
                         </div>
                       </div>
                     </motion.div>
