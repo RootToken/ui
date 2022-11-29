@@ -11,7 +11,7 @@ import {
   IRedeemFormState,
 } from "./interfaces/mintForm.js";
 import { ITokenSymbol, TOKENS } from "./interfaces/token.js";
-import { createERC20Contract, createRootContract } from "./util/contract.js";
+import { createERC20Contract, createRootContract, createUSDTContract } from "./util/contract.js";
 import {
   BeanstalkSDK,
   DataSource,
@@ -209,6 +209,7 @@ const setupContracts = (signer?: ethers.Signer) => {
     rpcUrl: ENVIRONMENT.rpcUrl,
     subgraphUrl: ENVIRONMENT.beanstalkSubgraphUrl,
     provider,
+    DEBUG: true,
   });
   return {
     beanstalkSdk: sdk,
@@ -221,7 +222,7 @@ const setupContracts = (signer?: ethers.Signer) => {
       [ENVIRONMENT.rootContractAddress]: createRootContract(signer),
       [TOKENS.BEAN.address]: createERC20Contract(TOKENS.BEAN.address, signer),
       [TOKENS.USDC.address]: createERC20Contract(TOKENS.USDC.address, signer),
-      [TOKENS.USDT.address]: createERC20Contract(TOKENS.USDT.address, signer),
+      [TOKENS.USDT.address]: createUSDTContract(TOKENS.USDT.address, signer),
       [TOKENS.DAI.address]: createERC20Contract(TOKENS.DAI.address, signer),
       [TOKENS.WETH.address]: createERC20Contract(TOKENS.WETH.address, signer),
     },
@@ -285,12 +286,13 @@ const useAppStore = create<AppState>()((set, get) => ({
     rpcUrl: ENVIRONMENT.rpcUrl,
     subgraphUrl: ENVIRONMENT.beanstalkSubgraphUrl,
     provider,
+    DEBUG: true,
   }),
   erc20Contracts: {
     [ENVIRONMENT.rootContractAddress]: createRootContract(),
     [TOKENS.BEAN.address]: createERC20Contract(TOKENS.BEAN.address),
     [TOKENS.USDC.address]: createERC20Contract(TOKENS.USDC.address),
-    [TOKENS.USDT.address]: createERC20Contract(TOKENS.USDT.address),
+    [TOKENS.USDT.address]: createUSDTContract(TOKENS.USDT.address),
     [TOKENS.DAI.address]: createERC20Contract(TOKENS.DAI.address),
     [TOKENS.WETH.address]: createERC20Contract(TOKENS.WETH.address),
   },

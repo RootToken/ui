@@ -15,6 +15,7 @@ interface ModalProps {
   onSelect: (token: IToken, siloDeposit?: ISiloDeposit) => void;
   excludes?: ITokenSymbol[];
   claim?: boolean;
+  showBalance?: boolean;
 }
 
 export default function TokenPickerModal({
@@ -23,6 +24,7 @@ export default function TokenPickerModal({
   onSelect,
   excludes = [],
   claim = false,
+  showBalance = true,
 }: ModalProps) {
   const [search, setSearch] = useState("");
   const { account, mintFormState, claimFormState, beanstalkSdk } = useAppStore(
@@ -100,6 +102,7 @@ export default function TokenPickerModal({
               const token = TOKENS[key as ITokenSymbol];
               return (
                 <CoinItem
+                  showBalance={showBalance}
                   tokenKey={tokenMap.get(token.address.toLowerCase())}
                   key={key}
                   token={token}
@@ -124,12 +127,14 @@ const CoinItem = ({
   account,
   onSelect,
   tokenKey,
+  showBalance
 }: {
   token: IToken;
   isDisabled: boolean;
   account?: IAccount;
   onSelect: (token: IToken) => void;
   tokenKey?: Token;
+  showBalance: boolean;
 }) => {
   let balance = TokenValue.fromHuman("0", token.decimals);
   if (token.symbol === "BEAN DEPOSIT" && account) {
@@ -160,7 +165,7 @@ const CoinItem = ({
             <div>{token.name}</div>
           </div>
         </div>
-        {account && (
+        {account && showBalance && (
           <div className="balance">
             {displayBN(balance, token.formatDecimals)}
           </div>
