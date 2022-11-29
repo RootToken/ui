@@ -363,7 +363,7 @@ export default function RedeemForm() {
           ),
           needInternalAllowance,
           internalAmount,
-          needAllowance,
+          needAllowance: internalAmount.gt(0) ? needAllowance : false,
         }));
       } catch (e) {
         setRedeemState(() => ({
