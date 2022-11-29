@@ -457,7 +457,6 @@ export default function RedeemForm() {
       } catch (e) {
         txToast.error(e);
       }
-
       return;
     }
 
@@ -473,7 +472,9 @@ export default function RedeemForm() {
         );
         resetState();
         return;
-      } catch (e) {}
+      } catch (e) {
+        return;
+      }
     } else if (redeemFormState.redeemToken.symbol === "BEAN DEPOSIT") {
       try {
         if (redeemState.internalAmount.gt(0)) {
@@ -492,7 +493,9 @@ export default function RedeemForm() {
         );
         resetState();
         return;
-      } catch (e) {}
+      } catch (e) {
+        return;
+      }
     } else if (redeemFormState.redeemToken.symbol === "ETH") {
       toast.error("ETH not supported");
       return;
@@ -517,8 +520,9 @@ export default function RedeemForm() {
           : FarmToMode.INTERNAL
       );
       resetState();
-    } catch (e) {}
-    return;
+    } catch (e) {
+      return
+    }
   };
 
   useEffect(() => {
