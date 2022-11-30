@@ -456,12 +456,8 @@ export default function useRedeem() {
                 step.pool,
                 step.tokenIn.address,
                 step.tokenOut.address,
-                "1000000000000000",
-                swap
-                  .getFarm()
-                  .generators.find((step) => step.name === "exchange")
-                  ? "0"
-                  : amountOutMinimum.toBlockchain(),
+                "0",
+                swap.getFarm().generators.find((step) => step.name === "exchange") ? "0" : amountOutMinimum.toBlockchain(),
                 step.fromMode,
                 step.toMode,
               ],
@@ -494,7 +490,7 @@ export default function useRedeem() {
                 step.registry,
                 step.tokenIn.address,
                 step.tokenOut.address,
-                "100000000000000000000",
+                "0",
                 amountOutMinimum.toBlockchain(),
                 step.fromMode,
                 step.toMode,
