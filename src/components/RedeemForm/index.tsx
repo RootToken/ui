@@ -200,6 +200,8 @@ export default function RedeemForm() {
             FarmToMode.EXTERNAL
           );
 
+          console.log(swap.getSimplePath())
+
           const erc20Estimate = await swap.estimate(beanOutput);
           console.log("erc20:", erc20Estimate.toHuman());
           setRedeemState(() => ({
