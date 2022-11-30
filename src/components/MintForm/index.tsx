@@ -77,7 +77,6 @@ export default function MintForm() {
     beanstalkSdk,
     account,
     onGetConnectedUserBalance,
-    erc20Contracts,
   } = useAppStore(
     ({
       mintFormState,
@@ -85,7 +84,6 @@ export default function MintForm() {
       onResetMintFormState,
       beanstalkSdk,
       account,
-      erc20Contracts,
       onGetConnectedUserBalance,
     }) => ({
       beanstalkSdk,
@@ -94,7 +92,6 @@ export default function MintForm() {
       onResetMintFormState,
       account,
       onGetConnectedUserBalance,
-      erc20Contracts,
     })
   );
 

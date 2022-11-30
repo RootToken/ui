@@ -162,16 +162,16 @@ export default function DashboardPage() {
     earnedBeans: TokenValue.fromHuman("0", 10),
     isLoading: false,
   });
-  const { beanstalkSdk, beanstalkContract, erc20Contracts, account } =
+  const { beanstalkSdk, beanstalkContract, contracts, account } =
     useAppStore((v) => ({
       beanstalkSdk: v.beanstalkSdk,
       beanstalkContract: v.beanstalkContract,
-      erc20Contracts: v.erc20Contracts,
+      contracts: v.contracts,
       account: v.account,
     }));
 
   const getData = async () => {
-    if (!beanstalkSdk || !beanstalkContract || !erc20Contracts) {
+    if (!beanstalkSdk || !beanstalkContract || !contracts) {
       return;
     }
     setState((s) => ({
@@ -189,13 +189,13 @@ export default function DashboardPage() {
         grownStalk,
         earnedBeans,
       ] = await Promise.all([
-        erc20Contracts[ENVIRONMENT.rootContractAddress]
+        contracts[ENVIRONMENT.rootContractAddress]
           .bdvPerRoot()
           .then((v: any) => TokenValue.fromBlockchain(v, 6)),
-        erc20Contracts[ENVIRONMENT.rootContractAddress]
+          contracts[ENVIRONMENT.rootContractAddress]
           .totalSupply()
           .then((v: any) => TokenValue.fromBlockchain(v, 18)),
-        erc20Contracts[ENVIRONMENT.rootContractAddress]
+          contracts[ENVIRONMENT.rootContractAddress]
           .underlyingBdv()
           .then((v: any) => TokenValue.fromBlockchain(v, 6)),
         beanstalkContract
@@ -273,7 +273,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     getData();
-  }, [erc20Contracts, beanstalkContract]);
+  }, [contracts, beanstalkContract]);
 
   return (
     <MainLayout>
