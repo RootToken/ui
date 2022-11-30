@@ -471,7 +471,7 @@ export default function useRedeem() {
               target: beanstalkSdk.contracts.beanstalk.address,
               callData:
                 beanstalkSdk.contracts.beanstalk.interface.encodeFunctionData(
-                  "getExternalBalance",
+                  "getBalance",
                   [
                     beanstalkSdk.contracts.pipeline.address,
                     step.tokenIn.address,
@@ -496,7 +496,7 @@ export default function useRedeem() {
                 step.toMode,
               ],
               amountInStep,
-              Clipboard.encodeSlot(context.step.findTag("tokenAfterSwap"), 0, 5)
+              Clipboard.encodeSlot(context.step.findTag("tokenAfterSwap"), 0, 4)
             );
           });
         }
@@ -759,7 +759,7 @@ export default function useRedeem() {
               target: beanstalkSdk.contracts.beanstalk.address,
               callData:
                 beanstalkSdk.contracts.beanstalk.interface.encodeFunctionData(
-                  "getExternalBalance",
+                  "getBalance",
                   [
                     beanstalkSdk.contracts.pipeline.address,
                     step.tokenIn.address,
@@ -784,7 +784,7 @@ export default function useRedeem() {
                 step.toMode,
               ],
               amountInStep,
-              Clipboard.encodeSlot(context.step.findTag("tokenAfterSwap"), 0, 5)
+              Clipboard.encodeSlot(context.step.findTag("tokenAfterSwap"), 0, 4)
             );
           });
         }
