@@ -37,7 +37,7 @@ export const getDefaultRedeemFormState = (): IRedeemFormState => ({
   redeemAmount: "",
   redeemToWallet: true,
   slippage: "0.5",
-  redeemToken: TOKENS["BEAN DEPOSIT"],
+  redeemToken: TOKENS.ETH,
 });
 
 export interface IClaimFormState {

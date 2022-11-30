@@ -14,6 +14,7 @@ import { ITokenSymbol, TOKENS } from "./interfaces/token.js";
 import {
   createERC20Contract,
   createRootContract,
+  createUnwrapAndSendWETHContract,
   createUSDTContract,
 } from "./util/contract.js";
 import {
@@ -39,11 +40,11 @@ interface AppState {
   connectedAddress?: string;
   beanstalkSdk: BeanstalkSDK;
   setBeanstalkSdk: (instance: BeanstalkSDK) => void;
-  erc20Contracts: {
+  contracts: {
     [address: string]: Contract;
   };
-  setERC20Contract: (address: string, instance: ethers.Contract) => void;
-  setERC20Contracts: (contract: { [address: string]: Contract }) => void;
+  setContract: (address: string, instance: ethers.Contract) => void;
+  setContracts: (contract: { [address: string]: Contract }) => void;
   beanstalkContract: Contract;
   setBeanstalkContract: (instance: ethers.Contract) => void;
 
@@ -79,7 +80,7 @@ interface AppState {
 
 const getUserBalance = async (
   sdk: BeanstalkSDK,
-  erc20Contracts: { [key: string]: ethers.Contract }
+  contracts: { [key: string]: ethers.Contract }
 ): Promise<IAccount> => {
   const tempDeposits: ISiloDeposit[] = [];
   const claimableDeposits: ISiloClaimable[] = [];
@@ -149,7 +150,7 @@ const getUserBalance = async (
               balance: TokenValue.fromBlockchain(balance, TOKENS.ETH.decimals),
             };
           }
-          const result = await erc20Contracts[
+          const result = await contracts[
             TOKENS[key as ITokenSymbol].address
           ].balanceOf(accountAddress);
           if (!result) {
@@ -182,9 +183,9 @@ const getUserBalance = async (
   }
 
   try {
-    const result = await erc20Contracts[
-      ENVIRONMENT.rootContractAddress
-    ].balanceOf(accountAddress);
+    const result = await contracts[ENVIRONMENT.rootContractAddress].balanceOf(
+      accountAddress
+    );
     if (result) {
       balances.set(
         ENVIRONMENT.rootContractAddress,
@@ -225,7 +226,9 @@ const setupContracts = (signer?: ethers.Signer) => {
       beanstalkAbi,
       signer || provider
     ),
-    erc20Contracts: {
+    contracts: {
+      [ENVIRONMENT.unwrapAndSendETHContractAddress]:
+        createUnwrapAndSendWETHContract(signer),
       [ENVIRONMENT.rootContractAddress]: createRootContract(signer),
       [TOKENS.BEAN.address]: createERC20Contract(TOKENS.BEAN.address, signer),
       [TOKENS.USDC.address]: createERC20Contract(TOKENS.USDC.address, signer),
@@ -239,12 +242,12 @@ const setupContracts = (signer?: ethers.Signer) => {
 const useAppStore = create<AppState>()((set, get) => ({
   onUserDisconnect: () => {
     try {
-      const { beanstalkContract, beanstalkSdk, erc20Contracts } =
+      const { beanstalkContract, beanstalkSdk, contracts } =
         setupContracts(undefined);
 
       set({
         beanstalkSdk,
-        erc20Contracts,
+        contracts,
         beanstalkContract,
         account: undefined,
       });
@@ -254,14 +257,14 @@ const useAppStore = create<AppState>()((set, get) => ({
   },
   onUserConnect: async (signer) => {
     try {
-      const { beanstalkContract, beanstalkSdk, erc20Contracts } =
+      const { beanstalkContract, beanstalkSdk, contracts } =
         setupContracts(signer);
 
-      const result = await getUserBalance(beanstalkSdk, erc20Contracts);
+      const result = await getUserBalance(beanstalkSdk, contracts);
 
       set({
         beanstalkSdk,
-        erc20Contracts,
+        contracts,
         beanstalkContract,
         account: result,
       });
@@ -273,10 +276,7 @@ const useAppStore = create<AppState>()((set, get) => ({
   onGetConnectedUserBalance: async () => {
     try {
       const state = get();
-      const result = await getUserBalance(
-        state.beanstalkSdk,
-        state.erc20Contracts
-      );
+      const result = await getUserBalance(state.beanstalkSdk, state.contracts);
 
       set({
         ...state,
@@ -295,7 +295,9 @@ const useAppStore = create<AppState>()((set, get) => ({
     provider,
     DEBUG: true,
   }),
-  erc20Contracts: {
+  contracts: {
+    [ENVIRONMENT.unwrapAndSendETHContractAddress]:
+      createUnwrapAndSendWETHContract(),
     [ENVIRONMENT.rootContractAddress]: createRootContract(),
     [TOKENS.BEAN.address]: createERC20Contract(TOKENS.BEAN.address),
     [TOKENS.USDC.address]: createERC20Contract(TOKENS.USDC.address),
@@ -303,15 +305,15 @@ const useAppStore = create<AppState>()((set, get) => ({
     [TOKENS.DAI.address]: createERC20Contract(TOKENS.DAI.address),
     [TOKENS.WETH.address]: createERC20Contract(TOKENS.WETH.address),
   },
-  setERC20Contracts: (contracts) =>
+  setContracts: (contracts) =>
     set((state) => ({
       ...state,
-      erc20Contracts: { ...state.erc20Contracts, ...contracts },
+      contracts: { ...state.contracts, ...contracts },
     })),
-  setERC20Contract: (address, instance) =>
+  setContract: (address, instance) =>
     set((state) => ({
       ...state,
-      erc20Contracts: { ...state.erc20Contracts, [address]: instance },
+      contracts: { ...state.contracts, [address]: instance },
     })),
 
   beanstalkContract: new ethers.Contract(

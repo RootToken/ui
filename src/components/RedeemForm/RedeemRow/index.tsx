@@ -71,7 +71,7 @@ export default function RedeemRow({ output, loading }: { output: string; loading
       </S.Row>
 
       <TokenPickerModal
-        excludes={["ETH"]}
+        excludes={[]}
         showBalance={true}
         open={openTokenPicker}
         onClose={() => setOpenTokenPicker(false)}

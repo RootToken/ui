@@ -41,7 +41,7 @@ export default function RedeemForm() {
     onChangeRedeemFormStateField,
     onResetRedeemFormState,
     account,
-    erc20Contracts,
+    contracts,
     beanstalkSdk,
     onGetConnectedUserBalance,
   } = useAppStore(
@@ -50,7 +50,7 @@ export default function RedeemForm() {
       onChangeRedeemFormStateField,
       onResetRedeemFormState,
       account,
-      erc20Contracts,
+      contracts,
       beanstalkSdk,
       onGetConnectedUserBalance,
     }) => ({
@@ -58,7 +58,7 @@ export default function RedeemForm() {
       onChangeRedeemFormStateField,
       onResetRedeemFormState,
       account,
-      erc20Contracts,
+      contracts,
       beanstalkSdk,
       onGetConnectedUserBalance,
     })
@@ -82,6 +82,7 @@ export default function RedeemForm() {
     redeemBeanDepositWithInternalRoot,
     redeemBeanWithRoot,
     redeemERC20WithRoot,
+    redeemETHWithRoot
   } = useRedeem();
 
   const calculateEstimate = useCallback(
@@ -199,6 +200,8 @@ export default function RedeemForm() {
             FarmToMode.EXTERNAL
           );
 
+          console.log(swap.getSimplePath())
+
           const erc20Estimate = await swap.estimate(beanOutput);
           console.log("erc20:", erc20Estimate.toHuman());
           setRedeemState(() => ({
@@ -238,10 +241,10 @@ export default function RedeemForm() {
           rootStalkBefore,
           rootSeedsBefore,
         ] = await Promise.all([
-          erc20Contracts[ENVIRONMENT.rootContractAddress]
+          contracts[ENVIRONMENT.rootContractAddress]
             .totalSupply()
             .then((v: any) => TokenValue.fromBlockchain(v, 18)), // automaticaly pulls as TokenValue
-          erc20Contracts[ENVIRONMENT.rootContractAddress]
+            contracts[ENVIRONMENT.rootContractAddress]
             .underlyingBdv()
             .then((v: any) => TokenValue.fromBlockchain(v, 6)), // automaticaly pulls as TokenValue
           beanstalkSdk.silo.balanceOfStalk(
@@ -497,8 +500,18 @@ export default function RedeemForm() {
         return;
       }
     } else if (redeemFormState.redeemToken.symbol === "ETH") {
-      toast.error("ETH not supported");
-      return;
+      try {
+        await redeemETHWithRoot(
+          redeemState.rootAmount,
+          redeemState.internalAmount,
+          beanstalkSdk.tokens.WETH,
+          redeemState.amountOutMinimum,
+        );
+        resetState();
+        return
+      } catch (e) {
+        return
+      }
     }
 
     const symbol = redeemFormState.redeemToken.symbol as
@@ -520,6 +533,7 @@ export default function RedeemForm() {
           : FarmToMode.INTERNAL
       );
       resetState();
+      return
     } catch (e) {
       return
     }
