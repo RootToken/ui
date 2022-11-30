@@ -82,7 +82,7 @@ export default function RedeemForm() {
     redeemBeanDepositWithInternalRoot,
     redeemBeanWithRoot,
     redeemERC20WithRoot,
-    redeemETHWithRoot
+    redeemETHWithRoot,
   } = useRedeem();
 
   const calculateEstimate = useCallback(
@@ -242,7 +242,7 @@ export default function RedeemForm() {
           contracts[ENVIRONMENT.rootContractAddress]
             .totalSupply()
             .then((v: any) => TokenValue.fromBlockchain(v, 18)), // automaticaly pulls as TokenValue
-            contracts[ENVIRONMENT.rootContractAddress]
+          contracts[ENVIRONMENT.rootContractAddress]
             .underlyingBdv()
             .then((v: any) => TokenValue.fromBlockchain(v, 6)), // automaticaly pulls as TokenValue
           beanstalkSdk.silo.balanceOfStalk(
@@ -399,6 +399,20 @@ export default function RedeemForm() {
     if (redeemState.output !== "0") {
     }
 
+    if (
+      redeemFormState.redeemToken.symbol === "ETH" &&
+      !redeemFormState.redeemToWallet
+    ) {
+      return "ETH can only be delivered to your wallet";
+    }
+
+    if (
+      redeemFormState.redeemToken.symbol === "BEAN DEPOSIT" &&
+      !redeemFormState.redeemToWallet
+    ) {
+      return "Bean Deposit can only be delivered to your wallet";
+    }
+
     if (redeemState.needInternalAllowance) {
       return "Approve Root Farm Balance";
     }
@@ -414,6 +428,20 @@ export default function RedeemForm() {
       return;
     }
     if (redeemState.loading || redeemState.output === "0") {
+      return;
+    }
+
+    if (
+      redeemFormState.redeemToken.symbol === "ETH" &&
+      !redeemFormState.redeemToWallet
+    ) {
+      return;
+    }
+
+    if (
+      redeemFormState.redeemToken.symbol === "BEAN DEPOSIT" &&
+      !redeemFormState.redeemToWallet
+    ) {
       return;
     }
 
@@ -503,12 +531,12 @@ export default function RedeemForm() {
           redeemState.rootAmount,
           redeemState.internalAmount,
           beanstalkSdk.tokens.WETH,
-          redeemState.amountOutMinimum,
+          redeemState.amountOutMinimum
         );
         resetState();
-        return
+        return;
       } catch (e) {
-        return
+        return;
       }
     }
 
@@ -531,9 +559,9 @@ export default function RedeemForm() {
           : FarmToMode.INTERNAL
       );
       resetState();
-      return
+      return;
     } catch (e) {
-      return
+      return;
     }
   };
 
@@ -1049,17 +1077,15 @@ export default function RedeemForm() {
                             </p>
                           ) : (
                             <p>
-                              Swap {displayBN(redeemAmount, 2)} Root
-                              for {redeemState.output}{" "}
+                              Swap {displayBN(redeemAmount, 2)} Root for{" "}
+                              {redeemState.output}{" "}
                               {redeemFormState.redeemToken.symbol}
                             </p>
                           )}
                           <p>
                             Transfer {redeemState.output}{" "}
                             {redeemFormState.redeemToken.name} to{" "}
-                            {redeemFormState.redeemToWallet ||
-                            redeemFormState.redeemToken.symbol ===
-                              "BEAN DEPOSIT"
+                            {redeemFormState.redeemToWallet
                               ? "your wallet"
                               : "Beanstalk Farm Balance"}
                           </p>
@@ -1075,7 +1101,14 @@ export default function RedeemForm() {
       </AnimatePresence>
 
       <S.MintButton
-        disabled={redeemState.loading || redeemState.output === "0"}
+        disabled={
+          redeemState.loading ||
+          redeemState.output === "0" ||
+          (redeemFormState.redeemToken.symbol === "BEAN DEPOSIT" &&
+            !redeemFormState.redeemToWallet) ||
+          (redeemFormState.redeemToken.symbol === "ETH" &&
+            !redeemFormState.redeemToWallet)
+        }
         onClick={onRedeem}
       >
         {renderRedeemText()}
