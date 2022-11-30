@@ -740,7 +740,7 @@ export default function useRedeem() {
                 step.pool,
                 step.tokenIn.address,
                 step.tokenOut.address,
-                "1000000000000000",
+                "0",
                 swap
                   .getFarm()
                   .generators.find((step) => step.name === "exchange")
