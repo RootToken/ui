@@ -33,6 +33,16 @@ export default function MenuModal({ open, onClose }: ModalProps) {
               </button>
             </Link>
           </li>
+          
+           <li>
+            <a target="_blank" href="https://bridge.arbitrum.io/">
+              <button>
+                <span>Bridge</span>
+                <ExternalLink size={18} color="#FFF" />
+              </button>
+            </a>
+          </li>
+          
           <li>
             <Link to="/dashboard" onClick={() => onClose()}>
               <button>
@@ -40,14 +50,7 @@ export default function MenuModal({ open, onClose }: ModalProps) {
               </button>
             </Link>
           </li>
-          <li>
-            <a href="https://app.betparadox.com/soccer" target="_blank">
-              <button>
-                <span>2022 FIFA World Cup Pool</span>
-                <ExternalLink size={18} color="#FFF" />
-              </button>
-            </a>
-          </li>
+          
           <li>
             <a target="_blank" href="https://roottoken.org/root.pdf">
               <button>
