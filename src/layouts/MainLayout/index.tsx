@@ -17,11 +17,7 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
         </div>
         <div className="right">
           <ul className="menu">
-            <li>
-              <a className="wc" href="https://app.betparadox.com/soccer" target="_blank">
-                2022 FIFA World Cup Pool
-              </a>
-            </li>
+            
             <li>
               <a target="_blank" href="https://roottoken.org/root.pdf">
                 Whitepaper
@@ -45,6 +41,11 @@ export default function MainLayout({ children }: { children: JSX.Element }) {
             <li>
               <a href="https://bean.money" target="_blank">
                 Beanstalk
+              </a>
+            </li>
+            <li>
+              <a href="https://bridge.arbitrum.io/" target="_blank">
+                Bridge
               </a>
             </li>
             <li>
