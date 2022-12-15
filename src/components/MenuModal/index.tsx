@@ -34,6 +34,14 @@ export default function MenuModal({ open, onClose }: ModalProps) {
             </Link>
           </li>
           
+          <li>
+            <Link to="/dashboard" onClick={() => onClose()}>
+              <button>
+                <span>Dashboard</span>
+              </button>
+            </Link>
+          </li>
+          
            <li>
             <a target="_blank" href="https://bridge.arbitrum.io/">
               <button>
@@ -43,13 +51,7 @@ export default function MenuModal({ open, onClose }: ModalProps) {
             </a>
           </li>
           
-          <li>
-            <Link to="/dashboard" onClick={() => onClose()}>
-              <button>
-                <span>Dashboard</span>
-              </button>
-            </Link>
-          </li>
+        
           
           <li>
             <a target="_blank" href="https://roottoken.org/root.pdf">
