@@ -86,7 +86,7 @@ export const Body = styled.div`
   > div {
     position: relative;
     z-index: 10;
-    padding: 20px 30px 100px 30px;
+    padding: 100px 30px 100px 30px;
 
     ${mediaDown("phone")`
       padding: 20px 20px 100px 20px;
