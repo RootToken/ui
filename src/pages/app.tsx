@@ -152,29 +152,7 @@ export default function AppPage() {
     <MainLayout>
       <>
         <Container>
-          <a href="https://app.betparadox.com/soccer" target="_blank">
-            <Banner>
-              <img
-                className="ribbon"
-                src="/fifa-wc.svg"
-                width={31}
-                height={54}
-              />
-              <div>
-                <h2>
-                  Bet to Earn on the
-                  <br /> 2022 FIFA World Cup
-                </h2>
-                <p>
-                  <img src="/root-logo.svg" width={47} height={23} />
-                  <span>
-                    on <b>Paradox</b>
-                  </span>
-                </p>
-              </div>
-              <img className="img" src="/wc.png" width={369} height={101} />
-            </Banner>
-          </a>
+          
           <MintContainer>
             <MintHeader>
               <MintHeaderButton
